@@ -2,27 +2,59 @@ import axiosClient from "./axiosClient";
 
 const baseUrl = "Employees/";
 
+/**
+ * Các API liên quan đến Employee
+ * Author: LHH - 04/01/23
+ */
 const employeeApi = {
 	getAllEmp: () => {
-		return axiosClient.get(baseUrl);
+		try {
+			return axiosClient.get(baseUrl);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	getEmpByFilter: (params) => {
-		return axiosClient.get(baseUrl, { params });
+		try {
+			return axiosClient.get(baseUrl + "filter", { params });
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	getNewEmpCode: () => {
-		return axiosClient.get(baseUrl + "NewEmployeeCode");
+		try {
+			return axiosClient.get(baseUrl + "NewEmployeeCode");
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	getEmpById: (id) => {
-		return axiosClient.get(baseUrl + id);
+		try {
+			return axiosClient.get(baseUrl + id);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	createEmp: (employee) => {
-		return axiosClient.post(baseUrl, employee);
+		try {
+			return axiosClient.post(baseUrl, employee);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	updateEmp: (id, newEmployee) => {
-		return axiosClient.put(baseUrl + id, newEmployee);
+		try {
+			return axiosClient.put(baseUrl + id, newEmployee);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	deleteEmp: (id) => {
-		return axiosClient.delete(baseUrl + id);
+		try {
+			return axiosClient.delete(baseUrl + id);
+		} catch (error) {
+			console.log(error);
+		}
 	},
 };
 

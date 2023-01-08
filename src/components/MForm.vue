@@ -1,17 +1,35 @@
 <script setup>
-import Input from "../components/Customs/MInput.vue";
-import DropDown from "../components/Customs/MDropDown.vue";
-import DatePicker from "../components/Customs/MDatePicker.vue";
-import Radio from "../components/Customs/MRadio.vue";
-import { inject, onMounted, reactive, ref } from "vue";
-import { formatDate } from "../util/common";
+import Input from "../components/customs/MInput.vue";
+import DropDown from "../components/customs/MDropDown.vue";
+import DatePicker from "../components/customs/MDatePicker.vue";
+import Radio from "../components/customs/MRadio.vue";
+import Button from "../components/MButton.vue";
+import Loading from "../components/MLoading.vue";
+import CheckBox from "../components/customs/MCheckBox.vue";
+import { computed, inject, onBeforeMount, reactive, ref } from "vue";
+import ENUMS from "../constants/enum";
 import useEmployee from "../composable/employee";
 import useDepartment from "../composable/department";
+import usePosition from "../composable/position";
 
-const store = inject("store");
+/**
+ * Lấy dữ liệu từ store
+ * Author: LHH - 04/01/23
+ */
+const {
+	state,
+	handleGetEmployees,
+	handleOpenForm,
+	handleCloseForm,
+	handleOpenModal,
+	handleOpenLoading,
+	handleCloseLoading,
+} = inject("store");
 
-const { state, handleCloseForm, handleOpenModal } = store;
-
+/**
+ * Các state và hàm liên quan đến employee
+ * Author: LHH - 04/01/23
+ */
 const {
 	newEmployeeCode,
 	editEmployee,
@@ -22,157 +40,330 @@ const {
 	updateNewEmployee,
 } = useEmployee();
 
+/**
+ * Các state và hàm liên quan đến department
+ * Author: LHH - 04/01/23
+ */
 const { departments, getAllDepartment } = useDepartment();
 
-const departmentsOption = ref([]);
+/**
+ * Các state và hàm liên quan đến position
+ * Author: LHH - 08/01/23
+ */
+const { positions, getAllPosition } = usePosition();
+
+/**
+ * Các state sử dụng trong component
+ * Author: LHH - 04/01/23
+ */
+const departmentList = ref([]);
+
+/**
+ * Xử lý department option
+ * Author: LHH - 06/01/23
+ */
+const departmentOptions = computed(() => {
+	return departmentList.value.map((item) => ({
+		key: item.DepartmentId,
+		value: item.DepartmentName,
+	}));
+});
 
 const formState = reactive({
 	formValue: {
-		EmployeeCode: "",
-		FullName: "",
-		DepartmentName: "",
-		PositionName: "",
-		DateOfBirth: "",
-		Gender: "",
-		IdentityNumber: "",
-		IdentityDate: "",
-		IdentityPlace: "",
-		PhoneNumber: "",
-		PersonalTaxCode: "",
-		Email: "",
+		employeeCode: "",
+		fullName: "",
+		departmentId: "",
+		positionName: "",
+		dateOfBirth: "",
+		gender: 0,
+		identityNumber: "",
+		identityDate: "",
+		identityPlace: "",
+		address: "",
+		phoneNumber: "",
+		personalTaxCode: "",
+		email: "",
 	},
-	formError: {},
+	formError: {
+		isError: null,
+		fullName: null,
+		employeeCode: null,
+		departmentId: null,
+	},
 });
 
-onMounted(() => {
-	if (state.form.type) {
-		if (state.form.type === "edit") {
-			handleGetEditEmployee(state.form.employeeId);
-		} else {
-			handleGetNewEmployeeCode();
-		}
+/**
+ * Tính toán tên form
+ * Author: LHH - 04/01/23
+ */
+const formName = computed(() => {
+	try {
+		if (state.form.type === "add") return "Thêm nhân viên";
+		else if (state.form.type === "edit") return "Sửa nhân viên";
+	} catch (error) {
+		console.log(error);
 	}
 });
 
+/**
+ * Xử lý call API
+ * Author: LHH - 04/01/23
+ */
+onBeforeMount(async () => {
+	try {
+		if (state.form.type) {
+			await getAllDepartment();
+			await getAllPosition();
+
+			departmentList.value = [...departments.value];
+
+			if (state.form.type === "edit") {
+				await handleGetEditEmployee(state.form.employeeId);
+			} else {
+				await handleGetNewEmployeeCode();
+			}
+		}
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+/**
+ * Hàm xử lý lấy nhân viên sửa
+ * Author: LHH - 04/01/23
+ */
 const handleGetEditEmployee = async (id) => {
 	try {
+		handleOpenLoading();
+
 		await getEmployeeById(id);
-		await getAllDepartment();
+
 		const {
 			EmployeeCode,
 			FullName,
-			DepartmentName,
+			DepartmentId,
 			PositionName,
+			PositionId,
 			DateOfBirth,
 			Gender,
 			IdentityNumber,
 			IdentityDate,
 			IdentityPlace,
+			Address,
 			PhoneNumber,
 			PersonalTaxCode,
 			Email,
 		} = editEmployee.value;
 
 		formState.formValue = {
-			EmployeeCode,
-			FullName,
-			DepartmentName,
-			PositionName,
-			DateOfBirth: formatDate(DateOfBirth),
-			Gender,
-			IdentityNumber,
-			IdentityDate: formatDate(IdentityDate),
-			IdentityPlace,
-			PhoneNumber,
-			PersonalTaxCode,
-			Email,
+			employeeCode: EmployeeCode,
+			fullName: FullName,
+			departmentId: DepartmentId,
+			positionName:
+				PositionName ??
+				positions.value?.find(
+					(position) => position.PositionId === PositionId
+				).PositionName,
+			dateOfBirth: new Date(DateOfBirth),
+			gender: Gender,
+			identityNumber: IdentityNumber,
+			identityDate: new Date(IdentityDate),
+			identityPlace: IdentityPlace,
+			address: Address,
+			phoneNumber: PhoneNumber,
+			personalTaxCode: PersonalTaxCode,
+			email: Email,
 		};
 
-		departmentsOption.value = [
-			...departments.value.map((item) => item.DepartmentName),
-		];
-	} catch (error) {}
+		handleCloseLoading();
+	} catch (error) {
+		console.log(error);
+		handleCloseLoading();
+	}
 };
 
+/**
+ * Xử lý lấy mã nhân viên mới
+ * Author: LHH - 04/01/23
+ */
 const handleGetNewEmployeeCode = async () => {
 	try {
+		handleOpenLoading();
+
 		await getNewEmployeeCode();
-		await getAllDepartment();
 
 		formState.formValue = {
-			EmployeeCode: newEmployeeCode.value,
+			employeeCode: newEmployeeCode.value,
+			fullName: "",
+			departmentId: "",
+			positionName: "",
+			dateOfBirth: "",
+			gender: 0,
+			identityNumber: "",
+			identityDate: "",
+			identityPlace: "",
+			address: "",
+			phoneNumber: "",
+			personalTaxCode: "",
+			email: "",
 		};
 
-		departmentsOption.value = [
-			...departments.value.map((item) => item.DepartmentName),
-		];
-	} catch (error) {}
+		handleCloseLoading();
+	} catch (error) {
+		console.log(error);
+		handleCloseLoading();
+		formState.formValue = {
+			employeeCode: "",
+			fullName: "",
+			departmentId: "",
+			positionName: "",
+			dateOfBirth: "",
+			gender: 0,
+			identityNumber: "",
+			identityDate: "",
+			identityPlace: "",
+			address: "",
+			phoneNumber: "",
+			personalTaxCode: "",
+			email: "",
+		};
+	}
 };
 
+/**
+ * Xử lý submit form
+ * Author: LHH - 04/01/23
+ */
 const handleSubmit = async () => {
-	handleValidateForm();
+	try {
+		handleValidateForm();
 
-	if (Object.entries(formState.formError).length !== 0) {
-		const { EmployeeCode, FullName, DepartmentName } = formState.formError;
-		handleOpenModal(
-			"Có lỗi",
-			EmployeeCode || FullName || DepartmentName,
-			"error"
-		);
-	} else {
-		if (state.form.type === "add") {
-			await addNewEmployee(formState.formValue);
-			if (statusCode.value === 1) {
-				handleCloseForm();
-			}
-		} else if (state.form.type === "edit") {
-			await updateNewEmployee(state.form.employeeId, formState.formValue);
-			if (statusCode.value === 1) {
-				handleCloseForm();
+		console.log(formState.formError);
+
+		if (formState.formError.isError) {
+			const { employeeCode, fullName, departmentId } =
+				formState.formError;
+			handleOpenModal(
+				"Có lỗi",
+				employeeCode || fullName || departmentId,
+				"error"
+			);
+		} else {
+			const { dateOfBirth, identityDate } = formState.formValue;
+			const formatDateOfBirth = new Date(dateOfBirth);
+			formatDateOfBirth.setDate(formatDateOfBirth.getDate() + 1);
+			const formatIdentityDate = new Date(identityDate);
+			formatIdentityDate.setDate(formatIdentityDate.getDate() + 1);
+			const data = {
+				...formState.formValue,
+				dateOfBirth: formatDateOfBirth,
+				identityDate: formatIdentityDate,
+			};
+			if (state.form.type === "add") {
+				await addNewEmployee(data);
+			} else if (state.form.type === "edit") {
+				await updateNewEmployee(state.form.employeeId, data);
 			}
 		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 
+/**
+ * Xử lý ấn vào nút cất
+ * Author: LHH - 08/01/23
+ */
+const onStoreBtnClick = async () => {
+	try {
+		await handleSubmit();
+		if (statusCode.value === 1) {
+			handleGetEmployees();
+			handleCloseForm();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý ấn vào nút cất và thêm
+ * Author: LHH - 08/01/23
+ */
+const onStoreAndAddBtnClick = async () => {
+	try {
+		await handleSubmit();
+		if (statusCode.value === 1) {
+			handleGetEmployees();
+			handleGetNewEmployeeCode();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý ấn vào nút đóng form
+ * Author: LHH - 04/01/23
+ */
 const onCloseBtnClick = () => {
-	handleOpenModal(
-		"Xác nhận",
-		"Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
-		"info"
-	);
+	try {
+		handleOpenModal(
+			"Xác nhận",
+			"Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
+			"info"
+		);
+	} catch (error) {
+		console.log(error);
+	}
 };
 
-const handleBindInputValue = (target) => {
-	formState.formValue[target.name] = target.value;
+/**
+ * Xử lý binding dữ liệu cho form
+ * Author: LHH - 04/01/23
+ */
+const handleBindValue = ({ name, value }) => {
+	try {
+		formState.formValue[name] = value;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
-const handleBindSelectValue = ({ name, value }) => {
-	formState.formValue[name] = value;
-};
-
-const handleBindRadioValue = ({ name, value }) => {
-	formState.formValue[name] = value;
-};
-
+/**
+ * Xử lý validate form
+ * Author: LHH - 04/01/23
+ */
 const handleValidateForm = () => {
-	const { EmployeeCode, FullName, DepartmentName } = formState.formValue;
+	try {
+		formState.formError.isError = false;
 
-	if (!EmployeeCode) {
-		formState.formError.EmployeeCode = "Mã nhân viên không được để trống";
-	} else {
-		formState.formError = {};
-	}
+		const { employeeCode, fullName, departmentId } = formState.formValue;
 
-	if (!FullName) {
-		formState.formError.FullName = "Tên nhân viên không được để trống";
-	} else {
-		formState.formError = {};
-	}
+		if (!employeeCode) {
+			formState.formError.employeeCode =
+				"Mã nhân viên không được để trống";
+			formState.formError.isError = true;
+		} else {
+			formState.formError.employeeCode = null;
+		}
 
-	if (!DepartmentName) {
-		formState.formError.DepartmentName = "Đơn vị không được để trống";
-	} else {
-		formState.formError = {};
+		if (!fullName) {
+			formState.formError.fullName = "Tên nhân viên không được để trống";
+			formState.formError.isError = true;
+		} else {
+			formState.formError.fullName = null;
+		}
+
+		if (!departmentId) {
+			formState.formError.departmentId = "Đơn vị không được để trống";
+			formState.formError.isError = true;
+		} else {
+			formState.formError.departmentId = null;
+		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 </script>
@@ -181,21 +372,21 @@ const handleValidateForm = () => {
 	<div class="overlay">
 		<form class="form" @submit.prevent="handleSubmit">
 			<div class="form__header">
-				<h2 class="form__heading">Thông tin nhân viên</h2>
+				<h2 class="form__heading">{{ formName }}</h2>
 
 				<div class="form__header__user-type">
 					<div class="form__header__user-type__item">
-						<Radio
+						<CheckBox
 							title="Là khách hàng"
-							name="user-type"
 							id="client"
+							name="user-type"
 						/>
 					</div>
 					<div class="form__header__user-type__item">
-						<Radio
+						<CheckBox
 							title="Là nhà cung cấp"
-							name="user-type"
 							id="contributor"
+							name="user-type"
 						/>
 					</div>
 				</div>
@@ -214,15 +405,17 @@ const handleValidateForm = () => {
 						<div class="form__row row-gap">
 							<div class="form__col col--4">
 								<Input
+									:focus="true"
 									isRequired
 									title="Mã"
-									name="EmployeeCode"
+									name="employeeCode"
 									size="sm"
-									:value="formState.formValue.EmployeeCode"
-									@change="handleBindInputValue"
+									:tabindex="1"
+									:value="formState.formValue.employeeCode"
+									@change="handleBindValue"
 									:error="
 										formState.formError
-											? formState.formError.EmployeeCode
+											? formState.formError.employeeCode
 											: ''
 									"
 								/>
@@ -231,13 +424,14 @@ const handleValidateForm = () => {
 								<Input
 									isRequired
 									title="Tên"
-									name="FullName"
+									name="fullName"
 									size="sm"
-									:value="formState.formValue.FullName"
-									@change="handleBindInputValue"
+									:tabindex="2"
+									:value="formState.formValue.fullName"
+									@change="handleBindValue"
 									:error="
 										formState.formError
-											? formState.formError.FullName
+											? formState.formError.fullName
 											: ''
 									"
 								/>
@@ -246,14 +440,21 @@ const handleValidateForm = () => {
 								<DropDown
 									size="sm"
 									isRequired
-									name="DepartmentName"
+									name="departmentId"
 									title="Đơn vị"
-									:value="formState.formValue.DepartmentName"
-									:listValue="departmentsOption"
-									@select="handleBindSelectValue"
+									:tabindex="4"
+									:listValue="departmentOptions"
+									:defaultValue="
+										departments?.find(
+											(item) =>
+												item.DepartmentId ===
+												editEmployee?.DepartmentId
+										)?.DepartmentName
+									"
+									@select="handleBindValue"
 									:error="
 										formState.formError
-											? formState.formError.FullName
+											? formState.formError.departmentId
 											: ''
 									"
 								/>
@@ -261,10 +462,11 @@ const handleValidateForm = () => {
 							<div class="form__col col--12">
 								<Input
 									title="Chức danh"
-									name="PositionName"
+									name="positionName"
 									size="sm"
-									:value="formState.formValue.PositionName"
-									@change="handleBindInputValue"
+									:tabindex="7"
+									:value="formState.formValue.positionName"
+									@change="handleBindValue"
 								/>
 							</div>
 						</div>
@@ -275,43 +477,53 @@ const handleValidateForm = () => {
 								<DatePicker
 									size="sm"
 									title="Ngày sinh"
-									name="DateOfBirth"
-									:value="formState.formValue.DateOfBirth"
+									name="dateOfBirth"
+									:tabindex="3"
+									:value="formState.formValue.dateOfBirth"
+									@change="handleBindValue"
+									placeholder="DD/MM/YYYY"
 								/>
 							</div>
 							<div class="form__col col--7">
 								<Radio
-									type="radio"
-									name="Gender"
-									:value="formState.formValue.Gender"
-									@check="handleBindRadioValue"
+									name="gender"
+									size="sm"
+									:list="ENUMS.gender"
+									:defaultValue="formState.formValue.gender"
+									@check="handleBindValue"
+									title="Giới tính"
 								/>
 							</div>
 							<div class="form__col col--7">
 								<Input
 									title="Số CMND"
-									name="IdentityNumber"
+									name="identityNumber"
 									size="sm"
+									:tabindex="5"
 									tooltip="Số chứng minh nhân dân"
-									:value="formState.formValue.IdentityNumber"
-									@change="handleBindInputValue"
+									:value="formState.formValue.identityNumber"
+									@change="handleBindValue"
 								/>
 							</div>
 							<div class="form__col col--5">
 								<DatePicker
 									size="sm"
 									title="Ngày cấp"
-									name="IdentityDate"
-									:value="formState.formValue.IdentityDate"
+									name="identityDate"
+									:tabindex="6"
+									:value="formState.formValue.identityDate"
+									@change="handleBindValue"
+									placeholder="DD/MM/YYYY"
 								/>
 							</div>
 							<div class="form__col col--12">
 								<Input
 									title="Nơi cấp"
-									name="IdentityPlace"
+									name="identityPlace"
 									size="sm"
-									:value="formState.formValue.IdentityPlace"
-									@change="handleBindInputValue"
+									:tabindex="8"
+									:value="formState.formValue.identityPlace"
+									@change="handleBindValue"
 								/>
 							</div>
 						</div>
@@ -321,40 +533,45 @@ const handleValidateForm = () => {
 					<div class="form__col col--12">
 						<Input
 							title="Địa chỉ"
-							name="Address"
+							name="address"
 							size="sm"
-							:value="formState.formValue.Address"
-							@change="handleBindInputValue"
+							:tabindex="9"
+							:value="formState.formValue.address"
+							@change="handleBindValue"
 						/>
 					</div>
 					<div class="form__col col--3">
 						<Input
 							title="ĐT di động"
-							name="PhoneNumber"
+							name="phoneNumber"
 							size="sm"
 							tooltip="Điện thoại di động"
-							:value="formState.formValue.PhoneNumber"
-							@change="handleBindInputValue"
+							:tabindex="10"
+							:value="formState.formValue.phoneNumber"
+							@change="handleBindValue"
 						/>
 					</div>
 					<div class="form__col col--3">
 						<Input
 							title="ĐT cố định"
-							name="PersonalTaxCode"
+							name="personalTaxCode"
 							size="sm"
 							tooltip="Điện thoại cố định"
-							:value="formState.formValue.PersonalTaxCode"
-							@change="handleBindInputValue"
+							:tabindex="11"
+							:value="formState.formValue.personalTaxCode"
+							@change="handleBindValue"
 						/>
 					</div>
 					<div class="form__col col--3">
 						<Input
 							title="Email"
-							name="Email"
+							name="email"
+							placeholder="example@gmail.com"
 							type="email"
 							size="sm"
-							:value="formState.formValue.Email"
-							@change="handleBindInputValue"
+							:tabindex="12"
+							:value="formState.formValue.email"
+							@change="handleBindValue"
 						/>
 					</div>
 					<div class="form__col col--3"></div>
@@ -363,6 +580,7 @@ const handleValidateForm = () => {
 							title="Tài khoản ngân hàng"
 							name="bank-account"
 							size="sm"
+							:tabindex="13"
 						/>
 					</div>
 					<div class="form__col col--3">
@@ -370,33 +588,40 @@ const handleValidateForm = () => {
 							title="Tên ngân hàng"
 							name="bank-name"
 							size="sm"
+							:tabindex="14"
 						/>
 					</div>
 					<div class="form__col col--3">
-						<Input title="Chi nhánh" name="bank-branch" size="sm" />
+						<Input
+							title="Chi nhánh"
+							name="bank-branch"
+							size="sm"
+							:tabindex="15"
+						/>
 					</div>
 				</div>
 			</div>
 			<div class="form__action">
-				<button
-					class="btn btn--sub"
-					id="cancel-form-btn"
+				<Button
+					type="sub"
+					content="Hủy"
 					@click="handleCloseForm"
-					type="button"
-				>
-					<span class="btn__text">Hủy</span>
-				</button>
+					:tabindex="18"
+				/>
 				<div class="form__action__group">
-					<button
-						class="btn btn--sub"
-						@click="handleCloseForm"
-						type="button"
-					>
-						<span class="btn__text">Cất</span>
-					</button>
-					<button class="btn" id="add-form-btn" type="submit">
-						<span class="btn__text">Cất và thêm</span>
-					</button>
+					<Button
+						type="sub"
+						content="Cất"
+						action="button"
+						@click.prevent="onStoreBtnClick"
+						:tabindex="17"
+					/>
+					<Button
+						content="Cất và thêm"
+						action="button"
+						@click="onStoreAndAddBtnClick"
+						:tabindex="16"
+					/>
 				</div>
 			</div>
 		</form>

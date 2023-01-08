@@ -4,13 +4,13 @@ import EmployeeItem from "./EmployeeItem.vue";
 import CheckBox from "../components/customs/MCheckBox.vue";
 import DropDown from "../components/customs/MDropDown.vue";
 import Button from "../components/MButton.vue";
-import { onMounted, reactive, inject } from "vue";
+import Pagination from "../components/MPagination.vue";
+import ENUMS from "../constants/enum";
+import { reactive, inject, onBeforeMount } from "vue";
 import useEmployee from "../composable/employee";
 
 // Định nghĩa các state
-const state = reactive({
-	employees: [],
-	isLoading: false,
+const empState = reactive({
 	listAction: {
 		isShow: false,
 		employeeId: "",
@@ -23,35 +23,35 @@ const state = reactive({
 	checkList: [],
 });
 
-const store = inject("store");
-
-const { handleOpenForm, handleOpenModal, handleCloseModal } = store;
-
-const { listEmployee, getAllEmployee } = useEmployee();
+const {
+	state,
+	handleGetEmployees,
+	handleOpenForm,
+	handleOpenModal,
+	handleCloseModal,
+	handleOpenLoading,
+	handleCloseLoading,
+} = inject("store");
 
 // Call API
-onMounted(() => {
+onBeforeMount(() => {
 	handleGetAllEmployee();
 });
 
+const { totalRecord } = useEmployee();
+
 // Khai báo các sự kiện
 
-const handleGetAllEmployee = async () => {
+const handleGetAllEmployee = () => {
 	try {
-		state.isLoading = true;
-
-		await getAllEmployee();
-
-		state.employees = [...listEmployee.value];
-
-		state.isLoading = false;
+		handleGetEmployees();
 	} catch (error) {
 		console.log(error);
 	}
 };
 
 const handleDisplayListAction = (data) => {
-	state.listAction = {
+	empState.listAction = {
 		isShow: true,
 		employeeId: data.employeeId,
 		employeeCode: data.employeeCode,
@@ -63,15 +63,15 @@ const handleDisplayListAction = (data) => {
 };
 
 const handleCloseListAction = () => {
-	state.listAction.isShow = false;
+	empState.listAction.isShow = false;
 };
 
 const onDeleteBtnClick = () => {
 	handleOpenModal(
 		"Xác nhận xóa",
-		`Bạn có chắc chắn muốn xóa nhân viên \<${state.listAction.employeeCode}\> không?`,
+		`Bạn có chắc chắn muốn xóa nhân viên \<${empState.listAction.employeeCode}\> không?`,
 		"warning",
-		state.listAction.employeeId
+		empState.listAction.employeeId
 	);
 
 	handleCloseListAction();
@@ -79,17 +79,27 @@ const onDeleteBtnClick = () => {
 
 const handleCheckAll = (target) => {
 	if (target.checked) {
-		state.checkList = [...state.employees.map((item) => item.EmployeeId)];
+		empState.checkList = [
+			...state.employees.map((item) => item.EmployeeId),
+		];
 	} else {
-		state.checkList = [];
+		empState.checkList = [];
 	}
 };
 
 const handleCheck = (value) => {
-	if (state.checkList.includes(value)) {
-		state.checkList.splice(state.checkList.indexOf(value), 1);
+	if (empState.checkList.includes(value)) {
+		empState.checkList.splice(empState.checkList.indexOf(value), 1);
 	} else {
-		state.checkList.push(value);
+		empState.checkList.push(value);
+	}
+};
+
+const handleSearchEmployee = (value) => {
+	if (value) {
+		handleGetEmployees({ employeeFilter: value });
+	} else {
+		handleGetEmployees();
 	}
 };
 </script>
@@ -116,6 +126,8 @@ const handleCheck = (value) => {
 							class="textfield__input"
 							placeholder="Tìm theo mã, tên nhân viên"
 							name="filter"
+							:debounce-events="['input', 'keyup']"
+							v-debounce:500ms.lock="handleSearchEmployee"
 						/>
 					</div>
 				</div>
@@ -136,9 +148,9 @@ const handleCheck = (value) => {
 									name="checkAll"
 									@check="handleCheckAll"
 									:checked="
-										state.checkList.length !== 0 &&
-										state.checkList.length ===
-											state.employees.length
+										empState.checkList.length !== 0 &&
+										empState.checkList.length ===
+											state.employees?.length
 									"
 								/>
 							</th>
@@ -180,15 +192,15 @@ const handleCheck = (value) => {
 							:employee="employee"
 							@click="handleDisplayListAction"
 							@check="handleCheck"
-							:checkList="state.checkList"
+							:checkList="empState.checkList"
 						/>
 					</tbody>
 				</table>
 				<!-- Action list -->
 				<ul
 					class="table__action__list"
-					v-if="state.listAction.isShow"
-					:style="state.listAction.style"
+					v-if="empState.listAction.isShow"
+					:style="empState.listAction.style"
 				>
 					<li
 						class="table__action__item"
@@ -209,46 +221,13 @@ const handleCheck = (value) => {
 						Ngưng sử dụng
 					</li>
 				</ul>
-				<!-- Table loading -->
-				<div class="table__loading" v-show="state.isLoading">
-					<Loading />
+				<div class="table__empty" v-if="state.employees.length === 0">
+					<img src="../assets/images/nodata.76e50bd8.svg" alt="" />
+					<p>Không có dữ liệu</p>
 				</div>
 			</div>
 
-			<div class="data-table__footer">
-				<p class="data-table__quantity">
-					Tổng số: <span>{{ state.employees.length }}</span> bản ghi
-				</p>
-
-				<div class="data-table__action">
-					<DropDown
-						:listValue="[
-							'10 sản phẩm trên 1 trang',
-							'20 sản phẩm trên 1 trang',
-							'50 sản phẩm trên 1 trang',
-							'100 sản phẩm trên 1 trang',
-						]"
-						name="emp-quantity"
-						:style="{ top: 'unset', bottom: '100%' }"
-					/>
-					<!-- Pagination -->
-					<div class="data-table__pagination">
-						<p class="data-table__pagination__action disabled">
-							Trước
-						</p>
-						<ul class="data-table__pagination__page">
-							<li class="data-table__pagination__item active">
-								1
-							</li>
-							<li class="data-table__pagination__item">2</li>
-							<li class="data-table__pagination__item">3</li>
-							<li class="data-table__pagination__item">...</li>
-							<li class="data-table__pagination__item">52</li>
-						</ul>
-						<p class="data-table__pagination__action">Sau</p>
-					</div>
-				</div>
-			</div>
+			<Pagination />
 		</div>
 	</div>
 </template>

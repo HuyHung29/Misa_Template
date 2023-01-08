@@ -36,3 +36,20 @@ export const formatMoney = (money) => {
 
 	return 0 + " VND";
 };
+
+/**
+ * Hàm convert ngày tháng
+ * Author: LHH - 06/01/23
+ */
+export const convertStringToDate = (data) => {
+	if (data) {
+		const str = data;
+
+		const [day, month, year] = str.split("/");
+
+		const date = new Date(+year, +month - 1, +day);
+		return date;
+	}
+
+	return "";
+};

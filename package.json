@@ -9,9 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^3.6.4",
     "axios": "^1.2.2",
     "query-string": "^8.1.0",
     "vue": "^3.2.45",
+    "vue-click-outside": "^1.1.0",
+    "vue-debounce": "^4.0.0",
     "vue-router": "4"
   },
   "devDependencies": {

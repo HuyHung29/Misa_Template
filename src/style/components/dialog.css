@@ -36,7 +36,6 @@
 
 .dialog__body {
 	padding: 24px 0;
-	margin-bottom: 12px;
 }
 
 .dialog__content {
@@ -68,7 +67,4 @@
 	align-items: center;
 	justify-content: flex-end;
 	column-gap: 8px;
-
-	border-top: 1px solid var(--border-color);
-	padding-top: 24px;
 }

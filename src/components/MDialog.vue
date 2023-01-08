@@ -2,27 +2,51 @@
 import { inject } from "vue";
 import useEmployee from "../composable/employee";
 
-const store = inject("store");
+/**
+ * Các state và phương thức dùng chung
+ * Author: LHH - 04/01/23
+ */
+const { state, handleGetEmployees, handleCloseModal, handleCloseForm } =
+	inject("store");
 
-const { state, handleCloseModal, handleCloseForm } = store;
-
+/**
+ * Các state và phương thức liên quan đến employee
+ * Author: LHH - 04/01/23
+ */
 const { statusCode, deleteEmployee } = useEmployee();
 
+/**
+ * Xử lý đóng dialog
+ * Author: LHH - 04/01/23
+ */
 const handleCloseAll = () => {
-	handleCloseModal();
-	handleCloseForm();
-};
-
-const handleDeleteBtn = async () => {
-	if (state.modal.type === "warning") {
-		await deleteEmployee(state.modal.employeeId);
-
-		if (statusCode.value === 1) {
-			handleCloseModal();
-		}
-	} else {
+	try {
 		handleCloseModal();
 		handleCloseForm();
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý ấn nút xóa
+ * Author: LHH - 04/01/23
+ */
+const handleDeleteBtn = async () => {
+	try {
+		if (state.modal.type === "warning") {
+			await deleteEmployee(state.modal.employeeId);
+
+			if (statusCode.value === 1) {
+				await handleGetEmployees();
+				handleCloseModal();
+			}
+		} else {
+			handleCloseModal();
+			handleCloseForm();
+		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 </script>

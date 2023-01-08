@@ -1,15 +1,23 @@
 import { ref } from "vue";
 import departmentApi from "../api/departmentApi";
 
+/**
+ * Các state và hàm dùng chung cho department
+ * Author: LHH - 04/01/23
+ */
 const useDepartment = () => {
 	try {
 		const departments = ref(null);
 
-		// Lấy tất cả nhân viên
+		// Lấy tất cả đơn vị
 		const getAllDepartment = async () => {
-			const response = await departmentApi.getAllDepartment();
+			try {
+				const response = await departmentApi.getAllDepartment();
 
-			departments.value = [...response];
+				departments.value = [...response];
+			} catch (error) {
+				console.log(error);
+			}
 		};
 
 		return {

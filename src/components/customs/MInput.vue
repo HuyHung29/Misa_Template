@@ -1,5 +1,9 @@
 <script setup>
-// Định nghĩa các props
+import { onMounted, ref, watch } from "vue";
+/**
+ * Định nghĩa các props
+ * Author: LHH - 04/01/23
+ */
 const props = defineProps({
 	title: {
 		type: String,
@@ -10,17 +14,21 @@ const props = defineProps({
 		required: true,
 	},
 	value: {
-		type: String,
+		type: [String, Number],
 		default: "",
 	},
-	placeHolder: {
+	placeholder: {
 		type: String,
 		default: "",
 	},
 	tooltip: {
 		type: String,
 	},
-	tabIndex: {
+	focus: {
+		type: Boolean,
+		default: false,
+	},
+	tabindex: {
 		type: Number,
 	},
 	type: {
@@ -30,9 +38,8 @@ const props = defineProps({
 	size: {
 		type: String,
 		validator(value) {
-			return ["sm", "md", "lg"].includes(value);
+			return ["sm", "lg"].includes(value);
 		},
-		default: "md",
 	},
 	isRequired: {
 		type: Boolean,
@@ -48,12 +55,36 @@ const props = defineProps({
 	},
 });
 
-// Định nghĩa hàm
+/**
+ * Định nghĩa các emit
+ * Author: LHH - 04/01/23
+ */
 const emit = defineEmits(["change"]);
 
-const handleChange = (e) => {
-	emit("change", e.target);
-};
+/**
+ * Định nghĩa state dùng trong component
+ * Author: LHH - 04/01/23
+ */
+const inputState = ref(props.value);
+const inputRef = ref(null);
+
+/**
+ * Xử lý binding dữ liệu
+ * Author: LHH - 04/01/23
+ */
+watch(inputState, () => {
+	try {
+		emit("change", { name: props.name, value: inputState.value });
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+onMounted(() => {
+	if (props.focus) {
+		inputRef.value.focus();
+	}
+});
 </script>
 
 <template>
@@ -73,13 +104,14 @@ const handleChange = (e) => {
 		</label>
 		<div class="textfield__input__wrap">
 			<input
+				ref="inputRef"
 				:type="type"
 				class="textfield__input"
 				:name="name"
-				:placeholder="placeHolder"
-				:tabindex="tabIndex"
+				:placeholder="placeholder"
+				:tabindex="tabindex"
 				:value="value"
-				@input="handleChange"
+				v-model="inputState"
 			/>
 		</div>
 		<p v-if="hasMessage" class="textfield__error">Error</p>

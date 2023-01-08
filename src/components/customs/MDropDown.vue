@@ -1,7 +1,10 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
 
-// Định nghĩa các props
+/**
+ * Định nghĩa các props
+ * Author: LHH - 04/01/23
+ */
 const props = defineProps({
 	listValue: {
 		type: Array,
@@ -15,15 +18,17 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
-	value: {
-		type: String,
+	tabindex: {
+		type: Number,
+	},
+	defaultValue: {
+		type: [String, Number],
 	},
 	size: {
 		type: String,
 		validator(value) {
-			return ["sm", "md", "lg"].includes(value);
+			return ["sm", "lg"].includes(value);
 		},
-		default: "md",
 	},
 	style: {
 		type: Object,
@@ -42,17 +47,74 @@ const props = defineProps({
 	},
 });
 
+/**
+ * Định nghĩa các emit
+ * Author: LHH - 04/01/23
+ */
 const emit = defineEmits(["select"]);
 
+/**
+ * Định nghĩa các state của component
+ * Author: LHH - 04/01/23
+ */
 const state = reactive({
 	isShow: false,
-	value: "",
+	value: props.defaultValue,
 });
 
-const handleChangeValue = (value) => {
-	state.value = value;
-	state.isShow = false;
-	emit("select", { name: props.name, value: state.value });
+/**
+ * Xử lý thay đổi dữ liệu
+ * Author: LHH - 04/01/23
+ */
+const handleChangeValue = (item) => {
+	try {
+		state.value = item.value;
+		state.isShow = false;
+		emit("select", { name: props.name, value: item.key });
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Theo dõi sự thay đổi của props
+ * Author: LHH - 04/01/23
+ */
+watch(
+	() => props.defaultValue,
+	(newVal) => {
+		try {
+			if (newVal) {
+				state.value = newVal;
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
+);
+
+/**
+ * Xử lý mở dropdown
+ * Author: LHH - 04/01/23
+ */
+const handleOpenList = () => {
+	try {
+		state.isShow = true;
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý đóng dropdown
+ * Author: LHH - 04/01/23
+ */
+const handleCloseList = () => {
+	try {
+		state.isShow = false;
+	} catch (error) {
+		console.log(error);
+	}
 };
 </script>
 
@@ -76,17 +138,18 @@ const handleChangeValue = (value) => {
 				type="text"
 				class="dropdown__input"
 				:value="state.value"
-				@focus="state.isShow = !state.isShow"
+				@click="state.isShow = !state.isShow"
+				:tabindex="tabindex"
 			/>
 			<ul class="dropdown__list" v-show="state.isShow" :style="style">
 				<li
-					v-for="value in listValue"
+					v-for="item in listValue"
 					class="dropdown__item"
-					:class="{ selected: value === state.value }"
-					:key="value"
-					@click="handleChangeValue(value)"
+					:class="{ selected: item.value === state.value }"
+					:key="item.key"
+					@click="handleChangeValue(item)"
 				>
-					{{ value }}
+					{{ item.value }}
 				</li>
 			</ul>
 		</div>

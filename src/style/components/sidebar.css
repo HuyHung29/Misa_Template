@@ -92,7 +92,10 @@
 	transition: 0.25s linear;
 }
 
-.side-bar__item:hover,
+.side-bar__item:hover {
+	background-color: var(--hover-dark);
+}
+
 .side-bar__item.active {
 	background-color: var(--hover-dark);
 

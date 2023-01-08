@@ -42,6 +42,10 @@
 	color: var(--disable-text-color);
 }
 
+.date-picker__input:not(:placeholder-shown) ~ .date-picker__icon {
+	display: none;
+}
+
 .date-picker__icon {
 	position: absolute;
 	top: 50%;
@@ -68,17 +72,7 @@
 	visibility: visible;
 }
 
-.date-picker:has(input:focus) .date-picker__calendar {
-	display: block;
-}
-
 .date-picker__calendar {
-	display: none;
-
-	position: absolute;
-	top: calc(100% - 14px);
-	right: 0;
-
 	background-color: white;
 	width: 320px;
 

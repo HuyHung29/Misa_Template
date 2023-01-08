@@ -1,9 +1,11 @@
 <script setup>
 import { inject } from "vue";
 
-const store = inject("store");
-
-const { state, handleOpenSidebar, handleCloseSidebar } = store;
+/**
+ * Các state và hàm dùng chung
+ * Author: LHH - 04/01/23
+ */
+const { state, handleOpenSidebar, handleCloseSidebar } = inject("store");
 </script>
 
 <template>

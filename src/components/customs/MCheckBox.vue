@@ -1,5 +1,8 @@
 <script setup>
-// Định nghĩa props
+/**
+ * Định nghĩa các props
+ * Author: LHH - 04/01/23
+ */
 const props = defineProps({
 	id: {
 		type: String,
@@ -23,10 +26,22 @@ const props = defineProps({
 	},
 });
 
+/**
+ * Định nghĩa các emit
+ * Author: LHH - 04/01/23
+ */
 const emit = defineEmits(["check"]);
 
+/**
+ * Xử lý sự kiện checked của checkbox
+ * Author: LHH - 04/01/23
+ */
 const handleCheck = (e) => {
-	emit("check", e.target);
+	try {
+		emit("check", e.target);
+	} catch (error) {
+		console.log(error);
+	}
 };
 </script>
 

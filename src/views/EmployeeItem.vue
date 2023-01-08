@@ -1,11 +1,9 @@
 <script setup>
-import CheckBox from "../components/Customs/MCheckBox.vue";
+import CheckBox from "../components/customs/MCheckBox.vue";
 import { formatDate, formatMoney } from "../util/common";
 import { inject } from "vue";
 
-const store = inject("store");
-
-const { state, handleOpenForm } = store;
+const { state, handleOpenForm } = inject("store");
 // Định nghĩa các props
 const props = defineProps({
 	employee: {

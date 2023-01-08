@@ -1,5 +1,13 @@
 <script setup>
-// Định nghĩa các props
+import Datepicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import ENUMS from "../../constants/enum";
+import { ref, watch } from "vue";
+
+/**
+ * Định nghĩa các props
+ * Author: LHH - 04/01/23
+ */
 const props = defineProps({
 	title: {
 		type: String,
@@ -9,19 +17,21 @@ const props = defineProps({
 		required: true,
 	},
 	value: {
-		type: String,
+		type: [String, Date],
 		default: "",
 	},
-	placeHolder: {
+	tabindex: {
+		type: Number,
+	},
+	placeholder: {
 		type: String,
-		default: "MM/DD/YYYY",
+		default: "DD/MM/YYYY",
 	},
 	size: {
 		type: String,
 		validator(value) {
-			return ["sm", "md", "lg"].includes(value);
+			return ["sm", "lg"].includes(value);
 		},
-		default: "md",
 	},
 	error: {
 		type: String,
@@ -31,6 +41,64 @@ const props = defineProps({
 		default: false,
 	},
 });
+
+/**
+ * Định nghĩa các emit
+ * Author: LHH -
+ */
+const emit = defineEmits(["change"]);
+
+/**
+ * Tạo các state của component
+ * Author: LHH -
+ */
+const date = ref();
+
+/**
+ * Hàm format date
+ * Author: LHH - 05/01/23
+ */
+const format = (date) => {
+	try {
+		const day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+		const month =
+			date.getMonth() + 1 < 10
+				? "0" + (date.getMonth() + 1)
+				: date.getMonth() + 1;
+		const year = date.getFullYear();
+
+		return `${day}/${month}/${year}`;
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Theo dõi sự thay đổi của các state
+ * Author: LHH - 05/01/23
+ */
+watch(date, () => {
+	try {
+		emit("change", { name: props.name, value: date });
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+/**
+ * Theo dõi sự thay đổi của props
+ * Author: LHH - 05/01/23
+ */
+watch(
+	() => props.value,
+	(newVal) => {
+		try {
+			date.value = newVal;
+		} catch (error) {
+			console.log(error);
+		}
+	}
+);
 </script>
 
 <template>
@@ -43,84 +111,57 @@ const props = defineProps({
 	>
 		<label v-if="title" class="date-picker__label">{{ title }}</label>
 		<div class="date-picker__wrapper">
-			<input
-				type="text"
-				class="date-picker__input"
-				:placeholder="placeHolder"
-				:name="name"
-				:value="value"
-			/>
-			<p class="date-picker__icon">
-				<i></i>
-			</p>
+			<Datepicker
+				v-model="date"
+				placeholder="DD/MM/YYYY"
+				text-input
+				auto-apply
+				close-on-scroll
+				show-now-button
+				:enable-time-picker="false"
+				:format="format"
+				hide-offset-dates
+				:day-names="['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']"
+			>
+				<template
+					#dp-input="{ value, onInput, onEnter, onTab, onClear }"
+				>
+					<div class="date-picker__wrapper">
+						<input
+							type="text"
+							class="date-picker__input"
+							:placeholder="placeholder"
+							:name="name"
+							:value="value"
+							:tabindex="tabindex"
+							autocomplete="off"
+						/>
+						<p class="date-picker__icon">
+							<i></i>
+						</p>
+					</div>
+				</template>
+				<template #month="{ text, value }">
+					{{ ENUMS.month[text] }}
+				</template>
+				<template #now-button="{ selectCurrentDate }">
+					<div class="date-picker__calendar__footer">
+						<button
+							class="btn btn--link"
+							@click="selectCurrentDate()"
+						>
+							<a class="btn__text">Hôm nay</a>
+						</button>
+					</div>
+				</template>
+			</Datepicker>
 		</div>
 		<p v-if="hasMessage" class="date-picker__error">{{ error }}</p>
-
-		<div class="date-picker__calendar">
-			<div class="date-picker__calendar__header">
-				<div class="date-picker__calendar__month-year">
-					<p class="date-picker__calendar__month-year__text">
-						Tháng 5, 2019
-					</p>
-					<p class="date-picker__calendar__month-year__icon">
-						<i></i>
-					</p>
-				</div>
-
-				<div class="date-picker__calendar__action">
-					<p class="date-picker__calendar__action__item">
-						<i class="icon-left"></i>
-					</p>
-					<p class="date-picker__calendar__action__item">
-						<i class="icon-right"></i>
-					</p>
-				</div>
-			</div>
-			<div class="date-picker__calendar__body">
-				<div class="date-picker__calendar__body__item day">T2</div>
-				<div class="date-picker__calendar__body__item day">T3</div>
-				<div class="date-picker__calendar__body__item day">T4</div>
-				<div class="date-picker__calendar__body__item day">T5</div>
-				<div class="date-picker__calendar__body__item day">T6</div>
-				<div class="date-picker__calendar__body__item day">T7</div>
-				<div class="date-picker__calendar__body__item day">CN</div>
-				<div class="date-picker__calendar__body__item d1 active">1</div>
-				<div class="date-picker__calendar__body__item d2">2</div>
-				<div class="date-picker__calendar__body__item d3">3</div>
-				<div class="date-picker__calendar__body__item d4">4</div>
-				<div class="date-picker__calendar__body__item d5">5</div>
-				<div class="date-picker__calendar__body__item d6">6</div>
-				<div class="date-picker__calendar__body__item d7">7</div>
-				<div class="date-picker__calendar__body__item d8">8</div>
-				<div class="date-picker__calendar__body__item d9">9</div>
-				<div class="date-picker__calendar__body__item d10">10</div>
-				<div class="date-picker__calendar__body__item d11">11</div>
-				<div class="date-picker__calendar__body__item d12">12</div>
-				<div class="date-picker__calendar__body__item d13">13</div>
-				<div class="date-picker__calendar__body__item d14">14</div>
-				<div class="date-picker__calendar__body__item d14">15</div>
-				<div class="date-picker__calendar__body__item d16">16</div>
-				<div class="date-picker__calendar__body__item d17">17</div>
-				<div class="date-picker__calendar__body__item d18">18</div>
-				<div class="date-picker__calendar__body__item d19">19</div>
-				<div class="date-picker__calendar__body__item d20">20</div>
-				<div class="date-picker__calendar__body__item d21">21</div>
-				<div class="date-picker__calendar__body__item d22">22</div>
-				<div class="date-picker__calendar__body__item d23">23</div>
-				<div class="date-picker__calendar__body__item d24">24</div>
-				<div class="date-picker__calendar__body__item d25">25</div>
-				<div class="date-picker__calendar__body__item d26">26</div>
-				<div class="date-picker__calendar__body__item d27">27</div>
-				<div class="date-picker__calendar__body__item d28">28</div>
-				<div class="date-picker__calendar__body__item d29">29</div>
-				<div class="date-picker__calendar__body__item d30">30</div>
-				<div class="date-picker__calendar__body__item d31">31</div>
-			</div>
-			<div class="date-picker__calendar__footer">
-				<button class="btn btn--link">
-					<a href="#" class="btn__text">Hôm nay</a>
-				</button>
-			</div>
-		</div>
 	</div>
 </template>
+
+<style scoped>
+.dp-custom-cell {
+	border-radius: 50%;
+}
+</style>
