@@ -298,7 +298,7 @@
 }
 
 .form__col .cbo__input,
-.form__col .dropdown__input {
+.form__col .select__input {
 	min-width: 100%;
 }
 

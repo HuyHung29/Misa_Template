@@ -1,6 +1,6 @@
 <script setup>
 import Input from "../components/customs/MInput.vue";
-import DropDown from "../components/customs/MDropDown.vue";
+import Select from "./customs/MSelect.vue";
 import DatePicker from "../components/customs/MDatePicker.vue";
 import Radio from "../components/customs/MRadio.vue";
 import Button from "../components/MButton.vue";
@@ -8,6 +8,7 @@ import Loading from "../components/MLoading.vue";
 import CheckBox from "../components/customs/MCheckBox.vue";
 import { computed, inject, onBeforeMount, reactive, ref } from "vue";
 import ENUMS from "../constants/enum";
+import RESOURCES from "../constants/resource";
 import useEmployee from "../composable/employee";
 import useDepartment from "../composable/department";
 import usePosition from "../composable/position";
@@ -19,11 +20,11 @@ import usePosition from "../composable/position";
 const {
 	state,
 	handleGetEmployees,
-	handleOpenForm,
 	handleCloseForm,
 	handleOpenModal,
 	handleOpenLoading,
 	handleCloseLoading,
+	handleShowToast,
 } = inject("store");
 
 /**
@@ -33,9 +34,11 @@ const {
 const {
 	newEmployeeCode,
 	editEmployee,
+	employeeCheck,
 	statusCode,
 	getEmployeeById,
 	getNewEmployeeCode,
+	getEmployeeByEmpCode,
 	addNewEmployee,
 	updateNewEmployee,
 } = useEmployee();
@@ -64,8 +67,8 @@ const departmentList = ref([]);
  */
 const departmentOptions = computed(() => {
 	return departmentList.value.map((item) => ({
-		key: item.DepartmentId,
-		value: item.DepartmentName,
+		value: item.DepartmentId,
+		title: item.DepartmentName,
 	}));
 });
 
@@ -85,6 +88,7 @@ const formState = reactive({
 		personalTaxCode: "",
 		email: "",
 	},
+	editEmployeeCode: "",
 	formError: {
 		isError: null,
 		fullName: null,
@@ -99,8 +103,10 @@ const formState = reactive({
  */
 const formName = computed(() => {
 	try {
-		if (state.form.type === "add") return "Thêm nhân viên";
-		else if (state.form.type === "edit") return "Sửa nhân viên";
+		if (state.form.type === RESOURCES.FORM_MODE.ADD)
+			return "Thêm nhân viên";
+		else if (state.form.type === RESOURCES.FORM_MODE.EDIT)
+			return "Sửa nhân viên";
 	} catch (error) {
 		console.log(error);
 	}
@@ -114,7 +120,6 @@ onBeforeMount(async () => {
 	try {
 		if (state.form.type) {
 			await getAllDepartment();
-			await getAllPosition();
 
 			departmentList.value = [...departments.value];
 
@@ -123,6 +128,7 @@ onBeforeMount(async () => {
 			} else {
 				await handleGetNewEmployeeCode();
 			}
+			await getAllPosition();
 		}
 	} catch (error) {
 		console.log(error);
@@ -159,22 +165,26 @@ const handleGetEditEmployee = async (id) => {
 		formState.formValue = {
 			employeeCode: EmployeeCode,
 			fullName: FullName,
-			departmentId: DepartmentId,
+			departmentId: DepartmentId
+				? DepartmentId
+				: departmentList.value[0].DepartmentId,
 			positionName:
 				PositionName ??
 				positions.value?.find(
 					(position) => position.PositionId === PositionId
 				).PositionName,
-			dateOfBirth: new Date(DateOfBirth),
+			dateOfBirth: DateOfBirth ? new Date(DateOfBirth) : "",
 			gender: Gender,
 			identityNumber: IdentityNumber,
-			identityDate: new Date(IdentityDate),
+			identityDate: IdentityDate ? new Date(IdentityDate) : "",
 			identityPlace: IdentityPlace,
 			address: Address,
 			phoneNumber: PhoneNumber,
 			personalTaxCode: PersonalTaxCode,
 			email: Email,
 		};
+
+		formState.editEmployeeCode = EmployeeCode;
 
 		handleCloseLoading();
 	} catch (error) {
@@ -196,7 +206,7 @@ const handleGetNewEmployeeCode = async () => {
 		formState.formValue = {
 			employeeCode: newEmployeeCode.value,
 			fullName: "",
-			departmentId: "",
+			departmentId: departmentList.value[0].DepartmentId,
 			positionName: "",
 			dateOfBirth: "",
 			gender: 0,
@@ -237,17 +247,30 @@ const handleGetNewEmployeeCode = async () => {
  */
 const handleSubmit = async () => {
 	try {
-		handleValidateForm();
+		await handleValidateForm();
 
 		console.log(formState.formError);
 
 		if (formState.formError.isError) {
-			const { employeeCode, fullName, departmentId } =
-				formState.formError;
+			const {
+				employeeCode,
+				fullName,
+				departmentId,
+				dateOfBirth,
+				identityDate,
+				phoneNumber,
+				email,
+			} = formState.formError;
 			handleOpenModal(
-				"Có lỗi",
-				employeeCode || fullName || departmentId,
-				"error"
+				RESOURCES.MODAL_TITLE.ERROR,
+				employeeCode ||
+					fullName ||
+					departmentId ||
+					dateOfBirth ||
+					identityDate ||
+					phoneNumber ||
+					email,
+				RESOURCES.MODAL_TYPE.ERROR
 			);
 		} else {
 			const { dateOfBirth, identityDate } = formState.formValue;
@@ -260,14 +283,34 @@ const handleSubmit = async () => {
 				dateOfBirth: formatDateOfBirth,
 				identityDate: formatIdentityDate,
 			};
-			if (state.form.type === "add") {
+			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
 				await addNewEmployee(data);
-			} else if (state.form.type === "edit") {
+			} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
 				await updateNewEmployee(state.form.employeeId, data);
 			}
 		}
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+/**
+ * Xử lý hiển thị thông báo thành công
+ * Author: LHH - 10/01/23
+ */
+const handleShowSuccessMessage = () => {
+	if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+		handleShowToast({
+			type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+			key: new Date(),
+			content: "Thêm nhân viên thành công",
+		});
+	} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+		handleShowToast({
+			type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+			key: new Date(),
+			content: "Sửa nhân viên thành công",
+		});
 	}
 };
 
@@ -279,7 +322,9 @@ const onStoreBtnClick = async () => {
 	try {
 		await handleSubmit();
 		if (statusCode.value === 1) {
+			console.log(state.form.type);
 			handleGetEmployees();
+			handleShowSuccessMessage();
 			handleCloseForm();
 		}
 	} catch (error) {
@@ -297,6 +342,7 @@ const onStoreAndAddBtnClick = async () => {
 		if (statusCode.value === 1) {
 			handleGetEmployees();
 			handleGetNewEmployeeCode();
+			handleShowSuccessMessage();
 		}
 	} catch (error) {
 		console.log(error);
@@ -310,9 +356,9 @@ const onStoreAndAddBtnClick = async () => {
 const onCloseBtnClick = () => {
 	try {
 		handleOpenModal(
-			"Xác nhận",
-			"Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
-			"info"
+			RESOURCES.MODAL_TITLE.INFO,
+			RESOURCES.MODAL_MESSAGE.INFO,
+			RESOURCES.MODAL_TYPE.INFO
 		);
 	} catch (error) {
 		console.log(error);
@@ -335,18 +381,37 @@ const handleBindValue = ({ name, value }) => {
  * Xử lý validate form
  * Author: LHH - 04/01/23
  */
-const handleValidateForm = () => {
+const handleValidateForm = async () => {
 	try {
-		formState.formError.isError = false;
+		const {
+			employeeCode,
+			fullName,
+			departmentId,
+			dateOfBirth,
+			identityNumber,
+			identityDate,
+			phoneNumber,
+			email,
+		} = formState.formValue;
 
-		const { employeeCode, fullName, departmentId } = formState.formValue;
+		formState.formError.isError = false;
 
 		if (!employeeCode) {
 			formState.formError.employeeCode =
 				"Mã nhân viên không được để trống";
 			formState.formError.isError = true;
 		} else {
-			formState.formError.employeeCode = null;
+			await getEmployeeByEmpCode(employeeCode);
+			if (
+				employeeCheck.value &&
+				employeeCheck.value.EmployeeCode !== formState.editEmployeeCode
+			) {
+				console.log(employeeCheck.value);
+				formState.formError.employeeCode = "Mã nhân viên đã tồn tại";
+				formState.formError.isError = true;
+			} else {
+				formState.formError.employeeCode = null;
+			}
 		}
 
 		if (!fullName) {
@@ -361,6 +426,59 @@ const handleValidateForm = () => {
 			formState.formError.isError = true;
 		} else {
 			formState.formError.departmentId = null;
+		}
+
+		if (dateOfBirth) {
+			const date = new Date(dateOfBirth).getTime();
+			const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
+			if (age < 18) {
+				formState.formError.dateOfBirth = "Nhân viên phải trên 18 tuổi";
+				formState.formError.isError = true;
+			} else {
+				formState.formError.dateOfBirth = null;
+			}
+		}
+
+		if (identityNumber) {
+			if (identityDate) {
+				console.log(
+					identityDate,
+					dateOfBirth,
+					identityNumber < dateOfBirth
+				);
+				if (identityDate < dateOfBirth) {
+					formState.formError.identityDate = "Ngày cấp không đúng";
+					formState.formError.isError = true;
+				} else {
+					formState.formError.dateOfBirth = null;
+				}
+			} else {
+				formState.formError.identityDate =
+					"Ngày cấp không được để trống";
+				formState.formError.isError = true;
+			}
+		}
+
+		if (phoneNumber) {
+			const regexPhone =
+				/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+			if (!regexPhone.test(phoneNumber)) {
+				formState.formError.phoneNumber = "Ngày cấp không đúng";
+				formState.formError.isError = true;
+			} else {
+				formState.formError.phoneNumber = null;
+			}
+		}
+
+		if (email) {
+			const regexEmail =
+				/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+			if (!regexEmail.test(email)) {
+				formState.formError.email = "Email không đúng";
+				formState.formError.isError = true;
+			} else {
+				formState.formError.email = null;
+			}
 		}
 	} catch (error) {
 		console.log(error);
@@ -437,7 +555,7 @@ const handleValidateForm = () => {
 								/>
 							</div>
 							<div class="form__col col--12">
-								<DropDown
+								<Select
 									size="sm"
 									isRequired
 									name="departmentId"
@@ -445,11 +563,13 @@ const handleValidateForm = () => {
 									:tabindex="4"
 									:listValue="departmentOptions"
 									:defaultValue="
-										departments?.find(
-											(item) =>
-												item.DepartmentId ===
-												editEmployee?.DepartmentId
-										)?.DepartmentName
+										editEmployee
+											? departments?.find(
+													(item) =>
+														item.DepartmentId ===
+														editEmployee?.DepartmentId
+											  )?.DepartmentName
+											: departmentOptions[0]?.title
 									"
 									@select="handleBindValue"
 									:error="
@@ -482,13 +602,18 @@ const handleValidateForm = () => {
 									:value="formState.formValue.dateOfBirth"
 									@change="handleBindValue"
 									placeholder="DD/MM/YYYY"
+									:error="
+										formState.formError
+											? formState.formError.dateOfBirth
+											: ''
+									"
 								/>
 							</div>
 							<div class="form__col col--7">
 								<Radio
 									name="gender"
 									size="sm"
-									:list="ENUMS.gender"
+									:list="ENUMS.GENDER"
 									:defaultValue="formState.formValue.gender"
 									@check="handleBindValue"
 									title="Giới tính"
@@ -514,6 +639,11 @@ const handleValidateForm = () => {
 									:value="formState.formValue.identityDate"
 									@change="handleBindValue"
 									placeholder="DD/MM/YYYY"
+									:error="
+										formState.formError
+											? formState.formError.identityDate
+											: ''
+									"
 								/>
 							</div>
 							<div class="form__col col--12">
@@ -549,6 +679,11 @@ const handleValidateForm = () => {
 							:tabindex="10"
 							:value="formState.formValue.phoneNumber"
 							@change="handleBindValue"
+							:error="
+								formState.formError
+									? formState.formError.phoneNumber
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3">
@@ -572,6 +707,11 @@ const handleValidateForm = () => {
 							:tabindex="12"
 							:value="formState.formValue.email"
 							@change="handleBindValue"
+							:error="
+								formState.formError
+									? formState.formError.email
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3"></div>

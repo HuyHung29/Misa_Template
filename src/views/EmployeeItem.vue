@@ -2,9 +2,17 @@
 import CheckBox from "../components/customs/MCheckBox.vue";
 import { formatDate, formatMoney } from "../util/common";
 import { inject } from "vue";
+import RESOURCES from "../constants/resource";
 
+/**
+ * Sử dụng store
+ * Author: LHH - 04/01/23
+ */
 const { state, handleOpenForm } = inject("store");
-// Định nghĩa các props
+/**
+ * Định nghĩa các props
+ * Author: LHH - 04/01/23
+ */
 const props = defineProps({
 	employee: {
 		type: Object,
@@ -17,33 +25,60 @@ const props = defineProps({
 	},
 });
 
-// Định nghĩa các sự kiện
+/**
+ * Định nghĩa các emiit
+ * Author: LHH - 04/01/23
+ */
 const emit = defineEmits(["click", "check"]);
 
+/**
+ * Xử lý khi ấn nút option
+ * Author: LHH - 04/01/23
+ */
 const onOptionBtnClick = (e) => {
-	const target = e.target;
-	const position = target.getBoundingClientRect();
-	emit("click", {
-		employeeId: props.employee.EmployeeId,
-		employeeCode: props.employee.EmployeeCode,
-		top: position.top,
-		right: document.body.offsetWidth - position.left,
-		width: position.width,
-		height: position.height,
-	});
+	try {
+		const target = e.target;
+		const position = target.getBoundingClientRect();
+		emit("click", {
+			employeeId: props.employee.EmployeeId,
+			employeeCode: props.employee.EmployeeCode,
+			top: position.top,
+			right: document.body.offsetWidth - position.left,
+			width: position.width,
+			height: position.height,
+		});
+	} catch (error) {
+		console.log(error);
+	}
 };
 
+/**
+ * Xử lý khi ấn nút sửa
+ * Author: LHH - 04/01/23
+ */
 const onUpdateBtnClick = () => {
-	handleOpenForm("edit", props.employee.EmployeeId);
+	try {
+		handleOpenForm(RESOURCES.FORM_MODE.EDIT, props.employee.EmployeeId);
+	} catch (error) {
+		console.log(error);
+	}
 };
 
+/**
+ * Xử lý check item
+ * Author: LHH - 04/01/23
+ */
 const handleCheckBox = (data) => {
-	emit("check", data.value);
+	try {
+		emit("check", data.value);
+	} catch (error) {
+		console.log(error);
+	}
 };
 </script>
 
 <template>
-	<tr class="table__row" @dblclick="onUpdateBtnClick('edit')">
+	<tr class="table__row" @dblclick="onUpdateBtnClick()">
 		<td class="table__col text-center">
 			<CheckBox
 				name="table-checkbox"
@@ -85,9 +120,9 @@ const handleCheckBox = (data) => {
 				<p class="table__action__update" @click="onUpdateBtnClick">
 					Sửa
 				</p>
-				<p class="table__action__more" @click="onOptionBtnClick">
+				<button class="table__action__more" @click="onOptionBtnClick">
 					<i class="table__action__icon"></i>
-				</p>
+				</button>
 			</button>
 		</td>
 	</tr>

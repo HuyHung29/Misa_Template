@@ -49,10 +49,6 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
-	hasMessage: {
-		type: Boolean,
-		default: false,
-	},
 });
 
 /**
@@ -114,6 +110,6 @@ onMounted(() => {
 				v-model="inputState"
 			/>
 		</div>
-		<p v-if="hasMessage" class="textfield__error">Error</p>
+		<p v-if="error" class="textfield__error">{{ error }}</p>
 	</div>
 </template>

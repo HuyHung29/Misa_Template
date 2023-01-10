@@ -1,5 +1,6 @@
 import { reactive, readonly } from "vue";
 import useEmployee from "../composable/employee";
+import RESOURCES from "../constants/resource";
 
 /**
  * Các hàm liên quan đến employee
@@ -32,13 +33,16 @@ const state = reactive({
 		isOpen: true,
 	},
 	isLoading: false,
+	toasts: [],
 });
 
 /**
  * Hàm xử lý danh sách nhân viên
  * Author: LHH - 06/01/23
  */
-const handleGetEmployees = async (filter = { pageSize: 20, pageNumber: 1 }) => {
+const handleGetEmployees = async (
+	filter = { pageSize: RESOURCES.PAGINATION[0].value, pageNumber: 1 }
+) => {
 	try {
 		state.isLoading = true;
 
@@ -166,6 +170,24 @@ const handleCloseLoading = () => {
 	}
 };
 
+/**
+ * Xử lý hiên thị toast message
+ * Author: LHH - 10/01/23
+ */
+const handleShowToast = (toast = { title: "", content: "" }) => {
+	state.toasts.push(toast);
+};
+
+/**
+ * Xử lý ẩn toast message
+ * Author: LHH - 10/01/23
+ */
+const handleCloseToast = (key) => {
+	const index = state.toasts.findIndex((toast) => toast.key === key);
+
+	state.toasts.splice(index, 1);
+};
+
 export default {
 	state: readonly(state),
 	handleGetEmployees,
@@ -177,4 +199,6 @@ export default {
 	handleCloseSidebar,
 	handleOpenLoading,
 	handleCloseLoading,
+	handleShowToast,
+	handleCloseToast,
 };

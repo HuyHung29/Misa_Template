@@ -1,8 +1,8 @@
 <script setup>
 import { useRoute } from "vue-router";
-import ENUMS from "../constants/enum";
-import DropDown from "../components/customs/MDropDown.vue";
-import { inject, reactive, watch } from "@vue/runtime-core";
+import RESOURCES from "../constants/resource";
+import Select from "./customs/MSelect.vue";
+import { computed, inject, reactive, watch } from "@vue/runtime-core";
 
 /**
  * Các state và hàm dùng chung
@@ -17,6 +17,7 @@ const { state, handleGetEmployees } = inject("store");
 const paginationState = reactive({
 	pageSize: 20,
 	pageNumber: 1,
+	siblingCount: 3,
 });
 
 /**
@@ -29,6 +30,31 @@ watch(paginationState, () => {
 	} catch (error) {
 		console.log(error);
 	}
+});
+
+/**
+ * Tính toán số trang hiển thị
+ * Author: LHH -10/01/23
+ */
+const pages = computed(() => {
+	let startPage = 1;
+	if (paginationState.pageNumber === 1) {
+		startPage = 1;
+	} else if (paginationState.pageNumber === state.totalPage) {
+		startPage = state.totalPage - paginationState.siblingCount;
+	} else startPage = paginationState.pageNumber - 1;
+	const range = [];
+
+	for (
+		let i = startPage;
+		i <=
+		Math.min(startPage + paginationState.siblingCount - 1, state.totalPage);
+		i++
+	) {
+		range.push(i);
+	}
+
+	return { startPage, range };
 });
 
 /**
@@ -90,9 +116,9 @@ const handleClickNextBtn = () => {
 		</p>
 
 		<div class="data-table__action">
-			<DropDown
-				:listValue="ENUMS.pagination"
-				:defaultValue="ENUMS.pagination[0].value"
+			<Select
+				:listValue="RESOURCES.PAGINATION"
+				:defaultValue="RESOURCES.PAGINATION[0].title"
 				name="emp-quantity"
 				:style="{ top: 'unset', bottom: '100%' }"
 				@select="handleChangeEmployeeQuantity"
@@ -109,12 +135,51 @@ const handleClickNextBtn = () => {
 				<ul class="data-table__pagination__page">
 					<li
 						class="data-table__pagination__item"
-						:class="{ active: paginationState.pageNumber === page }"
-						v-for="page in +state.totalPage"
+						@click="handleChangePageNumber(1)"
+						:class="{ active: paginationState.pageNumber === 1 }"
+					>
+						1
+					</li>
+					<li
+						class="data-table__pagination__dot"
+						v-if="pages.startPage > 2"
+					>
+						...
+					</li>
+					<li
+						class="data-table__pagination__item"
+						v-for="page in state.totalPage"
 						:key="page"
 						@click="handleChangePageNumber(page)"
+						:class="{ active: paginationState.pageNumber === page }"
+						v-show="
+							page !== 1 &&
+							page !== state.totalPage &&
+							pages.range.includes(page)
+						"
 					>
 						{{ page }}
+					</li>
+					<li
+						class="data-table__pagination__dot"
+						v-if="
+							pages.startPage + paginationState.siblingCount <
+							state.totalPage
+						"
+					>
+						..
+					</li>
+
+					<li
+						class="data-table__pagination__item"
+						@click="handleChangePageNumber(state.totalPage)"
+						:class="{
+							active:
+								paginationState.pageNumber === state.totalPage,
+						}"
+						v-show="state.totalPage !== 1"
+					>
+						{{ state.totalPage }}
 					</li>
 				</ul>
 				<p

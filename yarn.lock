@@ -457,11 +457,6 @@ vite@^4.0.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vue-click-outside@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/vue-click-outside/-/vue-click-outside-1.1.0.tgz#48b7680b518923e701643cccb3e165854aad99eb"
-  integrity sha512-pNyvAA9mRXJwPHlHJyjMb4IONSc7khS5lxGcMyE2EIKgNMAO279PWM9Hyq0d5J4FkiSRdmFLwnbjDd5UtPizHQ==
-
 vue-debounce@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/vue-debounce/-/vue-debounce-4.0.0.tgz#3f584dabc08a841a0182ab68d19f77f70a416fcc"

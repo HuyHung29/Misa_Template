@@ -41,10 +41,6 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
-	hasMessage: {
-		type: Boolean,
-		default: false,
-	},
 });
 
 /**
@@ -68,9 +64,9 @@ const state = reactive({
  */
 const handleChangeValue = (item) => {
 	try {
-		state.value = item.value;
+		state.value = item.title;
 		state.isShow = false;
-		emit("select", { name: props.name, value: item.key });
+		emit("select", { name: props.name, value: item.value });
 	} catch (error) {
 		console.log(error);
 	}
@@ -94,7 +90,7 @@ watch(
 );
 
 /**
- * Xử lý mở dropdown
+ * Xử lý mở select
  * Author: LHH - 04/01/23
  */
 const handleOpenList = () => {
@@ -106,7 +102,7 @@ const handleOpenList = () => {
 };
 
 /**
- * Xử lý đóng dropdown
+ * Xử lý đóng select
  * Author: LHH - 04/01/23
  */
 const handleCloseList = () => {
@@ -120,40 +116,40 @@ const handleCloseList = () => {
 
 <template>
 	<div
-		class="dropdown"
+		class="select"
 		:class="{
-			'dropdown--sm': size === 'sm',
-			'dropdown--lg': size === 'lg',
+			'select--sm': size === 'sm',
+			'select--lg': size === 'lg',
 			invalid: error,
 		}"
 	>
-		<label v-if="title" for="" class="dropdown__label"
+		<label v-if="title" for="" class="select__label"
 			>{{ title }} <span v-if="isRequired">*</span></label
 		>
-		<div class="dropdown__input__wrap">
-			<p class="dropdown__icon">
+		<div class="select__input__wrap">
+			<p class="select__icon">
 				<i></i>
 			</p>
 			<input
 				type="text"
-				class="dropdown__input"
+				class="select__input"
 				:value="state.value"
 				@click="state.isShow = !state.isShow"
 				:tabindex="tabindex"
 			/>
-			<ul class="dropdown__list" v-show="state.isShow" :style="style">
+			<ul class="select__list" v-show="state.isShow" :style="style">
 				<li
 					v-for="item in listValue"
-					class="dropdown__item"
-					:class="{ selected: item.value === state.value }"
-					:key="item.key"
+					class="select__item"
+					:class="{ selected: item.title === state.value }"
+					:key="item.value"
 					@click="handleChangeValue(item)"
 				>
-					{{ item.value }}
+					{{ item.title }}
 				</li>
 			</ul>
 		</div>
-		<p v-if="hasMessage" class="dropdown__error">Error Message</p>
+		<p v-if="error" class="select__error">{{ error }}</p>
 	</div>
 </template>
 

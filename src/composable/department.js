@@ -17,6 +17,7 @@ const useDepartment = () => {
 				departments.value = [...response];
 			} catch (error) {
 				console.log(error);
+				departments.value = [];
 			}
 		};
 

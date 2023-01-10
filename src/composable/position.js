@@ -17,6 +17,7 @@ const usePosition = () => {
 				positions.value = [...response];
 			} catch (error) {
 				console.log(error);
+				positions.value = [];
 			}
 		};
 

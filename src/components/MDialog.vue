@@ -1,4 +1,5 @@
 <script setup>
+import RESOURCES from "../constants/resource";
 import { inject } from "vue";
 import useEmployee from "../composable/employee";
 
@@ -6,8 +7,13 @@ import useEmployee from "../composable/employee";
  * Các state và phương thức dùng chung
  * Author: LHH - 04/01/23
  */
-const { state, handleGetEmployees, handleCloseModal, handleCloseForm } =
-	inject("store");
+const {
+	state,
+	handleGetEmployees,
+	handleCloseModal,
+	handleCloseForm,
+	handleShowToast,
+} = inject("store");
 
 /**
  * Các state và phương thức liên quan đến employee
@@ -34,12 +40,17 @@ const handleCloseAll = () => {
  */
 const handleDeleteBtn = async () => {
 	try {
-		if (state.modal.type === "warning") {
+		if (state.modal.type === RESOURCES.MODAL_TYPE.WARNING) {
 			await deleteEmployee(state.modal.employeeId);
 
 			if (statusCode.value === 1) {
 				await handleGetEmployees();
 				handleCloseModal();
+				handleShowToast({
+					type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+					key: new Date(),
+					content: "Xóa nhân viên thành công",
+				});
 			}
 		} else {
 			handleCloseModal();
@@ -56,8 +67,9 @@ const handleDeleteBtn = async () => {
 		<div
 			class="dialog"
 			:class="{
-				'dialog--error': state.modal.type === 'error',
-				'dialog--info': state.modal.type === 'info',
+				'dialog--error':
+					state.modal.type === RESOURCES.MODAL_TYPE.ERROR,
+				'dialog--info': state.modal.type === RESOURCES.MODAL_TYPE.INFO,
 			}"
 		>
 			<div class="dialog__header">
@@ -76,7 +88,7 @@ const handleDeleteBtn = async () => {
 			</div>
 			<div class="dialog__action">
 				<button
-					v-if="state.modal.type !== 'error'"
+					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 					@click="handleCloseModal"
 					class="btn btn--sub"
 					:style="{
@@ -84,11 +96,13 @@ const handleDeleteBtn = async () => {
 					}"
 				>
 					<span class="btn__text">{{
-						state.modal.type === "warning" ? "Không" : "Hủy"
+						state.modal.type === RESOURCES.MODAL_TYPE.WARNING
+							? "Không"
+							: "Hủy"
 					}}</span>
 				</button>
 				<button
-					v-if="state.modal.type === 'info'"
+					v-if="state.modal.type === RESOURCES.MODAL_TYPE.INFO"
 					class="btn btn--sub"
 					@click="handleCloseAll"
 				>
@@ -97,14 +111,14 @@ const handleDeleteBtn = async () => {
 				<button
 					class="btn"
 					@click="handleDeleteBtn"
-					v-if="state.modal.type !== 'error'"
+					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 				>
 					<span class="btn__text">Có</span>
 				</button>
 				<button
 					@click="handleCloseModal"
 					class="btn"
-					v-if="state.modal.type === 'error'"
+					v-if="state.modal.type === RESOURCES.MODAL_TYPE.ERROR"
 					:style="{ margin: '0 auto' }"
 				>
 					<span class="btn__text">Đóng</span>

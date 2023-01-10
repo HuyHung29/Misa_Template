@@ -34,10 +34,6 @@ const props = defineProps({
 		type: String,
 		default: "",
 	},
-	hasMessage: {
-		type: Boolean,
-		default: false,
-	},
 });
 
 /**
@@ -99,6 +95,6 @@ const handleRadioChange = () => {
 				}}</label>
 			</div>
 		</div>
-		<p v-if="hasMessage" class="radiofield__error">Error</p>
+		<p v-if="error" class="radiofield__error">{{ error }}</p>
 	</div>
 </template>

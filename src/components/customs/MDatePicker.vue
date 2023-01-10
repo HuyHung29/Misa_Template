@@ -1,7 +1,6 @@
 <script setup>
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-import ENUMS from "../../constants/enum";
 import { ref, watch } from "vue";
 
 /**
@@ -36,10 +35,6 @@ const props = defineProps({
 	error: {
 		type: String,
 	},
-	hasMessage: {
-		type: Boolean,
-		default: false,
-	},
 });
 
 /**
@@ -60,14 +55,18 @@ const date = ref();
  */
 const format = (date) => {
 	try {
-		const day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-		const month =
-			date.getMonth() + 1 < 10
-				? "0" + (date.getMonth() + 1)
-				: date.getMonth() + 1;
-		const year = date.getFullYear();
+		if (date) {
+			const day =
+				date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+			const month =
+				date.getMonth() + 1 < 10
+					? "0" + (date.getMonth() + 1)
+					: date.getMonth() + 1;
+			const year = date.getFullYear();
 
-		return `${day}/${month}/${year}`;
+			return `${day}/${month}/${year}`;
+		}
+		return "";
 	} catch (error) {
 		console.log(error);
 	}
@@ -107,6 +106,7 @@ watch(
 		:class="{
 			'date-picker--sm': size === 'sm',
 			'date-picker--lg': size === 'lg',
+			invalid: error,
 		}"
 	>
 		<label v-if="title" class="date-picker__label">{{ title }}</label>
@@ -118,6 +118,7 @@ watch(
 				auto-apply
 				close-on-scroll
 				show-now-button
+				locale="vi"
 				:enable-time-picker="false"
 				:format="format"
 				hide-offset-dates
@@ -142,7 +143,7 @@ watch(
 					</div>
 				</template>
 				<template #month="{ text, value }">
-					{{ ENUMS.month[text] }}
+					{{ text }}
 				</template>
 				<template #now-button="{ selectCurrentDate }">
 					<div class="date-picker__calendar__footer">
@@ -156,12 +157,6 @@ watch(
 				</template>
 			</Datepicker>
 		</div>
-		<p v-if="hasMessage" class="date-picker__error">{{ error }}</p>
+		<p v-if="error" class="date-picker__error">{{ error }}</p>
 	</div>
 </template>
-
-<style scoped>
-.dp-custom-cell {
-	border-radius: 50%;
-}
-</style>

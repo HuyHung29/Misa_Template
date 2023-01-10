@@ -4,6 +4,7 @@ import Header from "../components/TheHeader.vue";
 import Form from "../components/MForm.vue";
 import Dialog from "../components/MDialog.vue";
 import Loading from "../components/MLoading.vue";
+import Toast from "../components/MToast.vue";
 import { inject } from "vue";
 
 /**
@@ -31,6 +32,14 @@ const { state } = inject("store");
 	<Form v-if="state.form.isOpen" />
 	<Dialog v-if="state.modal.isOpen" />
 	<Loading v-show="state.isLoading" />
+	<div class="toast-wrap">
+		<Toast
+			v-for="(toast, index) in state.toasts"
+			:key="toast.type"
+			:toast="toast"
+			:item="toast.type + index"
+		/>
+	</div>
 </template>
 
 <style></style>

@@ -2,14 +2,17 @@
 import Loading from "../components/MLoading.vue";
 import EmployeeItem from "./EmployeeItem.vue";
 import CheckBox from "../components/customs/MCheckBox.vue";
-import DropDown from "../components/customs/MDropDown.vue";
+import Select from "../components/customs/MSelect.vue";
 import Button from "../components/MButton.vue";
 import Pagination from "../components/MPagination.vue";
-import ENUMS from "../constants/enum";
+import RESOURCES from "../constants/resource";
 import { reactive, inject, onBeforeMount } from "vue";
 import useEmployee from "../composable/employee";
 
-// Định nghĩa các state
+/**
+ * Định nghĩa các state
+ * Author: LHH - 04/01/23
+ */
 const empState = reactive({
 	listAction: {
 		isShow: false,
@@ -23,6 +26,10 @@ const empState = reactive({
 	checkList: [],
 });
 
+/**
+ * Sử dụng store
+ * Author: LHH -04/01/23
+ */
 const {
 	state,
 	handleGetEmployees,
@@ -33,15 +40,28 @@ const {
 	handleCloseLoading,
 } = inject("store");
 
-// Call API
+/**
+ * Call API
+ * Author: LHH - 04/01/23
+ */
 onBeforeMount(() => {
-	handleGetAllEmployee();
+	try {
+		handleGetAllEmployee();
+	} catch (error) {
+		console.log(error);
+	}
 });
 
+/**
+ * Khai báo state của component
+ * Author: LHH - 04/01/23
+ */
 const { totalRecord } = useEmployee();
 
-// Khai báo các sự kiện
-
+/**
+ * Hàm call API
+ * Author: LHH - 04/01/23
+ */
 const handleGetAllEmployee = () => {
 	try {
 		handleGetEmployees();
@@ -50,56 +70,110 @@ const handleGetAllEmployee = () => {
 	}
 };
 
+/**
+ * Hàm xử lý việc hiển thị action list
+ * Author: LHH -
+ */
 const handleDisplayListAction = (data) => {
-	empState.listAction = {
-		isShow: true,
-		employeeId: data.employeeId,
-		employeeCode: data.employeeCode,
-		style: {
-			top: data.top + data.height + "px",
-			right: data.right - data.width + "px",
-		},
-	};
+	try {
+		if (empState.listAction.employeeId === data.employeeId) {
+			empState.listAction = {
+				isShow: false,
+			};
+		} else {
+			empState.listAction = {
+				isShow: true,
+				employeeId: data.employeeId,
+				employeeCode: data.employeeCode,
+				style: {
+					top: data.top + data.height + "px",
+					right: data.right - data.width + "px",
+				},
+			};
+		}
+	} catch (error) {
+		console.log(error);
+	}
 };
 
+/**
+ * Hàm xử lý đóng action
+ * Author: LHH - 04/01/23
+ */
 const handleCloseListAction = () => {
-	empState.listAction.isShow = false;
+	try {
+		empState.listAction.isShow = false;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
+/**
+ * Hàm xử lý khi ấn nút xóa
+ * Author: LHH - 04/01/23
+ */
 const onDeleteBtnClick = () => {
-	handleOpenModal(
-		"Xác nhận xóa",
-		`Bạn có chắc chắn muốn xóa nhân viên \<${empState.listAction.employeeCode}\> không?`,
-		"warning",
-		empState.listAction.employeeId
-	);
+	try {
+		handleOpenModal(
+			RESOURCES.MODAL_TITLE.WARNING,
+			RESOURCES.MODAL_MESSAGE.WARNING(empState.listAction.employeeCode),
+			RESOURCES.MODAL_TYPE.WARNING,
+			empState.listAction.employeeId
+		);
 
-	handleCloseListAction();
+		handleCloseListAction();
+	} catch (error) {
+		console.log(error);
+	}
 };
 
+/**
+ * Hàm xử lý check all
+ * Author: LHH - 04/01/23
+ */
 const handleCheckAll = (target) => {
-	if (target.checked) {
-		empState.checkList = [
-			...state.employees.map((item) => item.EmployeeId),
-		];
-	} else {
-		empState.checkList = [];
+	try {
+		if (target.checked) {
+			empState.checkList = [
+				...state.employees.map((item) => item.EmployeeId),
+			];
+		} else {
+			empState.checkList = [];
+		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 
+/**
+ * Hàm xử lý check item
+ * Author: LHH - 04/01/23
+ */
 const handleCheck = (value) => {
-	if (empState.checkList.includes(value)) {
-		empState.checkList.splice(empState.checkList.indexOf(value), 1);
-	} else {
-		empState.checkList.push(value);
+	try {
+		if (empState.checkList.includes(value)) {
+			empState.checkList.splice(empState.checkList.indexOf(value), 1);
+		} else {
+			empState.checkList.push(value);
+		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 
+/**
+ * Hàm xử lý tìm kiếm
+ * Author: LHH - 04/01/23
+ */
 const handleSearchEmployee = (value) => {
-	if (value) {
-		handleGetEmployees({ employeeFilter: value });
-	} else {
-		handleGetEmployees();
+	try {
+		if (value) {
+			handleGetEmployees({ employeeFilter: value });
+		} else {
+			handleGetEmployees();
+		}
+	} catch (error) {
+		console.log(error);
 	}
 };
 </script>
@@ -110,7 +184,7 @@ const handleSearchEmployee = (value) => {
 			<h2 class="data-table__heading">Nhân viên</h2>
 			<Button
 				content="Thêm mới nhân viên"
-				@click="handleOpenForm('add')"
+				@click="handleOpenForm(RESOURCES.FORM_MODE.ADD)"
 			/>
 		</div>
 
