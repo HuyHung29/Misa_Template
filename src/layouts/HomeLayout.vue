@@ -33,12 +33,7 @@ const { state } = inject("store");
 	<Dialog v-if="state.modal.isOpen" />
 	<Loading v-show="state.isLoading" />
 	<div class="toast-wrap">
-		<Toast
-			v-for="(toast, index) in state.toasts"
-			:key="toast.type"
-			:toast="toast"
-			:item="toast.type + index"
-		/>
+		<Toast v-for="toast in state.toasts" :key="toast.key" :toast="toast" />
 	</div>
 </template>
 

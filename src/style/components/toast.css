@@ -46,6 +46,7 @@
 @keyframes fadeOut {
 	to {
 		opacity: 0;
+		transform: translateX(calc(100% + 32px));
 	}
 }
 
@@ -149,6 +150,8 @@
 
 	margin-top: -4px;
 	padding: 2px;
+
+	cursor: pointer;
 }
 
 .toast__action_close .toast__action_close__img {

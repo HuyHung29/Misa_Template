@@ -13,13 +13,15 @@ const {
 	handleCloseModal,
 	handleCloseForm,
 	handleShowToast,
+	handleOpenModal,
 } = inject("store");
 
 /**
  * Các state và phương thức liên quan đến employee
  * Author: LHH - 04/01/23
  */
-const { statusCode, deleteEmployee } = useEmployee();
+const { statusCode, addNewEmployee, updateNewEmployee, deleteEmployee } =
+	useEmployee();
 
 /**
  * Xử lý đóng dialog
@@ -38,23 +40,67 @@ const handleCloseAll = () => {
  * Xử lý ấn nút xóa
  * Author: LHH - 04/01/23
  */
-const handleDeleteBtn = async () => {
+const handleAgreeBtnClick = async () => {
 	try {
 		if (state.modal.type === RESOURCES.MODAL_TYPE.WARNING) {
 			await deleteEmployee(state.modal.employeeId);
+		}
 
-			if (statusCode.value === 1) {
-				await handleGetEmployees();
-				handleCloseModal();
-				handleShowToast({
-					type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
-					key: new Date(),
-					content: "Xóa nhân viên thành công",
-				});
+		if (state.modal.type === RESOURCES.MODAL_TYPE.INFO) {
+			const { employeeCode, fullName, departmentId } =
+				state.modal.employeeEdited;
+
+			let isError = false;
+			let error = "";
+
+			if (!employeeCode) {
+				error = "Mã nhân viên không được để trống";
+				isError = true;
 			}
-		} else {
-			handleCloseModal();
-			handleCloseForm();
+
+			if (!fullName) {
+				error = "Tên nhân viên không được để trống";
+
+				isError = true;
+			}
+
+			if (!departmentId) {
+				error = "Đơn vị không được để trống";
+
+				isError = true;
+			}
+
+			if (!isError) {
+				if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+					await addNewEmployee(state.modal.employeeEdited);
+				}
+
+				if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+					await updateNewEmployee(
+						state.form.employeeId,
+						state.modal.employeeEdited
+					);
+				}
+			} else {
+				handleOpenModal(
+					"Dữ liệu không đúng",
+					error,
+					RESOURCES.MODAL_TYPE.ERROR
+				);
+			}
+		}
+
+		if (statusCode.value === 1) {
+			await handleGetEmployees();
+
+			handleShowToast({
+				type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+				content:
+					state.modal.type === RESOURCES.MODAL_TYPE.WARNING
+						? "Xóa nhân viên thành công"
+						: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
+			});
+			handleCloseAll();
 		}
 	} catch (error) {
 		console.log(error);
@@ -88,29 +134,22 @@ const handleDeleteBtn = async () => {
 			</div>
 			<div class="dialog__action">
 				<button
-					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 					@click="handleCloseModal"
 					class="btn btn--sub"
-					:style="{
-						'margin-right': 'auto',
-					}"
+					v-if="state.modal.type === RESOURCES.MODAL_TYPE.INFO"
 				>
-					<span class="btn__text">{{
-						state.modal.type === RESOURCES.MODAL_TYPE.WARNING
-							? "Không"
-							: "Hủy"
-					}}</span>
+					<span class="btn__text">Hủy</span>
 				</button>
 				<button
-					v-if="state.modal.type === RESOURCES.MODAL_TYPE.INFO"
 					class="btn btn--sub"
 					@click="handleCloseAll"
+					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 				>
 					<span class="btn__text">Không</span>
 				</button>
 				<button
 					class="btn"
-					@click="handleDeleteBtn"
+					@click="handleAgreeBtnClick"
 					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 				>
 					<span class="btn__text">Có</span>
@@ -119,7 +158,6 @@ const handleDeleteBtn = async () => {
 					@click="handleCloseModal"
 					class="btn"
 					v-if="state.modal.type === RESOURCES.MODAL_TYPE.ERROR"
-					:style="{ margin: '0 auto' }"
 				>
 					<span class="btn__text">Đóng</span>
 				</button>

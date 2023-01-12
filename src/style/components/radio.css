@@ -82,6 +82,10 @@
 	display: none;
 }
 
+.radiofield__input:focus ~ .radiofield__input__icon {
+	box-shadow: 0 0 16px black;
+}
+
 .radiofield__input:checked ~ .radiofield__input__icon {
 	background: url(../../assets/icons/radio-checked.png) no-repeat center
 		center;

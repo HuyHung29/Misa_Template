@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, onUpdated, ref, watch } from "vue";
 /**
  * Định nghĩa các props
  * Author: LHH - 04/01/23
@@ -70,13 +70,30 @@ const inputRef = ref(null);
  */
 watch(inputState, () => {
 	try {
-		emit("change", { name: props.name, value: inputState.value });
+		emit("change", {
+			name: props.name,
+			value: inputState.value,
+		});
 	} catch (error) {
 		console.log(error);
 	}
 });
 
+/**
+ * Xử lý focus cho input
+ * Author: LHH - 08/01/23
+ */
 onMounted(() => {
+	if (props.focus) {
+		inputRef.value.focus();
+	}
+});
+
+/**
+ * Xử lý focus cho input
+ * Author: LHH - 11/01/23
+ */
+onUpdated(() => {
 	if (props.focus) {
 		inputRef.value.focus();
 	}

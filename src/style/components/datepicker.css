@@ -36,6 +36,10 @@
 	padding: 0 8px 0 12px;
 }
 
+.date-picker__input:focus {
+	border-color: var(--primary-color);
+}
+
 .date-picker__input:hover {
 	box-shadow: 0 0 4px var(--border-color);
 }

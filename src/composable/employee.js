@@ -24,6 +24,7 @@ const useEmployee = () => {
 				const response = await employeeApi.getAllEmp();
 
 				listEmployee.value = [...response];
+				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
 			}
@@ -42,6 +43,7 @@ const useEmployee = () => {
 				totalRecord.value = TotalRecord;
 
 				listEmployee.value = [...Data];
+				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
 
@@ -61,6 +63,7 @@ const useEmployee = () => {
 				const response = await employeeApi.getEmpById(id);
 
 				editEmployee.value = { ...response };
+				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
 			}
@@ -75,8 +78,9 @@ const useEmployee = () => {
 				const response = await employeeApi.getNewEmpCode();
 
 				newEmployeeCode.value = response;
+				statusCode.value = null;
 			} catch (error) {
-				console.log(error);
+				throw error;
 			}
 		};
 
@@ -91,6 +95,7 @@ const useEmployee = () => {
 				});
 
 				employeeCheck.value = response.Data ? response.Data[0] : null;
+				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
 			}
@@ -107,6 +112,7 @@ const useEmployee = () => {
 				statusCode.value = response;
 			} catch (error) {
 				console.log(error);
+				statusCode.value = null;
 			}
 		};
 
@@ -122,6 +128,7 @@ const useEmployee = () => {
 				statusCode.value = response;
 			} catch (error) {
 				console.log(error);
+				statusCode.value = null;
 			}
 		};
 
@@ -137,6 +144,7 @@ const useEmployee = () => {
 				statusCode.value = response;
 			} catch (error) {
 				console.log(error);
+				statusCode.value = null;
 			}
 		};
 

@@ -19,15 +19,16 @@ const state = reactive({
 	totalRecord: null,
 	modal: {
 		isOpen: false,
-		title: "",
-		content: "",
+		title: null,
+		content: null,
 		type: "warning",
-		employeeId: "",
+		employeeId: null,
+		employeeEdited: null,
 	},
 	form: {
 		isOpen: false,
-		type: "",
-		employeeId: "",
+		type: null,
+		employeeId: null,
 	},
 	sidebar: {
 		isOpen: true,
@@ -62,7 +63,7 @@ const handleGetEmployees = async (
  * Hàm xử lý mở modal
  * Author: LHH - 02/01/23
  */
-const handleOpenModal = (title, content, type, employeeId) => {
+const handleOpenModal = (title, content, type, employeeId, employeeEdited) => {
 	try {
 		state.modal = {
 			isOpen: true,
@@ -70,7 +71,10 @@ const handleOpenModal = (title, content, type, employeeId) => {
 			content,
 			type,
 			employeeId,
+			employeeEdited,
 		};
+
+		console.log(state.modal.type);
 	} catch (error) {
 		console.log(error);
 	}
@@ -174,8 +178,8 @@ const handleCloseLoading = () => {
  * Xử lý hiên thị toast message
  * Author: LHH - 10/01/23
  */
-const handleShowToast = (toast = { title: "", content: "" }) => {
-	state.toasts.push(toast);
+const handleShowToast = ({ type, content }) => {
+	state.toasts.unshift({ type, content, key: new Date() });
 };
 
 /**

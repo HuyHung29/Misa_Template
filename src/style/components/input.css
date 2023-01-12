@@ -40,12 +40,16 @@
 	position: relative;
 }
 
+.textfield:has(p.textfield__icon) .textfield__input {
+	padding: 0 40px 0 12px;
+}
+
 .textfield__input {
 	outline: unset;
 	border: 1px solid var(--border-color);
 	border-radius: 4px;
 
-	padding: 0 40px 0 12px;
+	padding: 0 12px;
 
 	min-width: 260px;
 	max-width: 100%;

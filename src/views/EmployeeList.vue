@@ -109,6 +109,22 @@ const handleCloseListAction = () => {
 };
 
 /**
+ * Xử lý ấn nút nhân bản
+ * Author: LHH - 11/01/23
+ */
+// const handleDuplicateClick = () => {
+// 	try {
+// 		empState.listAction.isShow = false;
+// 		handleOpenForm(
+// 			RESOURCES.FORM_MODE.DUPLICATE,
+// 			empState.listAction.employeeId
+// 		);
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// };
+
+/**
  * Hàm xử lý khi ấn nút xóa
  * Author: LHH - 04/01/23
  */
@@ -276,12 +292,7 @@ const handleSearchEmployee = (value) => {
 					v-if="empState.listAction.isShow"
 					:style="empState.listAction.style"
 				>
-					<li
-						class="table__action__item"
-						@click="handleCloseListAction"
-					>
-						Nhân bản
-					</li>
+					<li class="table__action__item">Nhân bản</li>
 					<li
 						class="table__action__item open-dialog-btn"
 						@click="onDeleteBtnClick"

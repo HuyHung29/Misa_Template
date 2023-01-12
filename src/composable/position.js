@@ -9,7 +9,10 @@ const usePosition = () => {
 	try {
 		const positions = ref(null);
 
-		// Lấy tất cả chức danh
+		/**
+		 * Lấy tất cả chức danh
+		 * Author: LHH - 04/01/23
+		 */
 		const getAllPosition = async () => {
 			try {
 				const response = await positionApi.getAllPosition();

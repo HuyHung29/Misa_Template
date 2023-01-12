@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, watch } from "vue";
+import useClickOutSide from "../../composable/clickOutSide";
+import { reactive, ref, watch } from "vue";
 
 /**
  * Định nghĩa các props
@@ -17,6 +18,12 @@ const props = defineProps({
 	name: {
 		type: String,
 		required: true,
+	},
+	type: {
+		type: String,
+		validator(value) {
+			return ["dropdown", "combobox"].includes(value);
+		},
 	},
 	tabindex: {
 		type: Number,
@@ -56,7 +63,15 @@ const emit = defineEmits(["select"]);
 const state = reactive({
 	isShow: false,
 	value: props.defaultValue,
+	indexItem: props.type === "dropdown" ? null : 0,
+	listSearch: [...props.listValue],
 });
+
+/**
+ * Định nghĩa các ref
+ * Author: LHH - 12/01/23
+ */
+const listRef = ref(null);
 
 /**
  * Xử lý thay đổi dữ liệu
@@ -77,16 +92,16 @@ const handleChangeValue = (item) => {
  * Author: LHH - 04/01/23
  */
 watch(
-	() => props.defaultValue,
-	(newVal) => {
+	() => props,
+	() => {
 		try {
-			if (newVal) {
-				state.value = newVal;
-			}
+			state.value = props.defaultValue;
+			state.listSearch = [...props.listValue];
 		} catch (error) {
 			console.log(error);
 		}
-	}
+	},
+	{ deep: true }
 );
 
 /**
@@ -112,6 +127,76 @@ const handleCloseList = () => {
 		console.log(error);
 	}
 };
+
+/**
+ * Xử lý đóng list khi click ra ngoài
+ * Author: LHH -
+ */
+useClickOutSide(listRef, () => {
+	if (state.isShow) {
+		state.isShow = false;
+	}
+});
+
+/**
+ * Xử lý tìm kiếm
+ * Author: LHH - 12/01/23
+ */
+const handleInput = (e) => {
+	console.log(e.target.value);
+	state.isShow = true;
+	state.indexItem = 0;
+	const inputVal = e.target.value.toLowerCase();
+
+	if (!inputVal) {
+		state.indexItem = 0;
+		state.listSearch = props.listValue;
+	}
+
+	state.listSearch = props.listValue.filter((item) =>
+		item.title.toLowerCase().includes(inputVal)
+	);
+};
+
+/**
+ * Xử lý ấn nút lên xuống và enter
+ * Author: LHH - 12/01/23
+ */
+
+const handleChangeItemSelected = (e) => {
+	switch (e.keyCode) {
+		case 38:
+			state.isShow = true;
+			if (state.indexItem > 0) {
+				state.indexItem--;
+			}
+			break;
+		case 40:
+			state.isShow = true;
+			const length = state.listSearch.length;
+			if (state.indexItem < length - 1) {
+				state.indexItem++;
+			}
+			break;
+		case 13:
+			state.isShow = false;
+			state.value = state.listSearch[state.indexItem].title;
+
+			state.indexItem = props.listValue.findIndex(
+				(item) => item.value === state.listSearch[state.indexItem].value
+			);
+			state.listSearch = [...props.listValue];
+			emit("select", {
+				name: props.name,
+				value: state.listSearch[state.indexItem].value,
+			});
+
+			break;
+
+		default:
+			break;
+	}
+};
 </script>
 
 <template>
@@ -122,26 +207,34 @@ const handleCloseList = () => {
 			'select--lg': size === 'lg',
 			invalid: error,
 		}"
+		ref="listRef"
 	>
 		<label v-if="title" for="" class="select__label"
 			>{{ title }} <span v-if="isRequired">*</span></label
 		>
 		<div class="select__input__wrap">
-			<p class="select__icon">
+			<button class="select__icon" @click="state.isShow = !state.isShow">
 				<i></i>
-			</p>
+			</button>
 			<input
 				type="text"
 				class="select__input"
-				:value="state.value"
+				:readonly="type === 'dropdown'"
+				v-model="state.value"
 				@click="state.isShow = !state.isShow"
 				:tabindex="tabindex"
+				@input="handleInput"
+				@keydown="handleChangeItemSelected"
 			/>
 			<ul class="select__list" v-show="state.isShow" :style="style">
 				<li
-					v-for="item in listValue"
+					v-for="(item, index) in state.listSearch"
 					class="select__item"
-					:class="{ selected: item.title === state.value }"
+					:class="{
+						selected:
+							state.indexItem === index ||
+							item.title === state.value,
+					}"
 					:key="item.value"
 					@click="handleChangeValue(item)"
 				>

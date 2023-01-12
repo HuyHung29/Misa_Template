@@ -1,6 +1,6 @@
 <script setup>
 import RESOURCES from "../constants/resource";
-import { inject, onMounted } from "vue";
+import { inject, onMounted, onUpdated, ref } from "vue";
 
 const { handleCloseToast } = inject("store");
 /**
@@ -13,21 +13,39 @@ const props = defineProps({
 	},
 });
 
+/**
+ * Khai báo state của component
+ * Author: LHH - 12/01/23
+ */
+const isShow = ref(true);
+
+let removeToast = null;
+
+/**
+ * Xử lý đóng toast
+ * Author: LHH - 12/01/23
+ */
 onMounted(() => {
-	const removeToast = setTimeout(function () {
-		handleCloseToast(props.toast.key);
-	}, 3300);
+	console.log(props.toast.content);
+
+	removeToast = setTimeout(function () {
+		isShow.value = false;
+	}, 4300);
 });
 
+/**
+ * Xử lý khi nhấn vào dẫu x
+ * Author: LHH -12/01/23
+ */
 const onClickCloseBtn = () => {
-	handleCloseToast(props.toast.key);
-
+	isShow.value = false;
 	clearTimeout(removeToast);
 };
 </script>
 
 <template>
 	<div
+		v-if="isShow"
 		class="toast"
 		:class="{
 			'toast--success':
@@ -49,7 +67,7 @@ const onClickCloseBtn = () => {
 		</div>
 		<div class="toast__action">
 			<a class="toast__action__main" v-if="toast.action">Hoàn tác</a>
-			<p class="toast__action_close" @click="handleCloseToast(toast.key)">
+			<p class="toast__action_close" @click="onClickCloseBtn">
 				<i class="toast__action_close__img"></i>
 			</p>
 		</div>

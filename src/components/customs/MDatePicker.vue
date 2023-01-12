@@ -78,7 +78,7 @@ const format = (date) => {
  */
 watch(date, () => {
 	try {
-		emit("change", { name: props.name, value: date });
+		emit("change", { name: props.name, value: date.value });
 	} catch (error) {
 		console.log(error);
 	}

@@ -119,6 +119,7 @@ const handleClickNextBtn = () => {
 			<Select
 				:listValue="RESOURCES.PAGINATION"
 				:defaultValue="RESOURCES.PAGINATION[0].title"
+				type="dropdown"
 				name="emp-quantity"
 				:style="{ top: 'unset', bottom: '100%' }"
 				@select="handleChangeEmployeeQuantity"

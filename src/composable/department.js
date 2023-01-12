@@ -9,7 +9,10 @@ const useDepartment = () => {
 	try {
 		const departments = ref(null);
 
-		// Lấy tất cả đơn vị
+		/**
+		 * Lấy tất cả phòng ban
+		 * Author: LHH - 04/01/23
+		 */
 		const getAllDepartment = async () => {
 			try {
 				const response = await departmentApi.getAllDepartment();

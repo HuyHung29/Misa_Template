@@ -19,13 +19,14 @@ const RESOURCES = {
 		},
 	},
 	FORM_MODE: {
-		ADD: "add",
-		EDIT: "edit",
+		ADD: "ADD",
+		EDIT: "EDIT",
+		DUPLICATE: "duplicate",
 	},
 	MODAL_TITLE: {
 		INFO: "Xác nhận",
 		WARNING: "Xác nhận xóa",
-		ERROR: "Có lỗi",
+		ERROR: "Dữ liệu không đúng",
 	},
 	MODAL_TYPE: {
 		INFO: "INFO",
