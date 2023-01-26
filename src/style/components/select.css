@@ -170,10 +170,19 @@
 	cursor: pointer;
 }
 
-.select__item.selected,
-.select__item:hover {
+.select__item.selected {
 	color: var(--text-white);
 	background-color: var(--primary-color);
+}
+
+.select__item.on-index {
+	color: var(--text-white);
+	background-color: var(--hover-color);
+}
+
+.select__item:hover {
+	color: var(--text-white);
+	background-color: var(--hover-color);
 }
 
 /* Status of select */

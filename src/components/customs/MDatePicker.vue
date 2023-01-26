@@ -2,6 +2,7 @@
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { ref, watch } from "vue";
+import { convertStringToDate, inputValidation } from "../../util/common";
 
 /**
  * Định nghĩa các props
@@ -18,6 +19,10 @@ const props = defineProps({
 	value: {
 		type: [String, Date],
 		default: "",
+	},
+	rules: {
+		type: Array,
+		default: [],
 	},
 	tabindex: {
 		type: Number,
@@ -41,13 +46,14 @@ const props = defineProps({
  * Định nghĩa các emit
  * Author: LHH -
  */
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["change", "error"]);
 
 /**
  * Tạo các state của component
  * Author: LHH -
  */
-const date = ref();
+const date = ref(null);
+const inputVal = ref(null);
 
 /**
  * Hàm format date
@@ -69,6 +75,51 @@ const format = (date) => {
 		return "";
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+/**
+ * Hàm xử lý validate
+ * Author: LHH - 26/01/23
+ */
+const handleValidate = async () => {
+	const message = await inputValidation(props.rules, date.value, props.name);
+	console.log({
+		name: props.name,
+		message,
+	});
+	emit("error", {
+		name: props.name,
+		message,
+	});
+};
+
+/**
+ * Định nghĩa các expose
+ * Author: LHH - 26/01/23
+ */
+defineExpose({
+	handleValidate,
+});
+
+/**
+ * Hàm xử lý thay đổi input
+ * Author: LHH - 16/01/23
+ */
+const handleInput = (e) => {
+	const value = e.target.value;
+
+	inputVal.value = value;
+};
+
+/**
+ * Hàm xử lý thay đổi date
+ * Author: LHH - 16/01/23
+ */
+const handleChangeDate = () => {
+	const dateValue = convertStringToDate(inputVal.value);
+	if (dateValue) {
+		date.value = new Date(dateValue);
 	}
 };
 
@@ -136,6 +187,8 @@ watch(
 							:value="value"
 							:tabindex="tabindex"
 							autocomplete="off"
+							@input="handleInput"
+							@blur="handleChangeDate"
 						/>
 						<p class="date-picker__icon">
 							<i></i>

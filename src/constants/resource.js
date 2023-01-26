@@ -17,6 +17,39 @@ const RESOURCES = {
 			EDIT: "Sửa nhân viên thành công!",
 			DELETE: "Xóa nhân viên thành công",
 		},
+		ERROR: {
+			NOT_EMPTY: (name) => `${name} không được để trống`,
+			UNIQUE: (name) => `${name} đã tồn tại`,
+			ADULT: "Nhân viên phải trên 18 tuổi",
+			HAS_FORMAT: (name) => `${name} chưa đúng định dạng`,
+		},
+	},
+	FORM_FIELD: {
+		employeeCode: "Mã nhân viên",
+		fullName: "Tên nhân viên",
+		departmentId: "Đơn vị",
+		phoneNumber: "Số điện thoại",
+		email: "Email",
+	},
+	INPUT_TITLE: {
+		employeeCode: "Mã nhân viên",
+		fullName: "Tên nhân viên",
+		departmentId: "Đơn vị",
+		phoneNumber: "Số điện thoại",
+		email: "Email",
+	},
+	INPUT_FIELD: {
+		EMPLOYEE_CODE: "employeeCode",
+		FULL_NAME: "fullName",
+		DEPARTMENT_ID: "departmentId",
+		PHONE_NUMBER: "phoneNumber",
+		EMAIL: "email",
+	},
+	FORM_RULES: {
+		NOT_EMPTY: "NOT_EMPTY",
+		HAS_FORMAT: "HAS_FORMAT",
+		UNIQUE: "UNIQUE",
+		ADULT: "ADULT",
 	},
 	FORM_MODE: {
 		ADD: "ADD",
@@ -55,6 +88,16 @@ const RESOURCES = {
 			title: "150 sản phẩm trên 1 trang",
 		},
 	],
+	KEYCODE: {
+		ARROW_DOWN: 38,
+		ARROW_UP: 40,
+		ENTER: 13,
+	},
+	REGEX: {
+		EMPLOYEE_CODE: /^NV-[0-9]{1,}$/,
+		EMAIL: /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
+		PHONE_NUMBER: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
+	},
 };
 
 export default RESOURCES;

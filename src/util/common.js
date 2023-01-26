@@ -1,3 +1,6 @@
+import employeeApi from "../api/employeeApi";
+import useEmployee from "../composable/employee";
+import RESOURCES from "../constants/resource";
 /**
  * Hàm định dạng ngày tháng
  * Author: LHH - 02/01/23
@@ -46,10 +49,102 @@ export const convertStringToDate = (data) => {
 		const str = data;
 
 		const [day, month, year] = str.split("/");
+		if (day && month && year) {
+			const date = new Date(+year, +month - 1, +day);
+			return date;
+		}
 
-		const date = new Date(+year, +month - 1, +day);
-		return date;
+		return "";
 	}
 
 	return "";
+};
+
+/**
+ * Hàm validate input
+ * Author: LHH - 26/01/23
+ */
+export const inputValidation = async (rules, value, name) => {
+	const { NOT_EMPTY, UNIQUE, ADULT, HAS_FORMAT } = RESOURCES.FORM_RULES;
+	const { ERROR } = RESOURCES.FORM_MESSAGE;
+	const { EMPLOYEE_CODE, EMAIL, PHONE_NUMBER } = RESOURCES.INPUT_FIELD;
+	const { INPUT_TITLE } = RESOURCES;
+	const { REGEX } = RESOURCES;
+
+	for (const rule of rules) {
+		switch (rule) {
+			case NOT_EMPTY: {
+				console.log("not empty");
+				if (!value) {
+					return ERROR[rule](INPUT_TITLE[name]);
+				}
+				break;
+			}
+			case UNIQUE: {
+				console.log("unique");
+				if (value) {
+					const { employeeCheck, getEmployeeByEmpCode } =
+						useEmployee();
+					await getEmployeeByEmpCode(value);
+
+					if (employeeCheck.value) {
+						return ERROR[rule](INPUT_TITLE[name]);
+					}
+				}
+				break;
+			}
+			case HAS_FORMAT: {
+				console.log("format");
+				if (value) {
+					switch (name) {
+						case EMPLOYEE_CODE: {
+							if (value) {
+								console.log(
+									"employeeCode",
+									ERROR[rule](INPUT_TITLE[name])
+								);
+								if (!REGEX.EMPLOYEE_CODE.test(value)) {
+									return ERROR[rule](INPUT_TITLE[name]);
+								}
+							}
+							break;
+						}
+						case PHONE_NUMBER: {
+							if (value) {
+								if (!REGEX.PHONE_NUMBER.test(value)) {
+									return ERROR[rule](INPUT_TITLE[name]);
+								}
+							}
+							break;
+						}
+						case EMAIL: {
+							if (value) {
+								if (!REGEX.EMAIL.test(value)) {
+									return ERROR[rule](INPUT_TITLE[name]);
+								}
+							}
+							break;
+						}
+						default:
+							return null;
+					}
+				}
+				break;
+			}
+			case ADULT: {
+				console.log("adult");
+				if (value) {
+					const date = new Date(value).getTime();
+					const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
+					if (age < 18) {
+						return ERROR[rule];
+					}
+				}
+				break;
+			}
+
+			default:
+				return null;
+		}
+	}
 };

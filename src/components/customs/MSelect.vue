@@ -1,6 +1,8 @@
 <script setup>
 import useClickOutSide from "../../composable/clickOutSide";
 import { reactive, ref, watch } from "vue";
+import RESOURCES from "../../constants/resource";
+import { inputValidation } from "../../util/common";
 
 /**
  * Định nghĩa các props
@@ -31,6 +33,10 @@ const props = defineProps({
 	defaultValue: {
 		type: [String, Number],
 	},
+	rules: {
+		type: Array,
+		default: [],
+	},
 	size: {
 		type: String,
 		validator(value) {
@@ -54,7 +60,7 @@ const props = defineProps({
  * Định nghĩa các emit
  * Author: LHH - 04/01/23
  */
-const emit = defineEmits(["select"]);
+const emit = defineEmits(["select", "error"]);
 
 /**
  * Định nghĩa các state của component
@@ -165,20 +171,22 @@ const handleInput = (e) => {
 
 const handleChangeItemSelected = (e) => {
 	switch (e.keyCode) {
-		case 38:
+		case RESOURCES.KEYCODE.ARROW_DOWN:
 			state.isShow = true;
 			if (state.indexItem > 0) {
 				state.indexItem--;
 			}
 			break;
-		case 40:
+		case RESOURCES.KEYCODE.ARROW_UP:
 			state.isShow = true;
 			const length = state.listSearch.length;
 			if (state.indexItem < length - 1) {
 				state.indexItem++;
+			} else {
+				state.indexItem = 0;
 			}
 			break;
-		case 13:
+		case RESOURCES.KEYCODE.ENTER:
 			state.isShow = false;
 			state.value = state.listSearch[state.indexItem].title;
 
@@ -197,6 +205,28 @@ const handleChangeItemSelected = (e) => {
 			break;
 	}
 };
+
+/**
+ * Hàm xử lý validate
+ * Author: LHH - 26/01/23
+ */
+const handleValidate = async () => {
+	const message = await inputValidation(props.rules, state.value, props.name);
+
+	console.log(message);
+	emit("error", {
+		name: props.name,
+		message,
+	});
+};
+
+/**
+ * Định nghĩa các expose
+ * Author: LHH - 26/01/23
+ */
+defineExpose({
+	handleValidate,
+});
 </script>
 
 <template>
@@ -231,9 +261,8 @@ const handleChangeItemSelected = (e) => {
 					v-for="(item, index) in state.listSearch"
 					class="select__item"
 					:class="{
-						selected:
-							state.indexItem === index ||
-							item.title === state.value,
+						selected: item.title === state.value,
+						'on-index': state.indexItem === index,
 					}"
 					:key="item.value"
 					@click="handleChangeValue(item)"

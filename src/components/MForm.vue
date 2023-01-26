@@ -218,7 +218,7 @@ const handleGetNewEmployeeCode = async () => {
 		formState.formValue = {
 			employeeCode: newEmployeeCode.value,
 			fullName: "",
-			departmentId: departmentList.value[0].DepartmentId,
+			departmentId: "",
 			positionName: "",
 			dateOfBirth: "",
 			gender: 0,
@@ -267,44 +267,44 @@ const handleSubmit = async () => {
 
 		console.log(formState.formValue);
 
-		// if (formState.formError.isError) {
-		// 	const {
-		// 		employeeCode,
-		// 		fullName,
-		// 		departmentId,
-		// 		dateOfBirth,
-		// 		identityDate,
-		// 		phoneNumber,
-		// 		email,
-		// 	} = formState.formError;
-		// 	handleOpenModal(
-		// 		RESOURCES.MODAL_TITLE.ERROR,
-		// 		employeeCode ||
-		// 			fullName ||
-		// 			departmentId ||
-		// 			dateOfBirth ||
-		// 			identityDate ||
-		// 			phoneNumber ||
-		// 			email,
-		// 		RESOURCES.MODAL_TYPE.ERROR
-		// 	);
-		// } else {
-		// 	const { dateOfBirth, identityDate } = formState.formValue;
-		// 	const formatDateOfBirth = new Date(dateOfBirth);
-		// 	formatDateOfBirth.setDate(formatDateOfBirth.getDate() + 1);
-		// 	const formatIdentityDate = new Date(identityDate);
-		// 	formatIdentityDate.setDate(formatIdentityDate.getDate() + 1);
-		// 	const data = {
-		// 		...formState.formValue,
-		// 		dateOfBirth: formatDateOfBirth,
-		// 		identityDate: formatIdentityDate,
-		// 	};
-		// 	if (state.form.type === RESOURCES.FORM_MODE.ADD) {
-		// 		await addNewEmployee(data);
-		// 	} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
-		// 		await updateNewEmployee(state.form.employeeId, data);
-		// 	}
-		// }
+		if (formState.formError.isError) {
+			const {
+				employeeCode,
+				fullName,
+				departmentId,
+				dateOfBirth,
+				identityDate,
+				phoneNumber,
+				email,
+			} = formState.formError;
+			handleOpenModal(
+				RESOURCES.MODAL_TITLE.ERROR,
+				employeeCode ||
+					fullName ||
+					departmentId ||
+					dateOfBirth ||
+					identityDate ||
+					phoneNumber ||
+					email,
+				RESOURCES.MODAL_TYPE.ERROR
+			);
+		} else {
+			const { dateOfBirth, identityDate } = formState.formValue;
+			const formatDateOfBirth = new Date(dateOfBirth);
+			formatDateOfBirth.setDate(formatDateOfBirth.getDate() + 1);
+			const formatIdentityDate = new Date(identityDate);
+			formatIdentityDate.setDate(formatIdentityDate.getDate() + 1);
+			const data = {
+				...formState.formValue,
+				dateOfBirth: formatDateOfBirth,
+				identityDate: formatIdentityDate,
+			};
+			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+				await addNewEmployee(data);
+			} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+				await updateNewEmployee(state.form.employeeId, data);
+			}
+		}
 	} catch (error) {
 		console.log(error);
 	}
@@ -446,59 +446,6 @@ const handleValidateForm = async () => {
 		} else {
 			formState.formError.departmentId = null;
 		}
-
-		// if (dateOfBirth) {
-		// 	const date = new Date(dateOfBirth).getTime();
-		// 	const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
-		// 	if (age < 18) {
-		// 		formState.formError.dateOfBirth = "Nhân viên phải trên 18 tuổi";
-		// 		formState.formError.isError = true;
-		// 	} else {
-		// 		formState.formError.dateOfBirth = null;
-		// 	}
-		// }
-
-		// if (identityNumber) {
-		// 	if (identityDate) {
-		// 		console.log(
-		// 			identityDate,
-		// 			dateOfBirth,
-		// 			identityNumber < dateOfBirth
-		// 		);
-		// 		if (identityDate < dateOfBirth) {
-		// 			formState.formError.identityDate = "Ngày cấp không đúng";
-		// 			formState.formError.isError = true;
-		// 		} else {
-		// 			formState.formError.dateOfBirth = null;
-		// 		}
-		// 	} else {
-		// 		formState.formError.identityDate =
-		// 			"Ngày cấp không được để trống";
-		// 		formState.formError.isError = true;
-		// 	}
-		// }
-
-		// if (phoneNumber) {
-		// 	const regexPhone =
-		// 		/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-		// 	if (!regexPhone.test(phoneNumber)) {
-		// 		formState.formError.phoneNumber = "Ngày cấp không đúng";
-		// 		formState.formError.isError = true;
-		// 	} else {
-		// 		formState.formError.phoneNumber = null;
-		// 	}
-		// }
-
-		// if (email) {
-		// 	const regexEmail =
-		// 		/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-		// 	if (!regexEmail.test(email)) {
-		// 		formState.formError.email = "Email không đúng";
-		// 		formState.formError.isError = true;
-		// 	} else {
-		// 		formState.formError.email = null;
-		// 	}
-		// }
 	} catch (error) {
 		console.log(error);
 	}
@@ -581,6 +528,13 @@ const handleValidateForm = async () => {
 									name="departmentId"
 									title="Đơn vị"
 									:tabindex="4"
+									:defaultValue="
+										departments?.find(
+											(item) =>
+												item.DepartmentId ===
+												editEmployee?.DepartmentId
+										)?.DepartmentName
+									"
 									:listValue="departmentOptions"
 									@select="handleBindValue"
 									:error="
@@ -687,6 +641,7 @@ const handleValidateForm = async () => {
 							name="phoneNumber"
 							size="sm"
 							tooltip="Điện thoại di động"
+							type="money"
 							:tabindex="10"
 							:value="formState.formValue.phoneNumber"
 							@change="handleBindValue"

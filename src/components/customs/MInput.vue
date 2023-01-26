@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUpdated, ref, watch } from "vue";
+import { inputValidation } from "../../util/common";
 /**
  * Định nghĩa các props
  * Author: LHH - 04/01/23
@@ -16,6 +17,10 @@ const props = defineProps({
 	value: {
 		type: [String, Number],
 		default: "",
+	},
+	rules: {
+		type: Array,
+		default: [],
 	},
 	placeholder: {
 		type: String,
@@ -55,7 +60,7 @@ const props = defineProps({
  * Định nghĩa các emit
  * Author: LHH - 04/01/23
  */
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["change", "error"]);
 
 /**
  * Định nghĩa state dùng trong component
@@ -63,6 +68,47 @@ const emit = defineEmits(["change"]);
  */
 const inputState = ref(props.value);
 const inputRef = ref(null);
+
+/**
+ * Hàm set focus cho input
+ * Author: LHH - 26/01/23
+ */
+const setFocusInput = () => {
+	try {
+		if (inputRef.value) {
+			inputRef.value.focus();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Hàm xử lý validate
+ * Author: LHH - 26/01/23
+ */
+const handleValidate = async () => {
+	const message = await inputValidation(
+		props.rules,
+		inputState.value,
+		props.name
+	);
+
+	console.log(message);
+	emit("error", {
+		name: props.name,
+		message,
+	});
+};
+
+/**
+ * Định nghĩa các expose
+ * Author: LHH - 26/01/23
+ */
+defineExpose({
+	setFocusInput,
+	handleValidate,
+});
 
 /**
  * Xử lý binding dữ liệu
@@ -84,8 +130,12 @@ watch(inputState, () => {
  * Author: LHH - 08/01/23
  */
 onMounted(() => {
-	if (props.focus) {
-		inputRef.value.focus();
+	try {
+		if (props.focus) {
+			setFocusInput();
+		}
+	} catch (error) {
+		console.log(error);
 	}
 });
 
@@ -94,8 +144,12 @@ onMounted(() => {
  * Author: LHH - 11/01/23
  */
 onUpdated(() => {
-	if (props.focus) {
-		inputRef.value.focus();
+	try {
+		if (props.focus) {
+			setFocusInput();
+		}
+	} catch (error) {
+		console.log(error);
 	}
 });
 </script>
@@ -127,6 +181,8 @@ onUpdated(() => {
 				v-model="inputState"
 			/>
 		</div>
-		<p v-if="error" class="textfield__error">{{ error }}</p>
+		<p v-show="error" class="textfield__error">
+			{{ error || "Thông tin không đúng" }}
+		</p>
 	</div>
 </template>
