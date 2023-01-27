@@ -95,6 +95,6 @@ const handleRadioChange = () => {
 				}}</label>
 			</div>
 		</div>
-		<p v-if="error" class="radiofield__error">{{ error }}</p>
+		<p class="radiofield__error">{{ error || "Có lỗi" }}</p>
 	</div>
 </template>

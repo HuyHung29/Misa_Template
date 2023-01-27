@@ -26,6 +26,7 @@ const {
 	handleOpenLoading,
 	handleCloseLoading,
 	handleShowToast,
+	handleCloseModal,
 } = inject("store");
 
 /**
@@ -95,18 +96,31 @@ const formState = reactive({
 	},
 	editEmployeeCode: "",
 	formError: {
-		isError: null,
-		fullName: null,
+		// isError: null,
 		employeeCode: null,
+		fullName: null,
 		departmentId: null,
+		phoneNumber: null,
+		email: null,
 	},
-	inputFocus: null,
 });
 
 /**
- * Ref của form
- * Author: LHH - 12/01/23
+ * Các quy tắc để validate
+ * Author: LHH - 27/01/23
  */
+const { NOT_EMPTY, UNIQUE, ADULT, HAS_FORMAT } = RESOURCES.FORM_RULES;
+
+/**
+ * Khai báo ref cho các input
+ * Author: LHH - 27/01/23
+ */
+const codeRef = ref(null);
+const nameRef = ref(null);
+const unitRef = ref(null);
+const dateRef = ref(null);
+const phoneRef = ref(null);
+const emailRef = ref(null);
 
 /**
  * Tính toán tên form
@@ -128,7 +142,7 @@ const formName = computed(() => {
  * Xử lý call API
  * Author: LHH - 04/01/23
  */
-onBeforeMount(async () => {
+const handleCallApi = async () => {
 	try {
 		if (state.form.type) {
 			await getAllDepartment();
@@ -144,6 +158,28 @@ onBeforeMount(async () => {
 		}
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+/**
+ * Hook xử lý các công việc trước khi render
+ * Author: LHH - 27/01/23
+ */
+onBeforeMount(() => {
+	try {
+		handleCallApi();
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+/**
+ * Xử lý focus vào mã nhân viên
+ * Author: LHH - 27/01/23
+ */
+onMounted(() => {
+	if (codeRef.value) {
+		codeRef.value.setFocusInput();
 	}
 });
 
@@ -202,6 +238,25 @@ const handleGetEditEmployee = async (id) => {
 	} catch (error) {
 		console.log(error);
 		handleCloseLoading();
+		formState.formValue = {
+			employeeCode: "",
+			fullName: "",
+			departmentId: "",
+			positionName: "",
+			dateOfBirth: "",
+			gender: 0,
+			identityNumber: "",
+			identityDate: "",
+			identityPlace: "",
+			address: "",
+			phoneNumber: "",
+			personalTaxCode: "",
+			email: "",
+		};
+		handleShowToast({
+			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
+			content: "Có lỗi, vui lòng liên hệ MISA để được trợ giúp",
+		});
 	}
 };
 
@@ -263,42 +318,41 @@ const handleGetNewEmployeeCode = async () => {
  */
 const handleSubmit = async () => {
 	try {
+		console.log("Value", formState.formValue);
 		await handleValidateForm();
 
-		console.log(formState.formValue);
+		let isError = false;
 
-		if (formState.formError.isError) {
-			const {
-				employeeCode,
-				fullName,
-				departmentId,
-				dateOfBirth,
-				identityDate,
-				phoneNumber,
-				email,
-			} = formState.formError;
-			handleOpenModal(
-				RESOURCES.MODAL_TITLE.ERROR,
-				employeeCode ||
-					fullName ||
-					departmentId ||
-					dateOfBirth ||
-					identityDate ||
-					phoneNumber ||
-					email,
-				RESOURCES.MODAL_TYPE.ERROR
-			);
-		} else {
+		for (const key in formState.formError) {
+			if (Object.hasOwnProperty.call(formState.formError, key)) {
+				const element = formState.formError[key];
+				if (element) {
+					handleOpenModal(
+						RESOURCES.MODAL_TITLE.ERROR,
+						element,
+						RESOURCES.MODAL_TYPE.ERROR
+					);
+					isError = true;
+					return;
+				}
+			}
+		}
+
+		if (!isError) {
 			const { dateOfBirth, identityDate } = formState.formValue;
+
 			const formatDateOfBirth = new Date(dateOfBirth);
 			formatDateOfBirth.setDate(formatDateOfBirth.getDate() + 1);
+
 			const formatIdentityDate = new Date(identityDate);
 			formatIdentityDate.setDate(formatIdentityDate.getDate() + 1);
+
 			const data = {
 				...formState.formValue,
 				dateOfBirth: formatDateOfBirth,
 				identityDate: formatIdentityDate,
 			};
+
 			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
 				await addNewEmployee(data);
 			} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
@@ -319,16 +373,6 @@ const handleShowSuccessMessage = () => {
 		type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
 		content: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
 	});
-
-	console.log(state.toasts, RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type]);
-	// if (state.form.type === RESOURCES.FORM_MODE.ADD) {
-	// }
-	// else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
-	// 	handleShowToast({
-	// 		type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
-	// 		content: "Sửa nhân viên thành công",
-	// 	});
-	// }
 };
 
 /**
@@ -343,6 +387,7 @@ const onStoreBtnClick = async () => {
 			await handleGetEmployees();
 			handleShowSuccessMessage();
 			handleCloseForm();
+			handleCloseModal();
 		}
 	} catch (error) {
 		console.log(error);
@@ -378,7 +423,7 @@ const onCloseBtnClick = () => {
 			RESOURCES.MODAL_MESSAGE.INFO,
 			RESOURCES.MODAL_TYPE.INFO,
 			state.form.employeeId,
-			formState.formValue
+			onStoreBtnClick
 		);
 	} catch (error) {
 		console.log(error);
@@ -392,6 +437,19 @@ const onCloseBtnClick = () => {
 const handleBindValue = ({ name, value }) => {
 	try {
 		formState.formValue[name] = value;
+		formState.formError[name] = null;
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý binding error
+ * Author: LHH - 27/01/23
+ */
+const handleBindError = ({ name, message }) => {
+	try {
+		formState.formError[name] = message;
 	} catch (error) {
 		console.log(error);
 	}
@@ -403,49 +461,12 @@ const handleBindValue = ({ name, value }) => {
  */
 const handleValidateForm = async () => {
 	try {
-		const {
-			employeeCode,
-			fullName,
-			departmentId,
-			dateOfBirth,
-			identityNumber,
-			identityDate,
-			phoneNumber,
-			email,
-		} = formState.formValue;
-
-		formState.formError.isError = false;
-
-		if (!employeeCode) {
-			formState.formError.employeeCode =
-				"Mã nhân viên không được để trống";
-			formState.formError.isError = true;
-		} else {
-			await getEmployeeByEmpCode(employeeCode);
-			if (
-				employeeCheck.value &&
-				employeeCheck.value.EmployeeCode !== formState.editEmployeeCode
-			) {
-				formState.formError.employeeCode = "Mã nhân viên đã tồn tại";
-				formState.formError.isError = true;
-			} else {
-				formState.formError.employeeCode = null;
-			}
-		}
-
-		if (!fullName) {
-			formState.formError.fullName = "Tên nhân viên không được để trống";
-			formState.formError.isError = true;
-		} else {
-			formState.formError.fullName = null;
-		}
-
-		if (!departmentId) {
-			formState.formError.departmentId = "Đơn vị không được để trống";
-			formState.formError.isError = true;
-		} else {
-			formState.formError.departmentId = null;
-		}
+		await codeRef.value.handleValidate();
+		await nameRef.value.handleValidate();
+		await unitRef.value.handleValidate();
+		await dateRef.value.handleValidate();
+		await phoneRef.value.handleValidate();
+		await emailRef.value.handleValidate();
 	} catch (error) {
 		console.log(error);
 	}
@@ -489,14 +510,17 @@ const handleValidateForm = async () => {
 						<div class="form__row row-gap">
 							<div class="form__col col--4">
 								<Input
-									:focus="true"
+									ref="codeRef"
 									isRequired
 									title="Mã"
 									name="employeeCode"
 									size="sm"
+									:rules="[NOT_EMPTY, HAS_FORMAT, UNIQUE]"
 									:tabindex="1"
 									:value="formState.formValue.employeeCode"
+									:originValue="formState.editEmployeeCode"
 									@change="handleBindValue"
+									@error="handleBindError"
 									:error="
 										formState.formError
 											? formState.formError.employeeCode
@@ -506,37 +530,49 @@ const handleValidateForm = async () => {
 							</div>
 							<div class="form__col col--8">
 								<Input
+									ref="nameRef"
 									isRequired
 									title="Tên"
 									name="fullName"
 									size="sm"
+									:rules="[NOT_EMPTY]"
 									:tabindex="2"
 									:value="formState.formValue.fullName"
 									@change="handleBindValue"
+									@error="handleBindError"
 									:error="
 										formState.formError
 											? formState.formError.fullName
 											: ''
 									"
-									ref="formRef"
 								/>
 							</div>
 							<div class="form__col col--12">
 								<Select
+									ref="unitRef"
 									size="sm"
 									isRequired
 									name="departmentId"
 									title="Đơn vị"
+									:rules="[NOT_EMPTY]"
 									:tabindex="4"
 									:defaultValue="
-										departments?.find(
-											(item) =>
-												item.DepartmentId ===
-												editEmployee?.DepartmentId
-										)?.DepartmentName
+										editEmployee
+											? departments?.find(
+													(item) =>
+														item.DepartmentId ===
+														editEmployee?.DepartmentId
+											  )?.DepartmentName
+											: departments?.find(
+													(item) =>
+														item.DepartmentId ===
+														formState.formValue
+															.departmentId
+											  )?.DepartmentName
 									"
 									:listValue="departmentOptions"
 									@select="handleBindValue"
+									@error="handleBindError"
 									:error="
 										formState.formError
 											? formState.formError.departmentId
@@ -560,12 +596,14 @@ const handleValidateForm = async () => {
 						<div class="form__row row-gap">
 							<div class="form__col col--5">
 								<DatePicker
+									ref="dateRef"
 									size="sm"
 									title="Ngày sinh"
 									name="dateOfBirth"
 									:tabindex="3"
 									:value="formState.formValue.dateOfBirth"
 									@change="handleBindValue"
+									@error="handleBindError"
 									placeholder="DD/MM/YYYY"
 									:error="
 										formState.formError
@@ -637,14 +675,17 @@ const handleValidateForm = async () => {
 					</div>
 					<div class="form__col col--3">
 						<Input
+							ref="phoneRef"
 							title="ĐT di động"
 							name="phoneNumber"
 							size="sm"
 							tooltip="Điện thoại di động"
 							type="money"
 							:tabindex="10"
+							:rules="[HAS_FORMAT]"
 							:value="formState.formValue.phoneNumber"
 							@change="handleBindValue"
+							@error="handleBindError"
 							:error="
 								formState.formError
 									? formState.formError.phoneNumber
@@ -665,14 +706,17 @@ const handleValidateForm = async () => {
 					</div>
 					<div class="form__col col--3">
 						<Input
+							ref="emailRef"
 							title="Email"
 							name="email"
 							placeholder="example@gmail.com"
 							type="email"
 							size="sm"
+							:rules="[HAS_FORMAT]"
 							:tabindex="12"
 							:value="formState.formValue.email"
 							@change="handleBindValue"
+							@error="handleBindError"
 							:error="
 								formState.formError
 									? formState.formError.email

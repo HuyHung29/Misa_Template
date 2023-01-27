@@ -64,7 +64,7 @@ export const convertStringToDate = (data) => {
  * Hàm validate input
  * Author: LHH - 26/01/23
  */
-export const inputValidation = async (rules, value, name) => {
+export const inputValidation = async (rules, value, name, checkValue) => {
 	const { NOT_EMPTY, UNIQUE, ADULT, HAS_FORMAT } = RESOURCES.FORM_RULES;
 	const { ERROR } = RESOURCES.FORM_MESSAGE;
 	const { EMPLOYEE_CODE, EMAIL, PHONE_NUMBER } = RESOURCES.INPUT_FIELD;
@@ -74,35 +74,31 @@ export const inputValidation = async (rules, value, name) => {
 	for (const rule of rules) {
 		switch (rule) {
 			case NOT_EMPTY: {
-				console.log("not empty");
 				if (!value) {
 					return ERROR[rule](INPUT_TITLE[name]);
 				}
 				break;
 			}
 			case UNIQUE: {
-				console.log("unique");
 				if (value) {
 					const { employeeCheck, getEmployeeByEmpCode } =
 						useEmployee();
 					await getEmployeeByEmpCode(value);
 
-					if (employeeCheck.value) {
+					if (
+						employeeCheck.value &&
+						employeeCheck.value.EmployeeCode !== checkValue
+					) {
 						return ERROR[rule](INPUT_TITLE[name]);
 					}
 				}
 				break;
 			}
 			case HAS_FORMAT: {
-				console.log("format");
 				if (value) {
 					switch (name) {
 						case EMPLOYEE_CODE: {
 							if (value) {
-								console.log(
-									"employeeCode",
-									ERROR[rule](INPUT_TITLE[name])
-								);
 								if (!REGEX.EMPLOYEE_CODE.test(value)) {
 									return ERROR[rule](INPUT_TITLE[name]);
 								}
@@ -132,7 +128,6 @@ export const inputValidation = async (rules, value, name) => {
 				break;
 			}
 			case ADULT: {
-				console.log("adult");
 				if (value) {
 					const date = new Date(value).getTime();
 					const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;

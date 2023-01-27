@@ -47,47 +47,8 @@ const handleAgreeBtnClick = async () => {
 		}
 
 		if (state.modal.type === RESOURCES.MODAL_TYPE.INFO) {
-			const { employeeCode, fullName, departmentId } =
-				state.modal.employeeEdited;
-
-			let isError = false;
-			let error = "";
-
-			if (!employeeCode) {
-				error = "Mã nhân viên không được để trống";
-				isError = true;
-			}
-
-			if (!fullName) {
-				error = "Tên nhân viên không được để trống";
-
-				isError = true;
-			}
-
-			if (!departmentId) {
-				error = "Đơn vị không được để trống";
-
-				isError = true;
-			}
-
-			if (!isError) {
-				if (state.form.type === RESOURCES.FORM_MODE.ADD) {
-					await addNewEmployee(state.modal.employeeEdited);
-				}
-
-				if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
-					await updateNewEmployee(
-						state.form.employeeId,
-						state.modal.employeeEdited
-					);
-				}
-			} else {
-				handleOpenModal(
-					"Dữ liệu không đúng",
-					error,
-					RESOURCES.MODAL_TYPE.ERROR
-				);
-			}
+			await state.modal.callback();
+			// handleCloseAll();
 		}
 
 		if (statusCode.value === 1) {

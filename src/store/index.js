@@ -23,7 +23,7 @@ const state = reactive({
 		content: null,
 		type: "warning",
 		employeeId: null,
-		employeeEdited: null,
+		callback: null,
 	},
 	form: {
 		isOpen: false,
@@ -63,7 +63,7 @@ const handleGetEmployees = async (
  * Hàm xử lý mở modal
  * Author: LHH - 02/01/23
  */
-const handleOpenModal = (title, content, type, employeeId, employeeEdited) => {
+const handleOpenModal = (title, content, type, employeeId, callback) => {
 	try {
 		state.modal = {
 			isOpen: true,
@@ -71,7 +71,7 @@ const handleOpenModal = (title, content, type, employeeId, employeeEdited) => {
 			content,
 			type,
 			employeeId,
-			employeeEdited,
+			callback,
 		};
 
 		console.log(state.modal.type);

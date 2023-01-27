@@ -18,6 +18,9 @@ const props = defineProps({
 		type: [String, Number],
 		default: "",
 	},
+	originValue: {
+		type: [String, Number],
+	},
 	rules: {
 		type: Array,
 		default: [],
@@ -28,10 +31,6 @@ const props = defineProps({
 	},
 	tooltip: {
 		type: String,
-	},
-	focus: {
-		type: Boolean,
-		default: false,
 	},
 	tabindex: {
 		type: Number,
@@ -90,11 +89,11 @@ const setFocusInput = () => {
 const handleValidate = async () => {
 	const message = await inputValidation(
 		props.rules,
-		inputState.value,
-		props.name
+		inputState.value || props.value,
+		props.name,
+		props.originValue
 	);
 
-	console.log(message);
 	emit("error", {
 		name: props.name,
 		message,
@@ -120,34 +119,6 @@ watch(inputState, () => {
 			name: props.name,
 			value: inputState.value,
 		});
-	} catch (error) {
-		console.log(error);
-	}
-});
-
-/**
- * Xử lý focus cho input
- * Author: LHH - 08/01/23
- */
-onMounted(() => {
-	try {
-		if (props.focus) {
-			setFocusInput();
-		}
-	} catch (error) {
-		console.log(error);
-	}
-});
-
-/**
- * Xử lý focus cho input
- * Author: LHH - 11/01/23
- */
-onUpdated(() => {
-	try {
-		if (props.focus) {
-			setFocusInput();
-		}
 	} catch (error) {
 		console.log(error);
 	}
@@ -181,7 +152,7 @@ onUpdated(() => {
 				v-model="inputState"
 			/>
 		</div>
-		<p v-show="error" class="textfield__error">
+		<p class="textfield__error">
 			{{ error || "Thông tin không đúng" }}
 		</p>
 	</div>

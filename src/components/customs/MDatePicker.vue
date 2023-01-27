@@ -54,6 +54,7 @@ const emit = defineEmits(["change", "error"]);
  */
 const date = ref(null);
 const inputVal = ref(null);
+const inputRef = ref(null);
 
 /**
  * Hàm format date
@@ -79,15 +80,26 @@ const format = (date) => {
 };
 
 /**
+ * Hàm set focus cho input
+ * Author: LHH - 26/01/23
+ */
+const setFocusInput = () => {
+	try {
+		if (inputRef.value) {
+			inputRef.value.focus();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
  * Hàm xử lý validate
  * Author: LHH - 26/01/23
  */
 const handleValidate = async () => {
 	const message = await inputValidation(props.rules, date.value, props.name);
-	console.log({
-		name: props.name,
-		message,
-	});
+
 	emit("error", {
 		name: props.name,
 		message,
@@ -99,6 +111,7 @@ const handleValidate = async () => {
  * Author: LHH - 26/01/23
  */
 defineExpose({
+	setFocusInput,
 	handleValidate,
 });
 
@@ -189,6 +202,7 @@ watch(
 							autocomplete="off"
 							@input="handleInput"
 							@blur="handleChangeDate"
+							ref="inputRef"
 						/>
 						<p class="date-picker__icon">
 							<i></i>
@@ -210,6 +224,6 @@ watch(
 				</template>
 			</Datepicker>
 		</div>
-		<p v-if="error" class="date-picker__error">{{ error }}</p>
+		<p class="date-picker__error">{{ error || "Có lỗi" }}</p>
 	</div>
 </template>

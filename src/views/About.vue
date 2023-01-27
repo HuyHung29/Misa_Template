@@ -100,6 +100,7 @@ const handleSubmit = async () => {
 			name="employeeCode"
 			title="Mã nhân viên"
 			:value="state.employeeCode"
+			:originValue="'NV - 048753'"
 			:rules="[NOT_EMPTY, HAS_FORMAT, UNIQUE]"
 			@change="handleBindValue"
 			@error="handleBindError"

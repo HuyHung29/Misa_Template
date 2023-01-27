@@ -27,6 +27,10 @@ const props = defineProps({
 			return ["dropdown", "combobox"].includes(value);
 		},
 	},
+	hasError: {
+		type: Boolean,
+		default: true,
+	},
 	tabindex: {
 		type: Number,
 	},
@@ -78,6 +82,7 @@ const state = reactive({
  * Author: LHH - 12/01/23
  */
 const listRef = ref(null);
+const inputRef = ref(null);
 
 /**
  * Xử lý thay đổi dữ liệu
@@ -207,13 +212,26 @@ const handleChangeItemSelected = (e) => {
 };
 
 /**
+ * Hàm set focus cho input
+ * Author: LHH - 26/01/23
+ */
+const setFocusInput = () => {
+	try {
+		if (inputRef.value) {
+			inputRef.value.focus();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
  * Hàm xử lý validate
  * Author: LHH - 26/01/23
  */
 const handleValidate = async () => {
 	const message = await inputValidation(props.rules, state.value, props.name);
 
-	console.log(message);
 	emit("error", {
 		name: props.name,
 		message,
@@ -225,6 +243,7 @@ const handleValidate = async () => {
  * Author: LHH - 26/01/23
  */
 defineExpose({
+	setFocusInput,
 	handleValidate,
 });
 </script>
@@ -255,6 +274,7 @@ defineExpose({
 				:tabindex="tabindex"
 				@input="handleInput"
 				@keydown="handleChangeItemSelected"
+				ref="inputRef"
 			/>
 			<ul class="select__list" v-show="state.isShow" :style="style">
 				<li
@@ -271,7 +291,7 @@ defineExpose({
 				</li>
 			</ul>
 		</div>
-		<p v-if="error" class="select__error">{{ error }}</p>
+		<p v-show="hasError" class="select__error">{{ error || "Có lỗi" }}</p>
 	</div>
 </template>
 
