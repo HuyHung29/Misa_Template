@@ -120,12 +120,6 @@ const handleSubmit = async () => {
 		<Select
 			name="departmentId"
 			title="Đơn vị"
-			:defaultValue="
-				departments?.find(
-					(item) => item.DepartmentId === state.departmentId
-				)?.DepartmentName
-			"
-			:listValue="departmentOptions"
 			@select="handleBindValue"
 			ref="unitRef"
 			@error="handleBindError"

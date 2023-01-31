@@ -1,5 +1,5 @@
-import employeeApi from "../api/employeeApi";
 import useEmployee from "../composable/employee";
+import ENUMS from "../constants/enum";
 import RESOURCES from "../constants/resource";
 /**
  * Hàm định dạng ngày tháng
@@ -58,6 +58,24 @@ export const convertStringToDate = (data) => {
 	}
 
 	return "";
+};
+
+/**
+ * Hàm convert ngày tháng
+ * Author: LHH - 06/01/23
+ */
+export const formatGender = (gender) => {
+	const { MALE, FEMALE, OTHER } = ENUMS.GENDER;
+	switch (gender) {
+		case MALE:
+			return "Nam";
+		case FEMALE:
+			return "Nữ";
+		case OTHER:
+			return "Khác";
+		default:
+			return "";
+	}
 };
 
 /**
@@ -142,4 +160,19 @@ export const inputValidation = async (rules, value, name, checkValue) => {
 				return null;
 		}
 	}
+};
+
+/**
+ * Kiểm tra phần tử có quá giới hạn hay ko
+ * Author: LHH - 31/01/23
+ */
+export const isOverflow = (element) => {
+	if (element) {
+		return (
+			element.scrollHeight > element.clientHeight ||
+			element.scrollWidth > element.clientWidth
+		);
+	}
+
+	return false;
 };

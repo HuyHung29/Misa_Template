@@ -13,15 +13,13 @@ const {
 	handleCloseModal,
 	handleCloseForm,
 	handleShowToast,
-	handleOpenModal,
 } = inject("store");
 
 /**
  * Các state và phương thức liên quan đến employee
  * Author: LHH - 04/01/23
  */
-const { statusCode, addNewEmployee, updateNewEmployee, deleteEmployee } =
-	useEmployee();
+const { statusCode, deleteEmployee } = useEmployee();
 
 /**
  * Xử lý đóng dialog
@@ -42,27 +40,29 @@ const handleCloseAll = () => {
  */
 const handleAgreeBtnClick = async () => {
 	try {
-		if (state.modal.type === RESOURCES.MODAL_TYPE.WARNING) {
-			await deleteEmployee(state.modal.employeeId);
-		}
+		// if (state.modal.type === RESOURCES.MODAL_TYPE.WARNING) {
+		// 	await deleteEmployee(state.modal.employeeId);
+		// }
 
-		if (state.modal.type === RESOURCES.MODAL_TYPE.INFO) {
-			await state.modal.callback();
-			// handleCloseAll();
-		}
+		// if (state.modal.type === RESOURCES.MODAL_TYPE.INFO) {
+		// 	await state.modal.callback();
+		// 	// handleCloseAll();
+		// }
 
-		if (statusCode.value === 1) {
-			await handleGetEmployees();
+		// if (statusCode.value) {
+		// 	await handleGetEmployees();
 
-			handleShowToast({
-				type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
-				content:
-					state.modal.type === RESOURCES.MODAL_TYPE.WARNING
-						? "Xóa nhân viên thành công"
-						: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
-			});
-			handleCloseAll();
-		}
+		// 	handleShowToast({
+		// 		type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+		// 		content:
+		// 			state.modal.type === RESOURCES.MODAL_TYPE.WARNING
+		// 				? "Xóa nhân viên thành công"
+		// 				: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
+		// 	});
+		// 	handleCloseAll();
+		// }
+
+		await state.modal.callback();
 	} catch (error) {
 		console.log(error);
 	}

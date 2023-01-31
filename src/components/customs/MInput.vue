@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUpdated, ref, watch } from "vue";
-import { inputValidation } from "../../util/common";
+import { inputValidation, isOverflow } from "../../util/common";
 /**
  * Định nghĩa các props
  * Author: LHH - 04/01/23
@@ -67,6 +67,8 @@ const emit = defineEmits(["change", "error"]);
  */
 const inputState = ref(props.value);
 const inputRef = ref(null);
+const errorRef = ref("null");
+const isShowTooltip = ref(false);
 
 /**
  * Hàm set focus cho input
@@ -123,6 +125,25 @@ watch(inputState, () => {
 		console.log(error);
 	}
 });
+
+watch(
+	() => props.value,
+	() => {
+		try {
+			inputState.value = props.value;
+		} catch (error) {
+			console.log(error);
+		}
+	}
+);
+
+onUpdated(() => {
+	if (isOverflow(errorRef.value)) {
+		isShowTooltip.value = true;
+	} else {
+		isShowTooltip.value = false;
+	}
+});
 </script>
 
 <template>
@@ -152,7 +173,11 @@ watch(inputState, () => {
 				v-model="inputState"
 			/>
 		</div>
-		<p class="textfield__error">
+		<p class="textfield__error" ref="errorRef">
+			{{ error || "Thông tin không đúng" }}
+		</p>
+
+		<p v-if="isShowTooltip" class="textfield__error__tooltip">
 			{{ error || "Thông tin không đúng" }}
 		</p>
 	</div>

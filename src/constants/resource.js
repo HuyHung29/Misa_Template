@@ -25,25 +25,31 @@ const RESOURCES = {
 		},
 	},
 	FORM_FIELD: {
-		employeeCode: "Mã nhân viên",
-		fullName: "Tên nhân viên",
-		departmentId: "Đơn vị",
-		phoneNumber: "Số điện thoại",
-		email: "Email",
+		EmployeeCode: "Mã nhân viên",
+		FullName: "Tên nhân viên",
+		DepartmentId: "Đơn vị",
+		PhoneNumber: "Số điện thoại",
+		Email: "Email",
+		DateOfBirth: "Ngày sinh",
+		IdentityDate: "Ngày cấp",
 	},
 	INPUT_TITLE: {
-		employeeCode: "Mã nhân viên",
-		fullName: "Tên nhân viên",
-		departmentId: "Đơn vị",
-		phoneNumber: "Số điện thoại",
-		email: "Email",
+		EmployeeCode: "Mã nhân viên",
+		FullName: "Tên nhân viên",
+		DepartmentId: "Đơn vị",
+		PhoneNumber: "Số điện thoại",
+		Email: "Email",
+		DateOfBirth: "Ngày sinh",
+		IdentityDate: "Ngày cấp",
 	},
 	INPUT_FIELD: {
-		EMPLOYEE_CODE: "employeeCode",
-		FULL_NAME: "fullName",
-		DEPARTMENT_ID: "departmentId",
-		PHONE_NUMBER: "phoneNumber",
-		EMAIL: "email",
+		EMPLOYEE_CODE: "EmployeeCode",
+		FULL_NAME: "FullName",
+		DEPARTMENT_ID: "DepartmentId",
+		PHONE_NUMBER: "PhoneNumber",
+		EMAIL: "Email",
+		DATEOFBIRTH: "DateOfBirth",
+		IDENTITYDATE: "IdentityDate",
 	},
 	FORM_RULES: {
 		NOT_EMPTY: "NOT_EMPTY",
@@ -98,6 +104,20 @@ const RESOURCES = {
 		EMAIL: /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
 		PHONE_NUMBER: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
 	},
+	GENDER: [
+		{
+			value: 0,
+			title: "Nam",
+		},
+		{
+			value: 1,
+			title: "Nữ",
+		},
+		{
+			value: 2,
+			title: "Khác",
+		},
+	],
 };
 
 export default RESOURCES;

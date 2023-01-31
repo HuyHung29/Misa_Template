@@ -33,11 +33,14 @@ const empState = reactive({
 const {
 	state,
 	handleGetEmployees,
+	handleUpdateEmployeeList,
 	handleOpenForm,
 	handleOpenModal,
 	handleCloseModal,
 	handleOpenLoading,
 	handleCloseLoading,
+	handleCloseForm,
+	handleShowToast,
 } = inject("store");
 
 /**
@@ -56,7 +59,7 @@ onBeforeMount(() => {
  * Khai báo state của component
  * Author: LHH - 04/01/23
  */
-const { totalRecord } = useEmployee();
+const { statusCode, deleteEmployee } = useEmployee();
 
 /**
  * Hàm call API
@@ -125,6 +128,34 @@ const handleCloseListAction = () => {
 // };
 
 /**
+ * Xử lý xóa nhân viên
+ * Author: LHH - 30/01/23
+ */
+const handleDeleteEmployee = async () => {
+	try {
+		await deleteEmployee(state.modal.employeeId);
+
+		if (statusCode.value) {
+			// await handleGetEmployees();
+
+			handleUpdateEmployeeList("DELETE", state.modal.employeeId);
+
+			handleShowToast({
+				type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+				content:
+					state.modal.type === RESOURCES.MODAL_TYPE.WARNING
+						? "Xóa nhân viên thành công"
+						: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
+			});
+			handleCloseModal();
+			handleCloseForm();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
  * Hàm xử lý khi ấn nút xóa
  * Author: LHH - 04/01/23
  */
@@ -134,7 +165,8 @@ const onDeleteBtnClick = () => {
 			RESOURCES.MODAL_TITLE.WARNING,
 			RESOURCES.MODAL_MESSAGE.WARNING(empState.listAction.employeeCode),
 			RESOURCES.MODAL_TYPE.WARNING,
-			empState.listAction.employeeId
+			empState.listAction.employeeId,
+			handleDeleteEmployee
 		);
 
 		handleCloseListAction();
@@ -184,7 +216,7 @@ const handleCheck = (value) => {
 const handleSearchEmployee = (value) => {
 	try {
 		if (value) {
-			handleGetEmployees({ employeeFilter: value });
+			handleGetEmployees({ keyword: value });
 		} else {
 			handleGetEmployees();
 		}

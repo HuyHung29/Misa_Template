@@ -1,6 +1,6 @@
 <script setup>
 import CheckBox from "../components/customs/MCheckBox.vue";
-import { formatDate, formatMoney } from "../util/common";
+import { formatDate, formatMoney, formatGender } from "../util/common";
 import { inject } from "vue";
 import RESOURCES from "../constants/resource";
 
@@ -95,7 +95,7 @@ const handleCheckBox = (data) => {
 			<span>{{ employee.FullName }}</span>
 		</td>
 		<td class="table__col">
-			<span>{{ employee.GenderName ? employee.GenderName : "" }}</span>
+			<span>{{ formatGender(employee.Gender) }}</span>
 		</td>
 		<td class="table__col text-center">
 			<span>{{ formatDate(employee.DateOfBirth) }}</span>
@@ -104,7 +104,7 @@ const handleCheckBox = (data) => {
 			<span>{{ employee.IdentityNumber }}</span>
 		</td>
 		<td class="table__col">
-			<span>{{ employee.PositionName }}</span>
+			<span>{{ employee.Position }}</span>
 		</td>
 		<td class="table__col">
 			<span>{{ employee.DepartmentName }}</span>

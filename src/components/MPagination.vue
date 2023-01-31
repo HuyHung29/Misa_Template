@@ -1,5 +1,4 @@
 <script setup>
-import { useRoute } from "vue-router";
 import RESOURCES from "../constants/resource";
 import Select from "./customs/MSelect.vue";
 import { computed, inject, reactive, watch } from "@vue/runtime-core";
@@ -169,7 +168,7 @@ const handleClickNextBtn = () => {
 							state.totalPage
 						"
 					>
-						..
+						...
 					</li>
 
 					<li
@@ -179,7 +178,7 @@ const handleClickNextBtn = () => {
 							active:
 								paginationState.pageNumber === state.totalPage,
 						}"
-						v-show="state.totalPage !== 1"
+						v-show="state.totalPage && state.totalPage !== 1"
 					>
 						{{ state.totalPage }}
 					</li>

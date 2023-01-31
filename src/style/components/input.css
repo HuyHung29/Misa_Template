@@ -1,3 +1,7 @@
+.textfield {
+	position: relative;
+}
+
 .textfield__label {
 	position: relative;
 	display: block;
@@ -110,6 +114,48 @@
 	text-overflow: ellipsis;
 
 	color: var(--error-color);
+}
+
+.textfield__input__wrap:hover ~ .textfield__error__tooltip {
+	display: block;
+}
+
+.textfield__error__tooltip {
+	display: none;
+
+	position: absolute;
+	top: calc(100% - 16px);
+	left: 0;
+
+	min-width: 150px;
+
+	text-align: center;
+	color: var(--error-color);
+
+	background-color: white;
+	box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.16);
+
+	padding: 5px;
+
+	z-index: 50;
+
+	border-radius: 5px;
+	border: 1px solid var(--error-color);
+}
+
+.textfield__error__tooltip::before {
+	content: "";
+
+	position: absolute;
+	top: 0;
+	left: 50%;
+
+	transform: translate(-50%, -100%);
+
+	display: block;
+
+	border: 10px solid;
+	border-color: transparent transparent var(--error-color) transparent;
 }
 
 .textfield.invalid .textfield__input {

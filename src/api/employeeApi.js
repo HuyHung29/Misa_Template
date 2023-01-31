@@ -16,7 +16,8 @@ const employeeApi = {
 	},
 	getEmpByFilter: (params) => {
 		try {
-			return axiosClient.get(baseUrl + "filter", { params });
+			// return axiosClient.get(baseUrl + "filter", { params });
+			return axiosClient.get(baseUrl, { params });
 		} catch (error) {
 			console.log(error);
 		}

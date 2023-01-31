@@ -59,6 +59,41 @@ const handleGetEmployees = async (
 	}
 };
 
+const handleUpdateEmployeeList = (type, employeeId, data) => {
+	try {
+		console.log("Data", type, employeeId, data);
+		let index;
+		switch (type) {
+			case "ADD":
+				state.employees.unshift(data);
+				break;
+			case "EDIT":
+				index = state.employees.findIndex(
+					(emp) => emp.EmployeeId === employeeId
+				);
+
+				if (index !== -1) {
+					state.employees[index] = data;
+				}
+				break;
+			case "DELETE":
+				index = state.employees.findIndex(
+					(emp) => emp.EmployeeId === employeeId
+				);
+
+				if (index !== -1) {
+					state.employees.splice(index, 1);
+				}
+				break;
+
+			default:
+				break;
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
 /**
  * Hàm xử lý mở modal
  * Author: LHH - 02/01/23
@@ -195,6 +230,7 @@ const handleCloseToast = (key) => {
 export default {
 	state: readonly(state),
 	handleGetEmployees,
+	handleUpdateEmployeeList,
 	handleOpenModal,
 	handleCloseModal,
 	handleOpenForm,

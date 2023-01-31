@@ -9,6 +9,7 @@ const useEmployee = () => {
 	try {
 		const listEmployee = ref([]);
 		const newEmployeeCode = ref(null);
+		const newEmployee = ref(null);
 		const editEmployee = ref(null);
 		const statusCode = ref(null);
 		const totalPage = ref(null);
@@ -42,7 +43,7 @@ const useEmployee = () => {
 				totalPage.value = TotalPage;
 				totalRecord.value = TotalRecord;
 
-				listEmployee.value = [...Data];
+				listEmployee.value = Data;
 				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
@@ -62,7 +63,7 @@ const useEmployee = () => {
 			try {
 				const response = await employeeApi.getEmpById(id);
 
-				editEmployee.value = { ...response };
+				editEmployee.value = response;
 				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
@@ -91,10 +92,13 @@ const useEmployee = () => {
 		const getEmployeeByEmpCode = async (employeeCode) => {
 			try {
 				const response = await employeeApi.getEmpByFilter({
-					employeeFilter: employeeCode,
+					employeeCode,
 				});
 
+				console.log("RESPONSE", response);
+
 				employeeCheck.value = response.Data ? response.Data[0] : null;
+
 				statusCode.value = null;
 			} catch (error) {
 				console.log(error);
@@ -109,7 +113,9 @@ const useEmployee = () => {
 			try {
 				const response = await employeeApi.createEmp(employee);
 
-				statusCode.value = response;
+				newEmployee.value = response;
+
+				statusCode.value = response ? true : false;
 			} catch (error) {
 				console.log(error);
 				statusCode.value = null;
@@ -125,7 +131,9 @@ const useEmployee = () => {
 				const response = await employeeApi.updateEmp(id, employee);
 				console.log(response);
 
-				statusCode.value = response;
+				newEmployee.value = response;
+
+				statusCode.value = response ? true : false;
 			} catch (error) {
 				console.log(error);
 				statusCode.value = null;
@@ -141,7 +149,7 @@ const useEmployee = () => {
 				const response = await employeeApi.deleteEmp(id);
 
 				console.log(response);
-				statusCode.value = response;
+				statusCode.value = response ? true : false;
 			} catch (error) {
 				console.log(error);
 				statusCode.value = null;
@@ -151,6 +159,7 @@ const useEmployee = () => {
 		return {
 			listEmployee,
 			newEmployeeCode,
+			newEmployee,
 			editEmployee,
 			employeeCheck,
 			statusCode,

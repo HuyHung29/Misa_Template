@@ -1,8 +1,8 @@
 <script setup>
 import useClickOutSide from "../../composable/clickOutSide";
-import { reactive, ref, watch } from "vue";
+import { onUpdated, reactive, ref, watch } from "vue";
 import RESOURCES from "../../constants/resource";
-import { inputValidation } from "../../util/common";
+import { inputValidation, isOverflow } from "../../util/common";
 
 /**
  * Định nghĩa các props
@@ -83,6 +83,8 @@ const state = reactive({
  */
 const listRef = ref(null);
 const inputRef = ref(null);
+const errorRef = ref("null");
+const isShowTooltip = ref(false);
 
 /**
  * Xử lý thay đổi dữ liệu
@@ -114,6 +116,19 @@ watch(
 	},
 	{ deep: true }
 );
+
+/**
+ * Xử lý show tooltip error
+ * Author: LHH - 31/01/23
+ */
+onUpdated(() => {
+	if (isOverflow(errorRef.value)) {
+		console.log("quanoi dngs");
+		isShowTooltip.value = true;
+	} else {
+		isShowTooltip.value = false;
+	}
+});
 
 /**
  * Xử lý mở select
@@ -291,7 +306,12 @@ defineExpose({
 				</li>
 			</ul>
 		</div>
-		<p v-show="hasError" class="select__error">{{ error || "Có lỗi" }}</p>
+		<p v-show="hasError" class="select__error" ref="errorRef">
+			{{ error || "Có lỗi" }}
+		</p>
+		<p v-if="!state.isShow && isShowTooltip" class="select__error__tooltip">
+			{{ error || "Thông tin không đúng" }}
+		</p>
 	</div>
 </template>
 
