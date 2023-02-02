@@ -35,19 +35,30 @@ const state = reactive({
 	},
 	isLoading: false,
 	toasts: [],
+	pagination: {
+		pageSize: 20,
+		pageNumber: 1,
+	},
 });
 
 /**
  * Hàm xử lý danh sách nhân viên
  * Author: LHH - 06/01/23
  */
-const handleGetEmployees = async (
-	filter = { pageSize: RESOURCES.PAGINATION[0].value, pageNumber: 1 }
-) => {
+const handleGetEmployees = async (filter) => {
 	try {
 		state.isLoading = true;
 
-		await getFilterEmployee(filter);
+		if (filter) {
+			state.pagination = { ...state.pagination, ...filter };
+		} else {
+			state.pagination = {
+				pageSize: 20,
+				pageNumber: 1,
+			};
+		}
+
+		await getFilterEmployee({ ...state.pagination });
 		state.employees = [...listEmployee.value];
 		state.totalPage = totalPage.value;
 		state.totalRecord = totalRecord.value;

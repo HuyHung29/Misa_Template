@@ -202,11 +202,9 @@ const handleGetEditEmployee = async (id) => {
 
 		formState.formValue = {
 			...editEmployee.value,
-			departmentId: DepartmentId
+			DepartmentId: DepartmentId
 				? DepartmentId
 				: departmentList.value[0].DepartmentId,
-			dateOfBirth: DateOfBirth ? new Date(DateOfBirth) : "",
-			identityDate: IdentityDate ? new Date(IdentityDate) : "",
 		};
 
 		formState.editEmployeeCode = EmployeeCode;
@@ -326,18 +324,8 @@ const handleSubmit = async () => {
 		}
 
 		if (!isError) {
-			// const { dateOfBirth, identityDate } = formState.formValue;
-
-			// const formatDateOfBirth = new Date(dateOfBirth);
-			// formatDateOfBirth.setDate(formatDateOfBirth.getDate() + 1);
-
-			// const formatIdentityDate = new Date(identityDate);
-			// formatIdentityDate.setDate(formatIdentityDate.getDate() + 1);
-
 			const data = {
 				...formState.formValue,
-				// dateOfBirth: formatDateOfBirth,
-				// identityDate: formatIdentityDate,
 			};
 
 			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
@@ -381,6 +369,9 @@ const handleAddEditEmployee = async () => {
 
 			handleShowSuccessMessage();
 			handleCloseModal();
+
+			handleCloseLoading();
+
 			return true;
 		}
 
@@ -404,20 +395,6 @@ const onStoreBtnClick = async () => {
 		if (await handleAddEditEmployee()) {
 			handleCloseForm();
 		}
-		// await handleSubmit();
-		// if (statusCode.value) {
-		// 	console.log(state.form.type);
-		// 	// await handleGetEmployees();
-		// 	handleUpdateEmployeeList(
-		// 		state.form.type,
-		// 		state.form.employeeId,
-		// 		newEmployee.value
-		// 	);
-
-		// 	handleShowSuccessMessage();
-		// 	handleCloseForm();
-		// 	handleCloseModal();
-		// }
 	} catch (error) {
 		console.log(error);
 	}
@@ -433,20 +410,6 @@ const onStoreAndAddBtnClick = async () => {
 			await handleGetNewEmployeeCode();
 			handleOpenForm(RESOURCES.FORM_MODE.ADD);
 		}
-
-		// await handleSubmit();
-		// if (statusCode.value) {
-		// 	// await handleGetEmployees();
-		// 	handleUpdateEmployeeList(
-		// 		state.form.type,
-		// 		state.form.employeeId,
-		// 		newEmployee.value
-		// 	);
-
-		// 	await handleGetNewEmployeeCode();
-		// 	handleShowSuccessMessage();
-		// 	handleOpenForm(RESOURCES.FORM_MODE.ADD);
-		// }
 	} catch (error) {
 		console.log(error);
 	}
@@ -479,7 +442,8 @@ const handleBindValue = ({ name, value }) => {
 		formState.formValue[name] = value;
 		formState.formError[name] = null;
 
-		console.log(formState.formValue.DepartmentId);
+		console.log("Name: ", name, "Value: ", value);
+		console.log("State: ", formState.formValue);
 	} catch (error) {
 		console.log(error);
 	}
@@ -827,6 +791,8 @@ const handleValidateForm = async () => {
 					/>
 				</div>
 			</div>
+
+			<Loading v-show="state.isLoading" />
 		</div>
 	</div>
 </template>

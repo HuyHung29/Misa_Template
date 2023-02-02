@@ -117,7 +117,7 @@ onMounted(() => {
 
 <style scoped>
 .loading {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 
 	display: flex;

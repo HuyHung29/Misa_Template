@@ -318,6 +318,7 @@ const handleSearchEmployee = (value) => {
 						/>
 					</tbody>
 				</table>
+				<Loading v-show="state.isLoading" />
 				<!-- Action list -->
 				<ul
 					class="table__action__list"

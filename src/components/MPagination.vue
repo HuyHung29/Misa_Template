@@ -25,7 +25,10 @@ const paginationState = reactive({
  */
 watch(paginationState, () => {
 	try {
-		handleGetEmployees({ ...paginationState });
+		handleGetEmployees({
+			pageSize: paginationState.pageSize,
+			pageNumber: paginationState.pageNumber,
+		});
 	} catch (error) {
 		console.log(error);
 	}
@@ -133,11 +136,14 @@ const handleClickNextBtn = () => {
 				>
 					Trước
 				</p>
-				<ul class="data-table__pagination__page">
+				<ul
+					class="data-table__pagination__page"
+					v-show="state.totalRecord > 0"
+				>
 					<li
 						class="data-table__pagination__item"
 						@click="handleChangePageNumber(1)"
-						:class="{ active: paginationState.pageNumber === 1 }"
+						:class="{ active: state.pagination.pageNumber === 1 }"
 					>
 						1
 					</li>
@@ -152,7 +158,9 @@ const handleClickNextBtn = () => {
 						v-for="page in state.totalPage"
 						:key="page"
 						@click="handleChangePageNumber(page)"
-						:class="{ active: paginationState.pageNumber === page }"
+						:class="{
+							active: state.pagination.pageNumber === page,
+						}"
 						v-show="
 							page !== 1 &&
 							page !== state.totalPage &&
@@ -176,7 +184,7 @@ const handleClickNextBtn = () => {
 						@click="handleChangePageNumber(state.totalPage)"
 						:class="{
 							active:
-								paginationState.pageNumber === state.totalPage,
+								state.pagination.pageNumber === state.totalPage,
 						}"
 						v-show="state.totalPage && state.totalPage !== 1"
 					>
