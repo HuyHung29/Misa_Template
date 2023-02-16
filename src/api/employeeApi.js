@@ -7,6 +7,10 @@ const baseUrl = "Employees/";
  * Author: LHH - 04/01/23
  */
 const employeeApi = {
+	/**
+	 * Hàm lấy tất cả nhân viên
+	 * Author: LHH - 04/01/23
+	 */
 	getAllEmp: () => {
 		try {
 			return axiosClient.get(baseUrl);
@@ -14,14 +18,24 @@ const employeeApi = {
 			console.log(error);
 		}
 	},
+
+	/**
+	 * Lấy danh sách nhân viên theo bộ lọc và phân trang
+	 * Author: LHH - 04/01/23
+	 */
 	getEmpByFilter: (params) => {
 		try {
-			// return axiosClient.get(baseUrl + "filter", { params });
-			return axiosClient.get(baseUrl, { params });
+			return axiosClient.get(baseUrl + "filter", { params });
+			// return axiosClient.get(baseUrl, { params });
 		} catch (error) {
 			console.log(error);
 		}
 	},
+
+	/**
+	 * Lấy mẫ nhân viên mới
+	 * Author: LHH - 04/01/23
+	 */
 	getNewEmpCode: () => {
 		try {
 			return axiosClient.get(baseUrl + "NewEmployeeCode");
@@ -29,6 +43,11 @@ const employeeApi = {
 			console.log(error);
 		}
 	},
+
+	/**
+	 * Lấy thông tin nhân viên theo ID
+	 * Author: LHH - 04/01/23
+	 */
 	getEmpById: (id) => {
 		try {
 			return axiosClient.get(baseUrl + id);
@@ -36,6 +55,10 @@ const employeeApi = {
 			console.log(error);
 		}
 	},
+	/**
+	 * Hàm thêm nhân viên
+	 * Author: LHH - 04/01/23
+	 */
 	createEmp: (employee) => {
 		try {
 			return axiosClient.post(baseUrl, employee);
@@ -43,6 +66,10 @@ const employeeApi = {
 			console.log(error);
 		}
 	},
+	/**
+	 * Hàm sửa nhân viên
+	 * Author: LHH - 04/01/23
+	 */
 	updateEmp: (id, newEmployee) => {
 		try {
 			return axiosClient.put(baseUrl + id, newEmployee);
@@ -50,9 +77,13 @@ const employeeApi = {
 			console.log(error);
 		}
 	},
-	deleteEmp: (id) => {
+	/**
+	 * Hàm xóa nhân viên
+	 * Author: LHH - 04/01/23
+	 */
+	deleteEmp: (ids) => {
 		try {
-			return axiosClient.delete(baseUrl + id);
+			return axiosClient.delete(baseUrl, { data: { ids } });
 		} catch (error) {
 			console.log(error);
 		}

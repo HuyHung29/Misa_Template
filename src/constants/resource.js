@@ -16,6 +16,7 @@ const RESOURCES = {
 			ADD: "Thêm mới nhân viên thành công!",
 			EDIT: "Sửa nhân viên thành công!",
 			DELETE: "Xóa nhân viên thành công",
+			DUPLICATE: "Nhân bản nhân viên thành công",
 		},
 		ERROR: {
 			NOT_EMPTY: (name) => `${name} không được để trống`,
@@ -60,7 +61,7 @@ const RESOURCES = {
 	FORM_MODE: {
 		ADD: "ADD",
 		EDIT: "EDIT",
-		DUPLICATE: "duplicate",
+		DUPLICATE: "DUPLICATE",
 	},
 	MODAL_TITLE: {
 		INFO: "Xác nhận",
@@ -75,6 +76,8 @@ const RESOURCES = {
 	MODAL_MESSAGE: {
 		INFO: "Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
 		WARNING: (id) => `Bạn có chắc chắn muốn xóa nhân viên \<${id}\> không?`,
+		WARNING_MULTIPLE:
+			"Bạn có chắc chắn muốn xóa các nhân viên được chọn không?",
 	},
 	PAGINATION: [
 		{

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import RESOURCES from "../../constants/resource";
 
 /**
  * Định nghĩa các props
@@ -24,6 +25,7 @@ const props = defineProps({
 		type: [Number, String],
 		default: 0,
 	},
+	tabindex: Number,
 	size: {
 		type: String,
 		validator(value) {
@@ -59,6 +61,18 @@ const handleRadioChange = () => {
 		console.log(error);
 	}
 };
+
+/**
+ * Xử lý check radio
+ * Author: LHH - 04/01/23
+ */
+const handleCheck = (e, item) => {
+	if (document.activeElement === e.target) {
+		if (e.keyCode === RESOURCES.KEYCODE.ENTER) {
+			emit("check", { name: props.name, value: item.value });
+		}
+	}
+};
 </script>
 
 <template>
@@ -89,6 +103,8 @@ const handleRadioChange = () => {
 				<label
 					:for="item.title"
 					class="radiofield__input__icon"
+					:tabindex="tabindex"
+					@keydown="handleCheck($event, item)"
 				></label>
 				<label :for="item.title" class="radiofield__input__label">{{
 					item.title

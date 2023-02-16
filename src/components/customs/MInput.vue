@@ -126,6 +126,10 @@ watch(inputState, () => {
 	}
 });
 
+/**
+ * Xử lý binding dữ liệu
+ * Author: LHH - 04/01/23
+ */
 watch(
 	() => props.value,
 	() => {
@@ -137,6 +141,10 @@ watch(
 	}
 );
 
+/**
+ * Xử lý hiên tooltip
+ * Author: LHH - 04/01/23
+ */
 onUpdated(() => {
 	if (isOverflow(errorRef.value)) {
 		isShowTooltip.value = true;

@@ -177,6 +177,12 @@ const handleInput = (e) => {
 	if (!inputVal) {
 		state.indexItem = 0;
 		state.listSearch = props.listValue;
+		emit("select", {
+			name: props.name,
+			value: "",
+		});
+
+		state.value = "";
 	}
 
 	state.listSearch = props.listValue.filter((item) =>

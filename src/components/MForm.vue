@@ -10,7 +10,6 @@ import { computed, inject, onBeforeMount, onMounted, reactive, ref } from "vue";
 import RESOURCES from "../constants/resource";
 import useEmployee from "../composable/employee";
 import useDepartment from "../composable/department";
-import usePosition from "../composable/position";
 
 /**
  * Lấy dữ liệu từ store
@@ -18,7 +17,6 @@ import usePosition from "../composable/position";
  */
 const {
 	state,
-	handleGetEmployees,
 	handleUpdateEmployeeList,
 	handleOpenForm,
 	handleCloseForm,
@@ -37,7 +35,6 @@ const {
 	newEmployeeCode,
 	newEmployee,
 	editEmployee,
-	employeeCheck,
 	statusCode,
 	getEmployeeById,
 	getNewEmployeeCode,
@@ -99,7 +96,6 @@ const formState = reactive({
 	},
 	editEmployeeCode: "",
 	formError: {
-		// isError: null,
 		EmployeeCode: null,
 		FullName: null,
 		DepartmentId: null,
@@ -132,11 +128,14 @@ const emailRef = ref(null);
  */
 const formName = computed(() => {
 	try {
-		if (state.form.type === RESOURCES.FORM_MODE.ADD)
+		if (state.form.type === RESOURCES.FORM_MODE.ADD) {
 			return "Thêm nhân viên";
-		else if (state.form.type === RESOURCES.FORM_MODE.EDIT)
+		}
+		if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
 			return "Sửa nhân viên";
-		else return "Nhân bản nhân viên";
+		}
+
+		return "Nhân bản nhân viên";
 	} catch (error) {
 		console.log(error);
 	}
@@ -155,10 +154,16 @@ const handleCallApi = async () => {
 
 			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
 				await handleGetNewEmployeeCode();
-			} else {
+			}
+
+			if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
 				await handleGetEditEmployee(state.form.employeeId);
 			}
-			// await getAllPosition();
+
+			if (state.form.type === RESOURCES.FORM_MODE.DUPLICATE) {
+				await handleGetEditEmployee(state.form.employeeId);
+				await handleGetNewEmployeeCode();
+			}
 		}
 	} catch (error) {
 		console.log(error);
@@ -213,27 +218,9 @@ const handleGetEditEmployee = async (id) => {
 	} catch (error) {
 		console.log(error);
 		handleCloseLoading();
-		formState.formValue = {
-			EmployeeCode: "",
-			FullName: "",
-			DepartmentId: "",
-			Position: "",
-			DateOfBirth: "",
-			Gender: 0,
-			IdentityNumber: "",
-			IdentityDate: "",
-			IdentityPlace: "",
-			Address: "",
-			PhoneNumber: "",
-			LandlineNumber: "",
-			Email: "",
-			BankAccount: "",
-			BankName: "",
-			BankBranch: "",
-		};
 		handleShowToast({
 			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
-			content: "Có lỗi, vui lòng liên hệ MISA để được trợ giúp",
+			content: error.UserMes,
 		});
 	}
 };
@@ -248,51 +235,36 @@ const handleGetNewEmployeeCode = async () => {
 
 		await getNewEmployeeCode();
 
-		formState.formValue = {
-			EmployeeCode: newEmployeeCode.value,
-			FullName: "",
-			DepartmentId: "",
-			Position: "",
-			DateOfBirth: "",
-			Gender: 0,
-			IdentityNumber: "",
-			IdentityDate: "",
-			IdentityPlace: "",
-			Address: "",
-			PhoneNumber: "",
-			LandlineNumber: "",
-			Email: "",
-			BankAccount: "",
-			BankName: "",
-			BankBranch: "",
-		};
+		if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+			formState.formValue = {
+				EmployeeCode: newEmployeeCode.value,
+				FullName: "",
+				DepartmentId: "",
+				Position: "",
+				DateOfBirth: "",
+				Gender: 0,
+				IdentityNumber: "",
+				IdentityDate: "",
+				IdentityPlace: "",
+				Address: "",
+				PhoneNumber: "",
+				LandlineNumber: "",
+				Email: "",
+				BankAccount: "",
+				BankName: "",
+				BankBranch: "",
+			};
+		} else {
+			formState.formValue.EmployeeCode = newEmployeeCode.value;
+		}
 
 		handleCloseLoading();
 	} catch (error) {
 		console.log(error);
 		handleCloseLoading();
-		formState.formValue = {
-			EmployeeCode: "",
-			FullName: "",
-			DepartmentId: "",
-			Position: "",
-			DateOfBirth: "",
-			Gender: 0,
-			IdentityNumber: "",
-			IdentityDate: "",
-			IdentityPlace: "",
-			Address: "",
-			PhoneNumber: "",
-			LandlineNumber: "",
-			Email: "",
-			BankAccount: "",
-			BankName: "",
-			BankBranch: "",
-		};
-
 		handleShowToast({
 			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
-			content: "Có lỗi, vui lòng liên hệ MISA để được trợ giúp",
+			content: error,
 		});
 	}
 };
@@ -328,14 +300,19 @@ const handleSubmit = async () => {
 				...formState.formValue,
 			};
 
-			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+			if (
+				state.form.type === RESOURCES.FORM_MODE.ADD ||
+				state.form.type === RESOURCES.FORM_MODE.DUPLICATE
+			) {
 				await addNewEmployee(data);
-			} else if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+			}
+
+			if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
 				await updateNewEmployee(state.form.employeeId, data);
 			}
 		}
 	} catch (error) {
-		console.log(error);
+		throw error;
 	}
 };
 
@@ -382,6 +359,21 @@ const handleAddEditEmployee = async () => {
 		handleCloseLoading();
 		console.log(error);
 
+		const { UserMes, MoreInfo } = error;
+
+		for (const key in MoreInfo) {
+			if (Object.hasOwnProperty.call(MoreInfo, key)) {
+				const value = MoreInfo[key];
+
+				formState.formError[key] = value;
+			}
+		}
+
+		handleShowToast({
+			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
+			content: UserMes,
+		});
+
 		return false;
 	}
 };
@@ -407,8 +399,8 @@ const onStoreBtnClick = async () => {
 const onStoreAndAddBtnClick = async () => {
 	try {
 		if (await handleAddEditEmployee()) {
-			await handleGetNewEmployeeCode();
 			handleOpenForm(RESOURCES.FORM_MODE.ADD);
+			await handleGetNewEmployeeCode();
 		}
 	} catch (error) {
 		console.log(error);
@@ -476,6 +468,17 @@ const handleValidateForm = async () => {
 		await emailRef.value.handleValidate();
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+/**
+ * Xử lsy quay đầu tab index
+ * Author: LHH - 15/02/23
+ */
+const handleSetTabIndex = (e) => {
+	if (e.keyCode === 9) {
+		e.preventDefault();
+		codeRef.value.setFocusInput();
 	}
 };
 </script>
@@ -562,20 +565,13 @@ const handleValidateForm = async () => {
 									name="DepartmentId"
 									title="Đơn vị"
 									:rules="[NOT_EMPTY]"
-									:tabindex="4"
+									:tabindex="3"
 									:defaultValue="
-										editEmployee
-											? departments?.find(
-													(item) =>
-														item.DepartmentId ===
-														editEmployee?.DepartmentId
-											  )?.DepartmentName
-											: departments?.find(
-													(item) =>
-														item.DepartmentId ===
-														formState.formValue
-															.DepartmentId
-											  )?.DepartmentName
+										departments?.find(
+											(item) =>
+												item.DepartmentId ===
+												formState.formValue.DepartmentId
+										)?.DepartmentName
 									"
 									:listValue="departmentOptions"
 									@select="handleBindValue"
@@ -592,7 +588,7 @@ const handleValidateForm = async () => {
 									title="Chức danh"
 									name="Position"
 									size="sm"
-									:tabindex="7"
+									:tabindex="4"
 									:value="formState.formValue.Position"
 									@change="handleBindValue"
 								/>
@@ -608,7 +604,7 @@ const handleValidateForm = async () => {
 									title="Ngày sinh"
 									name="DateOfBirth"
 									:rules="[NOT_EMPTY]"
-									:tabindex="3"
+									:tabindex="5"
 									:value="formState.formValue.DateOfBirth"
 									@change="handleBindValue"
 									@error="handleBindError"
@@ -628,6 +624,7 @@ const handleValidateForm = async () => {
 									:defaultValue="formState.formValue.Gender"
 									@check="handleBindValue"
 									title="Giới tính"
+									:tabindex="6"
 								/>
 							</div>
 							<div class="form__col col--7">
@@ -635,7 +632,7 @@ const handleValidateForm = async () => {
 									title="Số CMND"
 									name="IdentityNumber"
 									size="sm"
-									:tabindex="5"
+									:tabindex="9"
 									tooltip="Số chứng minh nhân dân"
 									:value="formState.formValue.IdentityNumber"
 									@change="handleBindValue"
@@ -648,7 +645,7 @@ const handleValidateForm = async () => {
 									title="Ngày cấp"
 									name="IdentityDate"
 									:rules="[NOT_EMPTY]"
-									:tabindex="6"
+									:tabindex="10"
 									:value="formState.formValue.IdentityDate"
 									@change="handleBindValue"
 									@error="handleBindError"
@@ -665,7 +662,7 @@ const handleValidateForm = async () => {
 									title="Nơi cấp"
 									name="IdentityPlace"
 									size="sm"
-									:tabindex="8"
+									:tabindex="11"
 									:value="formState.formValue.IdentityPlace"
 									@change="handleBindValue"
 								/>
@@ -679,7 +676,7 @@ const handleValidateForm = async () => {
 							title="Địa chỉ"
 							name="Address"
 							size="sm"
-							:tabindex="9"
+							:tabindex="12"
 							:value="formState.formValue.Address"
 							@change="handleBindValue"
 						/>
@@ -692,7 +689,7 @@ const handleValidateForm = async () => {
 							size="sm"
 							tooltip="Điện thoại di động"
 							type="money"
-							:tabindex="10"
+							:tabindex="13"
 							:rules="[HAS_FORMAT]"
 							:value="formState.formValue.PhoneNumber"
 							@change="handleBindValue"
@@ -710,7 +707,7 @@ const handleValidateForm = async () => {
 							name="LandlineNumber"
 							size="sm"
 							tooltip="Điện thoại cố định"
-							:tabindex="11"
+							:tabindex="14"
 							:value="formState.formValue.LandlineNumber"
 							@change="handleBindValue"
 						/>
@@ -724,7 +721,7 @@ const handleValidateForm = async () => {
 							type="email"
 							size="sm"
 							:rules="[HAS_FORMAT]"
-							:tabindex="12"
+							:tabindex="15"
 							:value="formState.formValue.Email"
 							@change="handleBindValue"
 							@error="handleBindError"
@@ -738,7 +735,7 @@ const handleValidateForm = async () => {
 					<div class="form__col col--3"></div>
 					<div class="form__col col--3">
 						<Input
-							:tabindex="13"
+							:tabindex="16"
 							title="Tài khoản ngân hàng"
 							name="BankAccount"
 							size="sm"
@@ -748,7 +745,7 @@ const handleValidateForm = async () => {
 					</div>
 					<div class="form__col col--3">
 						<Input
-							:tabindex="14"
+							:tabindex="17"
 							title="Tên ngân hàng"
 							name="BankName"
 							size="sm"
@@ -758,7 +755,7 @@ const handleValidateForm = async () => {
 					</div>
 					<div class="form__col col--3">
 						<Input
-							:tabindex="15"
+							:tabindex="18"
 							title="Chi nhánh"
 							name="BankBranch"
 							size="sm"
@@ -773,7 +770,8 @@ const handleValidateForm = async () => {
 					type="sub"
 					content="Hủy"
 					@click="handleCloseForm"
-					:tabindex="18"
+					:tabindex="21"
+					@keydown="handleSetTabIndex"
 				/>
 				<div class="form__action__group">
 					<Button
@@ -781,13 +779,13 @@ const handleValidateForm = async () => {
 						content="Cất"
 						action="button"
 						@click.prevent="onStoreBtnClick"
-						:tabindex="17"
+						:tabindex="19"
 					/>
 					<Button
 						content="Cất và thêm"
 						action="button"
 						@click="onStoreAndAddBtnClick"
-						:tabindex="16"
+						:tabindex="20"
 					/>
 				</div>
 			</div>

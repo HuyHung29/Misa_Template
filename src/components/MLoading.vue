@@ -1,6 +1,10 @@
 <script setup>
 import { onMounted } from "vue";
 
+/**
+ * Xử lý loading
+ * Author: LHH - 04/01/23
+ */
 onMounted(() => {
 	!(function () {
 		function t(t) {

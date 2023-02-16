@@ -70,6 +70,10 @@ const handleGetEmployees = async (filter) => {
 	}
 };
 
+/**
+ * Hàm xử lý cập nhật lại danh sách nhân viên
+ * Author: LHH - 06/01/23
+ */
 const handleUpdateEmployeeList = (type, employeeId, data) => {
 	try {
 		console.log("Data", type, employeeId, data);
@@ -77,6 +81,17 @@ const handleUpdateEmployeeList = (type, employeeId, data) => {
 		switch (type) {
 			case "ADD":
 				state.employees.unshift(data);
+				state.totalRecord++;
+				state.totalPage = Math.round(
+					state.totalRecord / state.pagination.pageSize
+				);
+				break;
+			case "DUPLICATE":
+				state.employees.unshift(data);
+				state.totalRecord++;
+				state.totalPage = Math.round(
+					state.totalRecord / state.pagination.pageSize
+				);
 				break;
 			case "EDIT":
 				index = state.employees.findIndex(
@@ -88,13 +103,19 @@ const handleUpdateEmployeeList = (type, employeeId, data) => {
 				}
 				break;
 			case "DELETE":
-				index = state.employees.findIndex(
-					(emp) => emp.EmployeeId === employeeId
+				console.log("Before:", state.employees);
+
+				state.totalRecord = state.totalRecord - data.length;
+				state.totalPage = Math.round(
+					state.totalRecord / state.pagination.pageSize
 				);
 
-				if (index !== -1) {
-					state.employees.splice(index, 1);
-				}
+				state.employees = [
+					...state.employees.filter(
+						(emp) => !data.includes(emp.EmployeeId)
+					),
+				];
+
 				break;
 
 			default:

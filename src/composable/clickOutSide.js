@@ -1,5 +1,9 @@
 import { onBeforeUnmount, onMounted } from "vue";
 
+/**
+ * Hàm xử lý sự kiện click ra ngoài element
+ * Author: LHH - 04/01/23
+ */
 export default function useDetectOutsideClick(component, callback) {
 	if (!component) return;
 	const listener = (event) => {

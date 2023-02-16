@@ -7,6 +7,10 @@ const baseUrl = "Departments";
  * Author: LHH - 04/01/23
  */
 const departmentApi = {
+	/**
+	 * Hàm lấy danh sách phòng ban
+	 * Author: LHH - 04/01/23
+	 */
 	getAllDepartment: () => {
 		try {
 			return axiosClient.get(baseUrl);

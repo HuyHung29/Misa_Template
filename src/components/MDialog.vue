@@ -2,6 +2,7 @@
 import RESOURCES from "../constants/resource";
 import { inject } from "vue";
 import useEmployee from "../composable/employee";
+import Button from "./MButton.vue";
 
 /**
  * Các state và phương thức dùng chung
@@ -94,34 +95,28 @@ const handleAgreeBtnClick = async () => {
 				</div>
 			</div>
 			<div class="dialog__action">
-				<button
+				<Button
+					type="sub"
 					@click="handleCloseModal"
-					class="btn btn--sub"
 					v-if="state.modal.type === RESOURCES.MODAL_TYPE.INFO"
-				>
-					<span class="btn__text">Hủy</span>
-				</button>
-				<button
-					class="btn btn--sub"
+					content="Hủy"
+				/>
+				<Button
+					type="sub"
 					@click="handleCloseAll"
 					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
-				>
-					<span class="btn__text">Không</span>
-				</button>
-				<button
-					class="btn"
+					content="Không"
+				/>
+				<Button
 					@click="handleAgreeBtnClick"
 					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
-				>
-					<span class="btn__text">Có</span>
-				</button>
-				<button
+					content="Có"
+				/>
+				<Button
 					@click="handleCloseModal"
-					class="btn"
 					v-if="state.modal.type === RESOURCES.MODAL_TYPE.ERROR"
-				>
-					<span class="btn__text">Đóng</span>
-				</button>
+					content="Đóng"
+				/>
 			</div>
 		</div>
 	</div>

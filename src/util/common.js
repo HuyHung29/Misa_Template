@@ -89,6 +89,8 @@ export const inputValidation = async (rules, value, name, checkValue) => {
 	const { INPUT_TITLE } = RESOURCES;
 	const { REGEX } = RESOURCES;
 
+	console.log("Value: ", value);
+
 	for (const rule of rules) {
 		switch (rule) {
 			case NOT_EMPTY: {

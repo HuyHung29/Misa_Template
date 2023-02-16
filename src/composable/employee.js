@@ -15,6 +15,7 @@ const useEmployee = () => {
 		const totalPage = ref(null);
 		const totalRecord = ref(null);
 		const employeeCheck = ref(null);
+		const deleteIds = ref(null);
 
 		/**
 		 * Lấy tất cả nhân viên
@@ -27,7 +28,7 @@ const useEmployee = () => {
 				listEmployee.value = [...response];
 				statusCode.value = null;
 			} catch (error) {
-				console.log(error);
+				throw error;
 			}
 		};
 
@@ -46,12 +47,11 @@ const useEmployee = () => {
 				listEmployee.value = Data;
 				statusCode.value = null;
 			} catch (error) {
-				console.log(error);
-
 				totalPage.value = 0;
 				totalRecord.value = 0;
 
 				listEmployee.value = [];
+				throw error;
 			}
 		};
 
@@ -66,7 +66,7 @@ const useEmployee = () => {
 				editEmployee.value = response;
 				statusCode.value = null;
 			} catch (error) {
-				console.log(error);
+				throw error;
 			}
 		};
 
@@ -92,16 +92,16 @@ const useEmployee = () => {
 		const getEmployeeByEmpCode = async (employeeCode) => {
 			try {
 				const response = await employeeApi.getEmpByFilter({
-					employeeCode,
+					recordCode: employeeCode,
 				});
 
 				console.log("RESPONSE", response);
 
-				employeeCheck.value = response.Data ? response.Data[0] : null;
+				employeeCheck.value = response.data === "" ? null : response;
 
 				statusCode.value = null;
 			} catch (error) {
-				console.log(error);
+				throw error;
 			}
 		};
 
@@ -117,8 +117,8 @@ const useEmployee = () => {
 
 				statusCode.value = response ? true : false;
 			} catch (error) {
-				console.log(error);
 				statusCode.value = null;
+				throw error;
 			}
 		};
 
@@ -135,8 +135,8 @@ const useEmployee = () => {
 
 				statusCode.value = response ? true : false;
 			} catch (error) {
-				console.log(error);
 				statusCode.value = null;
+				throw error;
 			}
 		};
 
@@ -144,15 +144,19 @@ const useEmployee = () => {
 		 * Xóa nhân viên
 		 * Author: LHH - 04/01/23
 		 */
-		const deleteEmployee = async (id) => {
+		const deleteEmployee = async (ids) => {
 			try {
-				const response = await employeeApi.deleteEmp(id);
+				console.log(ids);
+				const response = await employeeApi.deleteEmp(ids);
 
 				console.log(response);
+
+				deleteIds.value = response;
+
 				statusCode.value = response ? true : false;
 			} catch (error) {
-				console.log(error);
 				statusCode.value = null;
+				throw error;
 			}
 		};
 
@@ -162,6 +166,7 @@ const useEmployee = () => {
 			newEmployee,
 			editEmployee,
 			employeeCheck,
+			deleteIds,
 			statusCode,
 			totalPage,
 			totalRecord,
@@ -175,7 +180,7 @@ const useEmployee = () => {
 			deleteEmployee,
 		};
 	} catch (error) {
-		console.log(error);
+		throw error;
 	}
 };
 
