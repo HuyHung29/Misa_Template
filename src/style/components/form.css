@@ -222,7 +222,7 @@
 }
 
 .form__row.row-gap {
-	row-gap: 0px;
+	row-gap: 12px;
 }
 
 .form__col {

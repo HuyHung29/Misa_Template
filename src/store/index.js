@@ -80,12 +80,12 @@ const handleUpdateEmployeeList = (type, employeeId, data) => {
 		let index;
 		switch (type) {
 			case "ADD":
-				state.employees.unshift(data);
-				state.totalRecord++;
-				state.totalPage = Math.round(
-					state.totalRecord / state.pagination.pageSize
-				);
-				break;
+			// state.employees.unshift(data);
+			// state.totalRecord++;
+			// state.totalPage = Math.round(
+			// 	state.totalRecord / state.pagination.pageSize
+			// );
+			// break;
 			case "DUPLICATE":
 				state.employees.unshift(data);
 				state.totalRecord++;
@@ -109,6 +109,7 @@ const handleUpdateEmployeeList = (type, employeeId, data) => {
 				state.totalPage = Math.round(
 					state.totalRecord / state.pagination.pageSize
 				);
+				state.pagination.pageNumber = 1;
 
 				state.employees = [
 					...state.employees.filter(

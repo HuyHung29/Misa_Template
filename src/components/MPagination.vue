@@ -34,6 +34,13 @@ watch(paginationState, () => {
 	}
 });
 
+watch(
+	() => state.pagination,
+	() => {
+		paginationState.pageNumber = state.pagination.pageNumber;
+	}
+);
+
 /**
  * Tính toán số trang hiển thị
  * Author: LHH -10/01/23

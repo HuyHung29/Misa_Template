@@ -181,7 +181,7 @@ onUpdated(() => {
 				v-model="inputState"
 			/>
 		</div>
-		<p class="textfield__error" ref="errorRef">
+		<p v-if="error" class="textfield__error" ref="errorRef">
 			{{ error || "Thông tin không đúng" }}
 		</p>
 

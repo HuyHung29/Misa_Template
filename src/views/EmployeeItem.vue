@@ -95,7 +95,7 @@ const handleCheckBox = (data) => {
 			<span>{{ employee.FullName }}</span>
 		</td>
 		<td class="table__col">
-			<span>{{ formatGender(employee.Gender) }}</span>
+			<span>{{ employee.GenderName }}</span>
 		</td>
 		<td class="table__col text-center">
 			<span>{{ formatDate(employee.DateOfBirth) }}</span>
@@ -109,11 +109,17 @@ const handleCheckBox = (data) => {
 		<td class="table__col">
 			<span>{{ employee.DepartmentName }}</span>
 		</td>
-		<td class="table__col text-right">
-			<span>{{ formatMoney(employee.Salary) }}</span>
-		</td>
 		<td class="table__col">
 			<span>{{ employee.PhoneNumber }}</span>
+		</td>
+		<td class="table__col">
+			<span>{{ employee.BankAccount }}</span>
+		</td>
+		<td class="table__col">
+			<span>{{ employee.BankName }}</span>
+		</td>
+		<td class="table__col">
+			<span>{{ employee.BankBranch }}</span>
 		</td>
 		<td class="table__col text-center">
 			<button class="table__action">

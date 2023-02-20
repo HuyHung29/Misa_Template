@@ -38,7 +38,7 @@ const employeeApi = {
 	 */
 	getNewEmpCode: () => {
 		try {
-			return axiosClient.get(baseUrl + "NewEmployeeCode");
+			return axiosClient.get(baseUrl + "new-employee-code");
 		} catch (error) {
 			console.log(error);
 		}
@@ -81,9 +81,38 @@ const employeeApi = {
 	 * Hàm xóa nhân viên
 	 * Author: LHH - 04/01/23
 	 */
+
+	/**
+	 * Hàm xóa nhân viên
+	 * Author: LHH - 04/01/23
+	 * @param {*} ids
+	 * @returns
+	 */
 	deleteEmp: (ids) => {
 		try {
 			return axiosClient.delete(baseUrl, { data: { ids } });
+		} catch (error) {
+			console.log(error);
+		}
+	},
+	/**
+	 * Hàm xuất excel
+	 * Author: LHH - 19/02/23
+	 */
+	exportExcel: () => {
+		try {
+			const headers = {
+				"Content-Disposition": `attachment; filename=hh.xlsx"}`,
+				"Content-Type":
+					"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			};
+			const config = {
+				method: "GET",
+				url: URL,
+				responseType: "arraybuffer",
+				headers,
+			};
+			return axiosClient.get(baseUrl + "get-employee-excel", config);
 		} catch (error) {
 			console.log(error);
 		}

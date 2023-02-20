@@ -8,6 +8,7 @@ import Pagination from "../components/MPagination.vue";
 import RESOURCES from "../constants/resource";
 import { reactive, inject, onBeforeMount, computed } from "vue";
 import useEmployee from "../composable/employee";
+import employeeApi from "../api/employeeApi";
 
 /**
  * Định nghĩa các state
@@ -50,10 +51,8 @@ const {
 const isCheckAll = computed(() => {
 	let isCheck = true;
 
-	if (empState.checkList.length !== 0) {
-		isCheck = true;
-	} else {
-		isCheck = false;
+	if (!(empState.checkList.length !== 0)) {
+		return false;
 	}
 
 	isCheck = state.employees.every((item) =>
@@ -286,6 +285,25 @@ const handleSearchEmployee = (value) => {
 const handleOpenAddForm = () => {
 	handleOpenForm(RESOURCES.FORM_MODE.ADD);
 };
+
+/**
+ * Hàm xử lý xuất file excel
+ * Author: LHH - 04/01/2023
+ */
+const handleExportData = async () => {
+	try {
+		var file = await employeeApi.exportExcel();
+
+		const url = URL.createObjectURL(new Blob([file]));
+		const link = document.createElement("a");
+		link.href = url;
+		link.setAttribute("download", "Danh_sach_nhan_vien.xlsx");
+		document.body.appendChild(link);
+		link.click();
+	} catch (error) {
+		console.log(error);
+	}
+};
 </script>
 
 <template>
@@ -332,6 +350,9 @@ const handleOpenAddForm = () => {
 				>
 					<i></i>
 				</p>
+				<p class="table__function__export" @click="handleExportData">
+					<i></i>
+				</p>
 			</div>
 			<div class="table__wrap" @scroll="handleCloseListAction">
 				<table class="table">
@@ -363,17 +384,23 @@ const handleOpenAddForm = () => {
 									Số chứng minh nhân dân
 								</p>
 							</th>
-							<th class="table__heading w-250">
+							<th class="table__heading w-200">
 								<span>chức danh</span>
 							</th>
 							<th class="table__heading w-300">
 								<span>tên đơn vị</span>
 							</th>
-							<th class="table__heading text-right w-200">
-								<span>Lương</span>
-							</th>
 							<th class="table__heading w-200">
 								<span>số điện thoại</span>
+							</th>
+							<th class="table__heading w-200">
+								<span>số tài khoản</span>
+							</th>
+							<th class="table__heading w-200">
+								<span>tên ngân hàng</span>
+							</th>
+							<th class="table__heading w-200">
+								<span>chi nhánh</span>
 							</th>
 							<th class="table__heading text-center w-150">
 								<span>chức năng</span>

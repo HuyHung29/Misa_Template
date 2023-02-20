@@ -78,14 +78,24 @@
 	margin-left: 12px;
 
 	cursor: pointer;
+
+	transition: all 0.25s linear;
 }
 
 .table__function__refresh i {
 	display: inline-block;
 
-	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -1098px -90px;
+	/* background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -1098px -90px;
 	width: 20px;
-	height: 21px;
+	height: 21px; */
+
+	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -425px -201px;
+	width: 21px;
+	height: 23px;
+}
+
+.table__function__refresh i:hover {
+	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -1098px -90px;
 }
 
 .table__function__refresh::after {
@@ -110,6 +120,53 @@
 }
 
 .table__function__refresh:hover::after {
+	display: block;
+}
+
+.table__function__export {
+	position: relative;
+	width: 24px;
+	height: 24px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	margin-left: 12px;
+
+	cursor: pointer;
+}
+
+.table__function__export i {
+	display: inline-block;
+
+	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -705px -202px;
+	width: 23px;
+	height: 20px;
+}
+
+.table__function__export::after {
+	display: none;
+	content: "Xuất tất cả dữ liệu";
+
+	position: absolute;
+	bottom: -30px;
+	right: 0;
+
+	z-index: 15;
+
+	padding: 2px 8px;
+
+	border-radius: 2px;
+
+	background-color: #38393d;
+	color: var(--text-white);
+	text-align: center;
+
+	min-width: 150px;
+}
+
+.table__function__export:hover::after {
 	display: block;
 }
 

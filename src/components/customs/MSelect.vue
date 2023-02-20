@@ -312,7 +312,7 @@ defineExpose({
 				</li>
 			</ul>
 		</div>
-		<p v-show="hasError" class="select__error" ref="errorRef">
+		<p v-show="hasError && error" class="select__error" ref="errorRef">
 			{{ error || "Có lỗi" }}
 		</p>
 		<p v-if="!state.isShow && isShowTooltip" class="select__error__tooltip">

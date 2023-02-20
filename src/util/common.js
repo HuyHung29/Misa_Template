@@ -149,6 +149,7 @@ export const inputValidation = async (rules, value, name, checkValue) => {
 			}
 			case ADULT: {
 				if (value) {
+					console.log(value);
 					const date = new Date(value).getTime();
 					const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
 					if (age < 18) {

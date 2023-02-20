@@ -6,7 +6,15 @@ import Radio from "../components/customs/MRadio.vue";
 import Button from "../components/MButton.vue";
 import Loading from "../components/MLoading.vue";
 import CheckBox from "../components/customs/MCheckBox.vue";
-import { computed, inject, onBeforeMount, onMounted, reactive, ref } from "vue";
+import {
+	computed,
+	inject,
+	onBeforeMount,
+	onMounted,
+	onUnmounted,
+	reactive,
+	ref,
+} from "vue";
 import RESOURCES from "../constants/resource";
 import useEmployee from "../composable/employee";
 import useDepartment from "../composable/department";
@@ -81,10 +89,10 @@ const formState = reactive({
 		FullName: "",
 		DepartmentId: "",
 		Position: "",
-		DateOfBirth: "",
+		DateOfBirth: null,
 		Gender: 0,
 		IdentityNumber: "",
-		IdentityDate: "",
+		IdentityDate: null,
 		IdentityPlace: "",
 		Address: "",
 		PhoneNumber: "",
@@ -104,6 +112,24 @@ const formState = reactive({
 	},
 });
 
+const originValue = ref({
+	EmployeeCode: "",
+	FullName: "",
+	DepartmentId: "",
+	Position: "",
+	DateOfBirth: "",
+	Gender: 0,
+	IdentityNumber: "",
+	IdentityDate: "",
+	IdentityPlace: "",
+	Address: "",
+	PhoneNumber: "",
+	LandlineNumber: "",
+	Email: "",
+	BankAccount: "",
+	BankName: "",
+	BankBranch: "",
+});
 /**
  * Các quy tắc để validate
  * Author: LHH - 27/01/23
@@ -164,6 +190,8 @@ const handleCallApi = async () => {
 				await handleGetEditEmployee(state.form.employeeId);
 				await handleGetNewEmployeeCode();
 			}
+
+			originValue.value = { ...formState.formValue };
 		}
 	} catch (error) {
 		console.log(error);
@@ -186,10 +214,26 @@ onBeforeMount(() => {
  * Xử lý focus vào mã nhân viên
  * Author: LHH - 27/01/23
  */
+
+function doc_keyUp(e) {
+	// this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
+	if (e.ctrlKey && e.key === "ArrowDown") {
+		// call your function to do the thing
+
+		console.log("hello");
+	}
+}
+
 onMounted(() => {
 	if (codeRef.value) {
 		codeRef.value.setFocusInput();
 	}
+
+	document.addEventListener("keyup", doc_keyUp, false);
+});
+
+onUnmounted(() => {
+	document.removeEventListener("keyup", doc_keyUp);
 });
 
 /**
@@ -241,10 +285,10 @@ const handleGetNewEmployeeCode = async () => {
 				FullName: "",
 				DepartmentId: "",
 				Position: "",
-				DateOfBirth: "",
+				DateOfBirth: null,
 				Gender: 0,
 				IdentityNumber: "",
-				IdentityDate: "",
+				IdentityDate: null,
 				IdentityPlace: "",
 				Address: "",
 				PhoneNumber: "",
@@ -413,13 +457,21 @@ const onStoreAndAddBtnClick = async () => {
  */
 const onCloseBtnClick = () => {
 	try {
-		handleOpenModal(
-			RESOURCES.MODAL_TITLE.INFO,
-			RESOURCES.MODAL_MESSAGE.INFO,
-			RESOURCES.MODAL_TYPE.INFO,
-			state.form.employeeId,
-			onStoreBtnClick
-		);
+		if (
+			JSON.stringify(formState.formValue) ===
+				JSON.stringify(originValue.value) &&
+			state.form.type !== RESOURCES.FORM_MODE.ADD
+		) {
+			handleCloseForm();
+		} else {
+			handleOpenModal(
+				RESOURCES.MODAL_TITLE.INFO,
+				RESOURCES.MODAL_MESSAGE.INFO,
+				RESOURCES.MODAL_TYPE.INFO,
+				state.form.employeeId,
+				onStoreBtnClick
+			);
+		}
 	} catch (error) {
 		console.log(error);
 	}
@@ -603,7 +655,7 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									title="Ngày sinh"
 									name="DateOfBirth"
-									:rules="[NOT_EMPTY]"
+									:rules="[ADULT]"
 									:tabindex="5"
 									:value="formState.formValue.DateOfBirth"
 									@change="handleBindValue"
@@ -644,7 +696,7 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									title="Ngày cấp"
 									name="IdentityDate"
-									:rules="[NOT_EMPTY]"
+									:rules="[]"
 									:tabindex="10"
 									:value="formState.formValue.IdentityDate"
 									@change="handleBindValue"

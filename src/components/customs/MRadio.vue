@@ -111,6 +111,6 @@ const handleCheck = (e, item) => {
 				}}</label>
 			</div>
 		</div>
-		<p class="radiofield__error">{{ error || "Có lỗi" }}</p>
+		<p v-if="error" class="radiofield__error">{{ error || "Có lỗi" }}</p>
 	</div>
 </template>

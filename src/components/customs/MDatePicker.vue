@@ -142,6 +142,10 @@ const handleChangeDate = () => {
 	}
 };
 
+const disabledDate = (time) => {
+	return time.getTime() > Date.now();
+};
+
 /**
  * Theo dõi sự thay đổi của các state
  * Author: LHH - 05/01/23
@@ -200,6 +204,7 @@ onUpdated(() => {
 			close-on-scroll
 			show-now-button
 			locale="vi"
+			:disabled-dates="disabledDate"
 			:enable-time-picker="false"
 			:format="format"
 			hide-offset-dates
@@ -235,7 +240,9 @@ onUpdated(() => {
 				</div>
 			</template>
 		</Datepicker>
-		<p class="date-picker__error" ref="errorRef">{{ error || "Có lỗi" }}</p>
+		<p v-if="error" class="date-picker__error" ref="errorRef">
+			{{ error || "Có lỗi" }}
+		</p>
 		<p v-if="isShowTooltip" class="date-picker__error__tooltip">
 			{{ error || "Thông tin không đúng" }}
 		</p>
