@@ -7,7 +7,7 @@ const props = defineProps({
 	type: {
 		type: String,
 		validator(value) {
-			return ["primary", "sub"].includes(value);
+			return ["primary", "sub", "warning"].includes(value);
 		},
 		default: "primary",
 	},
@@ -22,6 +22,8 @@ const props = defineProps({
 		},
 		default: "button",
 	},
+	tooltip: String,
+	style: Object,
 });
 </script>
 
@@ -31,9 +33,12 @@ const props = defineProps({
 		class="btn"
 		:class="{
 			'btn--sub': type === 'sub',
+			'btn--warning': type === 'warning',
 		}"
+		:style="style"
 	>
 		<span class="btn__text">{{ content }}</span>
+		<p v-if="tooltip" class="btn__tooltip">{{ tooltip }}</p>
 	</button>
 </template>
 

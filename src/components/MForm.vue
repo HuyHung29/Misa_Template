@@ -14,6 +14,7 @@ import {
 	onUnmounted,
 	reactive,
 	ref,
+	watch,
 } from "vue";
 import RESOURCES from "../constants/resource";
 import useEmployee from "../composable/employee";
@@ -55,12 +56,6 @@ const {
  * Author: LHH - 04/01/23
  */
 const { departments, getAllDepartment } = useDepartment();
-
-/**
- * Các state và hàm liên quan đến position
- * Author: LHH - 08/01/23
- */
-// const { positions, getAllPosition } = usePosition();
 
 /**
  * Các state sử dụng trong component
@@ -107,8 +102,18 @@ const formState = reactive({
 		EmployeeCode: null,
 		FullName: null,
 		DepartmentId: null,
+		Position: null,
+		DateOfBirth: null,
+		IdentityNumber: null,
+		IdentityDate: null,
+		IdentityPlace: null,
+		Address: null,
 		PhoneNumber: null,
+		LandlineNumber: null,
 		Email: null,
+		BankAccount: null,
+		BankName: null,
+		BankBranch: null,
 	},
 });
 
@@ -134,19 +139,47 @@ const originValue = ref({
  * Các quy tắc để validate
  * Author: LHH - 27/01/23
  */
-const { NOT_EMPTY, UNIQUE, ADULT, HAS_FORMAT } = RESOURCES.FORM_RULES;
+const { NOT_EMPTY, ADULT, HAS_FORMAT, MIN_VALUE, MAX_LENGTH } =
+	RESOURCES.FORM_RULES;
+
+/**
+ * Các regex cho input
+ * Author: LHH - 27/01/23
+ */
+const { EMAIL, EMPLOYEE_CODE, PHONE_NUMBER, IDENTITY_NUMBER, LANDLINE_NUMBER } =
+	RESOURCES.REGEX;
+
+/**
+ * Các form mode
+ * Author: LHH - 27/01/23
+ */
+const { ADD, DUPLICATE, EDIT } = RESOURCES.FORM_MODE;
+
+/**
+ * Các nootification type
+ * Author: LHH - 27/01/23
+ */
+const { ERROR, SUCCESS } = RESOURCES.NOTIFICATION_TYPE;
 
 /**
  * Khai báo ref cho các input
  * Author: LHH - 27/01/23
  */
-const codeRef = ref(null);
-const nameRef = ref(null);
-const unitRef = ref(null);
+const employeeCodeRef = ref(null);
+const fullNameRef = ref(null);
+const departmentIdRef = ref(null);
+const positionRef = ref(null);
 const dateOfBirthRef = ref(null);
+const identityNumberRef = ref(null);
 const identityDateRef = ref(null);
-const phoneRef = ref(null);
+const identityPlaceRef = ref(null);
+const addressRef = ref(null);
+const phoneNumberRef = ref(null);
+const landlineNumberRef = ref(null);
 const emailRef = ref(null);
+const bankAccountRef = ref(null);
+const bankNameRef = ref(null);
+const bankBranchRef = ref(null);
 
 /**
  * Tính toán tên form
@@ -154,10 +187,10 @@ const emailRef = ref(null);
  */
 const formName = computed(() => {
 	try {
-		if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+		if (state.form.type === ADD) {
 			return "Thêm nhân viên";
 		}
-		if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+		if (state.form.type === EDIT) {
 			return "Sửa nhân viên";
 		}
 
@@ -178,15 +211,15 @@ const handleCallApi = async () => {
 
 			departmentList.value = [...departments.value];
 
-			if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+			if (state.form.type === ADD) {
 				await handleGetNewEmployeeCode();
 			}
 
-			if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+			if (state.form.type === EDIT) {
 				await handleGetEditEmployee(state.form.employeeId);
 			}
 
-			if (state.form.type === RESOURCES.FORM_MODE.DUPLICATE) {
+			if (state.form.type === DUPLICATE) {
 				await handleGetEditEmployee(state.form.employeeId);
 				await handleGetNewEmployeeCode();
 			}
@@ -211,30 +244,67 @@ onBeforeMount(() => {
 });
 
 /**
- * Xử lý focus vào mã nhân viên
- * Author: LHH - 27/01/23
+ * Hàm xử lý phím tắt trong form
+ * @param {event} e Sự kiện html
  */
-
-function doc_keyUp(e) {
+function docKeyDown(e) {
+	console.log(e);
 	// this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
-	if (e.ctrlKey && e.key === "ArrowDown") {
-		// call your function to do the thing
+	if (e.ctrlKey && e.key === "s") {
+		e.preventDefault();
+		e.stopPropagation();
 
-		console.log("hello");
+		// call your function to do the thing
+		onStoreBtnClick();
+
+		console.log("save");
+	}
+
+	if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// call your function to do the thing
+		onStoreAndAddBtnClick();
+
+		console.log("save and add");
+	}
+
+	if (e.code === "Escape") {
+		onCloseBtnClick();
 	}
 }
 
+/**
+ * Xử lý focus vào mã nhân viên và các phím tắt ở form
+ * Author: LHH - 27/01/23
+ */
 onMounted(() => {
-	if (codeRef.value) {
-		codeRef.value.setFocusInput();
+	if (employeeCodeRef.value) {
+		employeeCodeRef.value.setFocusInput();
 	}
 
-	document.addEventListener("keyup", doc_keyUp, false);
+	document.addEventListener("keydown", docKeyDown, false);
 });
 
+/**
+ * Hàm xử lý remove event
+ * Author: LHH - 23/03/23
+ */
 onUnmounted(() => {
-	document.removeEventListener("keyup", doc_keyUp);
+	document.removeEventListener("keydown", docKeyDown);
 });
+
+/**
+ * Hàm bindError do BE trả về
+ * Author: LHH - 23/03/23
+ */
+watch(
+	() => state.form.formError,
+	() => {
+		formState.formError = { ...state.form.formError };
+	}
+);
 
 /**
  * Hàm xử lý lấy nhân viên sửa
@@ -258,14 +328,12 @@ const handleGetEditEmployee = async (id) => {
 
 		formState.editEmployeeCode = EmployeeCode;
 
-		handleCloseLoading();
+		setTimeout(() => {
+			handleCloseLoading();
+		}, 500);
 	} catch (error) {
 		console.log(error);
-		handleCloseLoading();
-		handleShowToast({
-			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
-			content: error.UserMes,
-		});
+		// handleShowErrorMessage(error.UserMes);
 	}
 };
 
@@ -279,7 +347,7 @@ const handleGetNewEmployeeCode = async () => {
 
 		await getNewEmployeeCode();
 
-		if (state.form.type === RESOURCES.FORM_MODE.ADD) {
+		if (state.form.type === ADD) {
 			formState.formValue = {
 				EmployeeCode: newEmployeeCode.value,
 				FullName: "",
@@ -302,14 +370,12 @@ const handleGetNewEmployeeCode = async () => {
 			formState.formValue.EmployeeCode = newEmployeeCode.value;
 		}
 
-		handleCloseLoading();
+		setTimeout(() => {
+			handleCloseLoading();
+		}, 1000);
 	} catch (error) {
 		console.log(error);
-		handleCloseLoading();
-		handleShowToast({
-			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
-			content: error,
-		});
+		// handleShowErrorMessage(error.UserMes);
 	}
 };
 
@@ -319,14 +385,14 @@ const handleGetNewEmployeeCode = async () => {
  */
 const handleSubmit = async () => {
 	try {
-		console.log("Value", formState.formValue);
-		await handleValidateForm();
+		handleValidateForm();
 
 		let isError = false;
 
 		for (const key in formState.formError) {
 			if (Object.hasOwnProperty.call(formState.formError, key)) {
 				const element = formState.formError[key];
+
 				if (element) {
 					handleOpenModal(
 						RESOURCES.MODAL_TITLE.ERROR,
@@ -344,14 +410,11 @@ const handleSubmit = async () => {
 				...formState.formValue,
 			};
 
-			if (
-				state.form.type === RESOURCES.FORM_MODE.ADD ||
-				state.form.type === RESOURCES.FORM_MODE.DUPLICATE
-			) {
+			if (state.form.type === ADD || state.form.type === DUPLICATE) {
 				await addNewEmployee(data);
 			}
 
-			if (state.form.type === RESOURCES.FORM_MODE.EDIT) {
+			if (state.form.type === EDIT) {
 				await updateNewEmployee(state.form.employeeId, data);
 			}
 		}
@@ -366,8 +429,20 @@ const handleSubmit = async () => {
  */
 const handleShowSuccessMessage = () => {
 	handleShowToast({
-		type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
+		type: SUCCESS,
 		content: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
+	});
+};
+
+/**
+ * Xử lý hiển thị thông báo thành công
+ * Author: LHH - 10/01/23
+ */
+const handleShowErrorMessage = (error) => {
+	handleCloseLoading();
+	handleShowToast({
+		type: ERROR,
+		content: error,
 	});
 };
 
@@ -400,23 +475,19 @@ const handleAddEditEmployee = async () => {
 
 		return false;
 	} catch (error) {
-		handleCloseLoading();
-		console.log(error);
+		// console.log(error);
 
-		const { UserMes, MoreInfo } = error;
+		// const { UserMes, MoreInfo } = error;
 
-		for (const key in MoreInfo) {
-			if (Object.hasOwnProperty.call(MoreInfo, key)) {
-				const value = MoreInfo[key];
+		// for (const key in MoreInfo) {
+		// 	if (Object.hasOwnProperty.call(MoreInfo, key)) {
+		// 		const value = MoreInfo[key];
 
-				formState.formError[key] = value;
-			}
-		}
+		// 		formState.formError[key] = value;
+		// 	}
+		// }
 
-		handleShowToast({
-			type: RESOURCES.NOTIFICATION_TYPE.ERROR,
-			content: UserMes,
-		});
+		// handleShowErrorMessage(UserMes);
 
 		return false;
 	}
@@ -459,8 +530,7 @@ const onCloseBtnClick = () => {
 	try {
 		if (
 			JSON.stringify(formState.formValue) ===
-				JSON.stringify(originValue.value) &&
-			state.form.type !== RESOURCES.FORM_MODE.ADD
+			JSON.stringify(originValue.value)
 		) {
 			handleCloseForm();
 		} else {
@@ -485,9 +555,6 @@ const handleBindValue = ({ name, value }) => {
 	try {
 		formState.formValue[name] = value;
 		formState.formError[name] = null;
-
-		console.log("Name: ", name, "Value: ", value);
-		console.log("State: ", formState.formValue);
 	} catch (error) {
 		console.log(error);
 	}
@@ -509,15 +576,23 @@ const handleBindError = ({ name, message }) => {
  * Xử lý validate form
  * Author: LHH - 04/01/23
  */
-const handleValidateForm = async () => {
+const handleValidateForm = () => {
 	try {
-		await codeRef.value.handleValidate();
-		await nameRef.value.handleValidate();
-		await unitRef.value.handleValidate();
-		await dateOfBirthRef.value.handleValidate();
-		await identityDateRef.value.handleValidate();
-		await phoneRef.value.handleValidate();
-		await emailRef.value.handleValidate();
+		employeeCodeRef.value.handleValidate();
+		fullNameRef.value.handleValidate();
+		departmentIdRef.value.handleValidate();
+		positionRef.value.handleValidate();
+		dateOfBirthRef.value.handleValidate();
+		identityNumberRef.value.handleValidate();
+		identityDateRef.value.handleValidate();
+		identityPlaceRef.value.handleValidate();
+		addressRef.value.handleValidate();
+		phoneNumberRef.value.handleValidate();
+		landlineNumberRef.value.handleValidate();
+		emailRef.value.handleValidate();
+		bankAccountRef.value.handleValidate();
+		bankNameRef.value.handleValidate();
+		bankBranchRef.value.handleValidate();
 	} catch (error) {
 		console.log(error);
 	}
@@ -530,7 +605,7 @@ const handleValidateForm = async () => {
 const handleSetTabIndex = (e) => {
 	if (e.keyCode === 9) {
 		e.preventDefault();
-		codeRef.value.setFocusInput();
+		employeeCodeRef.value.setFocusInput();
 	}
 };
 </script>
@@ -572,15 +647,17 @@ const handleSetTabIndex = (e) => {
 						<div class="form__row row-gap">
 							<div class="form__col col--4">
 								<Input
-									ref="codeRef"
+									ref="employeeCodeRef"
 									isRequired
 									title="Mã"
 									name="EmployeeCode"
 									size="sm"
-									:rules="[NOT_EMPTY, HAS_FORMAT, UNIQUE]"
+									:rules="[
+										NOT_EMPTY(),
+										HAS_FORMAT(EMPLOYEE_CODE),
+									]"
 									:tabindex="1"
 									:value="formState.formValue.EmployeeCode"
-									:originValue="formState.editEmployeeCode"
 									@change="handleBindValue"
 									@error="handleBindError"
 									:error="
@@ -592,12 +669,12 @@ const handleSetTabIndex = (e) => {
 							</div>
 							<div class="form__col col--8">
 								<Input
-									ref="nameRef"
+									ref="fullNameRef"
 									isRequired
 									title="Tên"
 									name="FullName"
 									size="sm"
-									:rules="[NOT_EMPTY]"
+									:rules="[NOT_EMPTY(), MAX_LENGTH(100)]"
 									:tabindex="2"
 									:value="formState.formValue.FullName"
 									@change="handleBindValue"
@@ -611,12 +688,12 @@ const handleSetTabIndex = (e) => {
 							</div>
 							<div class="form__col col--12">
 								<Select
-									ref="unitRef"
+									ref="departmentIdRef"
 									size="sm"
 									isRequired
 									name="DepartmentId"
 									title="Đơn vị"
-									:rules="[NOT_EMPTY]"
+									:rules="[NOT_EMPTY()]"
 									:tabindex="3"
 									:defaultValue="
 										departments?.find(
@@ -640,9 +717,17 @@ const handleSetTabIndex = (e) => {
 									title="Chức danh"
 									name="Position"
 									size="sm"
+									ref="positionRef"
+									:rules="[MAX_LENGTH(100)]"
 									:tabindex="4"
 									:value="formState.formValue.Position"
 									@change="handleBindValue"
+									@error="handleBindError"
+									:error="
+										formState.formError
+											? formState.formError.Position
+											: ''
+									"
 								/>
 							</div>
 						</div>
@@ -655,16 +740,20 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									title="Ngày sinh"
 									name="DateOfBirth"
-									:rules="[ADULT]"
+									placeholder="DD/MM/YYYY"
+									:rules="[ADULT()]"
 									:tabindex="5"
 									:value="formState.formValue.DateOfBirth"
 									@change="handleBindValue"
 									@error="handleBindError"
-									placeholder="DD/MM/YYYY"
 									:error="
 										formState.formError
 											? formState.formError.DateOfBirth
 											: ''
+									"
+									:isShowError="
+										!!formState.formError.EmployeeCode ||
+										!!formState.formError.FullName
 									"
 								/>
 							</div>
@@ -686,8 +775,19 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									:tabindex="9"
 									tooltip="Số chứng minh nhân dân"
+									ref="identityNumberRef"
+									:rules="[HAS_FORMAT(IDENTITY_NUMBER)]"
 									:value="formState.formValue.IdentityNumber"
 									@change="handleBindValue"
+									:isShowError="
+										!!formState.formError.DepartmentId
+									"
+									@error="handleBindError"
+									:error="
+										formState.formError
+											? formState.formError.IdentityNumber
+											: ''
+									"
 								/>
 							</div>
 							<div class="form__col col--5">
@@ -696,12 +796,17 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									title="Ngày cấp"
 									name="IdentityDate"
-									:rules="[]"
+									placeholder="DD/MM/YYYY"
 									:tabindex="10"
+									:rules="[
+										MIN_VALUE(
+											formState.formValue.DateOfBirth,
+											'DateOfBirth'
+										),
+									]"
 									:value="formState.formValue.IdentityDate"
 									@change="handleBindValue"
 									@error="handleBindError"
-									placeholder="DD/MM/YYYY"
 									:error="
 										formState.formError
 											? formState.formError.IdentityDate
@@ -714,9 +819,17 @@ const handleSetTabIndex = (e) => {
 									title="Nơi cấp"
 									name="IdentityPlace"
 									size="sm"
+									ref="identityPlaceRef"
+									:rules="[MAX_LENGTH(255)]"
 									:tabindex="11"
 									:value="formState.formValue.IdentityPlace"
 									@change="handleBindValue"
+									@error="handleBindError"
+									:error="
+										formState.formError
+											? formState.formError.IdentityPlace
+											: ''
+									"
 								/>
 							</div>
 						</div>
@@ -729,20 +842,28 @@ const handleSetTabIndex = (e) => {
 							name="Address"
 							size="sm"
 							:tabindex="12"
+							ref="addressRef"
+							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.Address"
 							@change="handleBindValue"
+							@error="handleBindError"
+							:error="
+								formState.formError
+									? formState.formError.Address
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3">
 						<Input
-							ref="phoneRef"
+							ref="phoneNumberRef"
 							title="ĐT di động"
 							name="PhoneNumber"
 							size="sm"
 							tooltip="Điện thoại di động"
 							type="money"
 							:tabindex="13"
-							:rules="[HAS_FORMAT]"
+							:rules="[HAS_FORMAT(PHONE_NUMBER)]"
 							:value="formState.formValue.PhoneNumber"
 							@change="handleBindValue"
 							@error="handleBindError"
@@ -760,8 +881,16 @@ const handleSetTabIndex = (e) => {
 							size="sm"
 							tooltip="Điện thoại cố định"
 							:tabindex="14"
+							ref="landlineNumberRef"
+							:rules="[HAS_FORMAT(LANDLINE_NUMBER)]"
 							:value="formState.formValue.LandlineNumber"
 							@change="handleBindValue"
+							@error="handleBindError"
+							:error="
+								formState.formError
+									? formState.formError.LandlineNumber
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3">
@@ -772,7 +901,7 @@ const handleSetTabIndex = (e) => {
 							placeholder="example@gmail.com"
 							type="email"
 							size="sm"
-							:rules="[HAS_FORMAT]"
+							:rules="[HAS_FORMAT(EMAIL), MAX_LENGTH(100)]"
 							:tabindex="15"
 							:value="formState.formValue.Email"
 							@change="handleBindValue"
@@ -791,8 +920,16 @@ const handleSetTabIndex = (e) => {
 							title="Tài khoản ngân hàng"
 							name="BankAccount"
 							size="sm"
+							ref="bankAccountRef"
+							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.BankAccount"
 							@change="handleBindValue"
+							@error="handleBindError"
+							:error="
+								formState.formError
+									? formState.formError.BankAccount
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3">
@@ -801,8 +938,16 @@ const handleSetTabIndex = (e) => {
 							title="Tên ngân hàng"
 							name="BankName"
 							size="sm"
+							ref="bankNameRef"
+							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.BankName"
 							@change="handleBindValue"
+							@error="handleBindError"
+							:error="
+								formState.formError
+									? formState.formError.BankName
+									: ''
+							"
 						/>
 					</div>
 					<div class="form__col col--3">
@@ -811,8 +956,16 @@ const handleSetTabIndex = (e) => {
 							title="Chi nhánh"
 							name="BankBranch"
 							size="sm"
+							ref="bankBranchRef"
+							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.BankBranch"
 							@change="handleBindValue"
+							@error="handleBindError"
+							:error="
+								formState.formError
+									? formState.formError.BankBranch
+									: ''
+							"
 						/>
 					</div>
 				</div>
@@ -830,12 +983,14 @@ const handleSetTabIndex = (e) => {
 						type="sub"
 						content="Cất"
 						action="button"
+						tooltip="Ctrl + S"
 						@click.prevent="onStoreBtnClick"
 						:tabindex="19"
 					/>
 					<Button
 						content="Cất và thêm"
 						action="button"
+						tooltip="Ctrl + Shift + S"
 						@click="onStoreAndAddBtnClick"
 						:tabindex="20"
 					/>

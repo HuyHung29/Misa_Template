@@ -44,6 +44,7 @@ const props = defineProps({
 	error: {
 		type: String,
 	},
+	isShowError: Boolean,
 });
 
 /**
@@ -61,6 +62,7 @@ const inputVal = ref(null);
 const inputRef = ref(null);
 const errorRef = ref(null);
 const isShowTooltip = ref(false);
+const isError = ref(props.isShowError);
 
 /**
  * Hàm format date
@@ -103,8 +105,8 @@ const setFocusInput = () => {
  * Hàm xử lý validate
  * Author: LHH - 26/01/23
  */
-const handleValidate = async () => {
-	const message = await inputValidation(props.rules, date.value, props.name);
+const handleValidate = () => {
+	const message = inputValidation(props.rules, date.value, props.name);
 
 	emit("error", {
 		name: props.name,
@@ -170,6 +172,17 @@ watch(
 		} catch (error) {
 			console.log(error);
 		}
+	}
+);
+
+/**
+ * Xử lý hiển thị lỗi
+ * Author: LHH - 21/02/23
+ */
+watch(
+	() => props.isShowError,
+	() => {
+		isError.value = props.isShowError;
 	}
 );
 
@@ -240,11 +253,11 @@ onUpdated(() => {
 				</div>
 			</template>
 		</Datepicker>
-		<p v-if="error" class="date-picker__error" ref="errorRef">
-			{{ error || "Có lỗi" }}
+		<p v-show="error || isError" class="date-picker__error" ref="errorRef">
+			{{ error || "Thông tin không hợp lệ" }}
 		</p>
 		<p v-if="isShowTooltip" class="date-picker__error__tooltip">
-			{{ error || "Thông tin không đúng" }}
+			{{ error }}
 		</p>
 	</div>
 </template>

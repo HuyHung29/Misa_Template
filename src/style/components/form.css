@@ -154,7 +154,9 @@
 
 .form__header__button__close::after {
 	display: none;
-	content: "Đóng";
+	content: "Đóng (ESC)";
+
+	min-width: 80px;
 
 	position: absolute;
 	top: calc(100% + 5px);

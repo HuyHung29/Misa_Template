@@ -29,6 +29,7 @@ const state = reactive({
 		isOpen: false,
 		type: null,
 		employeeId: null,
+		formError: {},
 	},
 	sidebar: {
 		isOpen: true,
@@ -36,6 +37,7 @@ const state = reactive({
 	isLoading: false,
 	toasts: [],
 	pagination: {
+		keyword: "",
 		pageSize: 20,
 		pageNumber: 1,
 	},
@@ -52,18 +54,21 @@ const handleGetEmployees = async (filter) => {
 		if (filter) {
 			state.pagination = { ...state.pagination, ...filter };
 		} else {
-			state.pagination = {
-				pageSize: 20,
-				pageNumber: 1,
-			};
+			state.pagination.keyword = "";
 		}
 
-		await getFilterEmployee({ ...state.pagination });
+		await getFilterEmployee(
+			{ ...state.pagination },
+			state.pagination.keyword
+		);
+
 		state.employees = [...listEmployee.value];
 		state.totalPage = totalPage.value;
 		state.totalRecord = totalRecord.value;
 
-		state.isLoading = false;
+		setTimeout(() => {
+			state.isLoading = false;
+		}, 500);
 	} catch (error) {
 		console.log(error);
 		state.isLoading = false;
@@ -195,6 +200,17 @@ const handleCloseForm = () => {
 };
 
 /**
+ * Hàm xử lý bind lỗi cho input
+ * @param {Objec} errors Lỗi
+ * Author: LHH - 23/02/23
+ */
+const handleSetErrorForm = (errors) => {
+	state.form.formError = {
+		...errors,
+	};
+};
+
+/**
  * Hàm xử lý mở sidebar
  * Author: LHH - 02/01/23
  */
@@ -268,6 +284,7 @@ export default {
 	handleCloseModal,
 	handleOpenForm,
 	handleCloseForm,
+	handleSetErrorForm,
 	handleOpenSidebar,
 	handleCloseSidebar,
 	handleOpenLoading,

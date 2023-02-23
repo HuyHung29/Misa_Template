@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import employeeApi from "../api/employeeApi";
+import RESOURCES from "../constants/resource";
 
 /**
  * Các hàm dùng chung cho employee
@@ -36,9 +37,12 @@ const useEmployee = () => {
 		 * Lấy nhân viên theo filter
 		 * Author: LHH - 04/01/23
 		 */
-		const getFilterEmployee = async (filter) => {
+		const getFilterEmployee = async (filter, keyword = "") => {
 			try {
-				const response = await employeeApi.getEmpByFilter(filter);
+				const response = await employeeApi.getEmpByFilter(
+					filter,
+					keyword
+				);
 				const { TotalPage, TotalRecord, Data } = response;
 
 				totalPage.value = TotalPage;
@@ -86,26 +90,6 @@ const useEmployee = () => {
 		};
 
 		/**
-		 * Lấy nhân viên theo mã nhân viên
-		 * Author: LHH - 10/01/23
-		 */
-		const getEmployeeByEmpCode = async (employeeCode) => {
-			try {
-				const response = await employeeApi.getEmpByFilter({
-					recordCode: employeeCode,
-				});
-
-				console.log("RESPONSE", response);
-
-				employeeCheck.value = response.data === "" ? null : response;
-
-				statusCode.value = null;
-			} catch (error) {
-				throw error;
-			}
-		};
-
-		/**
 		 * Thêm nhân viên mới
 		 * Author: LHH - 04/01/23
 		 */
@@ -141,7 +125,8 @@ const useEmployee = () => {
 		};
 
 		/**
-		 * Xóa nhân viên
+		 * Hàm xử lý xóa nhân viên
+		 * @param {Array} ids: danh sách id nhân viên cần xóa
 		 * Author: LHH - 04/01/23
 		 */
 		const deleteEmployee = async (ids) => {
@@ -160,6 +145,24 @@ const useEmployee = () => {
 			}
 		};
 
+		/**
+		 * Hàm xuất excel
+		 * Author: LHH - 21/02/23
+		 */
+		const handleExportExcel = async () => {
+			try {
+				const response = await employeeApi.exportExcel();
+
+				const url = URL.createObjectURL(new Blob([response]));
+				const link = document.createElement("a");
+				link.href = url;
+				link.setAttribute("download", RESOURCES.FILE_NAME);
+				document.body.appendChild(link);
+				link.click();
+			} catch (error) {
+				console.log(error);
+			}
+		};
 		return {
 			listEmployee,
 			newEmployeeCode,
@@ -174,10 +177,10 @@ const useEmployee = () => {
 			getFilterEmployee,
 			getEmployeeById,
 			getNewEmployeeCode,
-			getEmployeeByEmpCode,
 			addNewEmployee,
 			updateNewEmployee,
 			deleteEmployee,
+			handleExportExcel,
 		};
 	} catch (error) {
 		throw error;

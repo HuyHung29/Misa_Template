@@ -111,6 +111,11 @@ const handleAgreeBtnClick = async () => {
 					@click="handleAgreeBtnClick"
 					v-if="state.modal.type !== RESOURCES.MODAL_TYPE.ERROR"
 					content="Có"
+					:type="
+						state.modal.type === RESOURCES.MODAL_TYPE.WARNING
+							? 'warning'
+							: 'primary'
+					"
 				/>
 				<Button
 					@click="handleCloseModal"

@@ -250,8 +250,8 @@ const setFocusInput = () => {
  * Hàm xử lý validate
  * Author: LHH - 26/01/23
  */
-const handleValidate = async () => {
-	const message = await inputValidation(props.rules, state.value, props.name);
+const handleValidate = () => {
+	const message = inputValidation(props.rules, state.value, props.name);
 
 	emit("error", {
 		name: props.name,
@@ -313,10 +313,10 @@ defineExpose({
 			</ul>
 		</div>
 		<p v-show="hasError && error" class="select__error" ref="errorRef">
-			{{ error || "Có lỗi" }}
+			{{ error }}
 		</p>
 		<p v-if="!state.isShow && isShowTooltip" class="select__error__tooltip">
-			{{ error || "Thông tin không đúng" }}
+			{{ error }}
 		</p>
 	</div>
 </template>

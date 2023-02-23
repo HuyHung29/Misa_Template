@@ -127,7 +127,12 @@ const handleClickNextBtn = () => {
 		<div class="data-table__action">
 			<Select
 				:listValue="RESOURCES.PAGINATION"
-				:defaultValue="RESOURCES.PAGINATION[0].title"
+				:defaultValue="
+					RESOURCES.PAGINATION.find(
+						(pageSize) =>
+							pageSize.value === state.pagination.pageSize
+					).title
+				"
 				:hasError="false"
 				type="dropdown"
 				name="emp-quantity"

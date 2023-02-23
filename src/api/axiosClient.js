@@ -1,5 +1,7 @@
 import axios from "axios";
 import queryString from "query-string";
+import RESOURCES from "../constants/resource";
+import store from "../store";
 
 /**
  * Config axios
@@ -28,7 +30,22 @@ axiosClient.interceptors.response.use(
 		return response;
 	},
 	(error) => {
-		throw error.response.data;
+		try {
+			const { status, data } = error.response;
+			const { handleShowToast, handleSetErrorForm, handleCloseLoading } =
+				store;
+			const { ERROR } = RESOURCES.NOTIFICATION_TYPE;
+
+			handleCloseLoading();
+			handleShowToast({ type: ERROR, content: data.UserMes });
+
+			handleSetErrorForm(data.MoreInfo);
+
+			// throw error.response.data;
+		} catch (err) {
+			console.log(store.state);
+			console.log("Looi axios:", err);
+		}
 	}
 );
 

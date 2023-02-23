@@ -23,9 +23,9 @@ const employeeApi = {
 	 * Lấy danh sách nhân viên theo bộ lọc và phân trang
 	 * Author: LHH - 04/01/23
 	 */
-	getEmpByFilter: (params) => {
+	getEmpByFilter: (params, keyword) => {
 		try {
-			return axiosClient.get(baseUrl + "filter", { params });
+			return axiosClient.post(baseUrl + "filter", keyword, { params });
 			// return axiosClient.get(baseUrl, { params });
 		} catch (error) {
 			console.log(error);

@@ -35,6 +35,8 @@
 }
 
 .btn {
+	position: relative;
+
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -80,6 +82,14 @@
 .btn.btn--sub {
 	background-color: #ffffff;
 	border: 1px solid #e6e6e6;
+}
+
+.btn.btn--warning {
+	background-color: var(--error-color);
+}
+
+.btn.btn--warning:hover {
+	background-color: var(--error-color-hover);
 }
 
 .btn.btn--left {
@@ -158,6 +168,43 @@
 	text-align: center;
 
 	transition: 0.25s linear;
+}
+
+.btn:hover .btn__tooltip {
+	display: block;
+}
+
+.btn__tooltip {
+	display: none;
+	position: absolute;
+
+	top: calc(100% + 10px);
+	left: 50%;
+
+	transform: translateX(-50%);
+
+	min-width: 80px;
+	max-width: max-content;
+	padding: 10px;
+
+	color: var(--text-white);
+
+	background-color: black;
+
+	border-radius: 5px;
+}
+
+.btn__tooltip::before {
+	display: block;
+	content: "";
+
+	position: absolute;
+	top: -20px;
+	left: 50%;
+	transform: translateX(-50%);
+
+	border: 10px solid;
+	border-color: transparent transparent black transparent;
 }
 
 /* Status of button */

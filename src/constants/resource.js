@@ -20,28 +20,33 @@ const RESOURCES = {
 		},
 		ERROR: {
 			NOT_EMPTY: (name) => `${name} không được để trống`,
-			UNIQUE: (name) => `${name} đã tồn tại`,
+			UNIQUE: (name) => `${name} đã tồn tại trong hệ thống`,
 			ADULT: "Nhân viên phải trên 18 tuổi",
 			HAS_FORMAT: (name) => `${name} chưa đúng định dạng`,
+			MAX_VALUE: (name, compareName) =>
+				`${name} không được vượt quá ${compareName}`,
+			MIN_VALUE: (name, compareName) =>
+				`${name} không được nhỏ hơn ${compareName}`,
+			MAX_LENGTH: (name, lenght) =>
+				`${name} không được vượt quá ${lenght} ký tự`,
 		},
-	},
-	FORM_FIELD: {
-		EmployeeCode: "Mã nhân viên",
-		FullName: "Tên nhân viên",
-		DepartmentId: "Đơn vị",
-		PhoneNumber: "Số điện thoại",
-		Email: "Email",
-		DateOfBirth: "Ngày sinh",
-		IdentityDate: "Ngày cấp",
 	},
 	INPUT_TITLE: {
 		EmployeeCode: "Mã nhân viên",
 		FullName: "Tên nhân viên",
 		DepartmentId: "Đơn vị",
+		Position: "Chức danh",
 		PhoneNumber: "Số điện thoại",
 		Email: "Email",
 		DateOfBirth: "Ngày sinh",
 		IdentityDate: "Ngày cấp",
+		IdentityNumber: "Số chứng minh nhân dân",
+		IdentityPlace: "Nơi cấp",
+		BankName: "Tên ngân hàng",
+		BankBranch: "Chi nhánh",
+		LandlineNumber: "Điện thoại cố định",
+		Address: "Địa chỉ",
+		BankAccount: "Tài khoản ngân hàng",
 	},
 	INPUT_FIELD: {
 		EMPLOYEE_CODE: "EmployeeCode",
@@ -53,10 +58,28 @@ const RESOURCES = {
 		IDENTITYDATE: "IdentityDate",
 	},
 	FORM_RULES: {
+		NOT_EMPTY: () => ({
+			NOT_EMPTY: "",
+		}),
+		HAS_FORMAT: (regex) => ({ HAS_FORMAT: regex }),
+		UNIQUE: (compareValue) => ({ UNIQUE: compareValue }),
+		ADULT: () => ({ ADULT: "" }),
+		MAX_VALUE: (compareValue, compareName) => ({
+			MAX_VALUE: { compareName, compareValue },
+		}),
+		MIN_VALUE: (compareValue, compareName) => ({
+			MIN_VALUE: { compareName, compareValue },
+		}),
+		MAX_LENGTH: (length) => ({ MAX_LENGTH: length }),
+	},
+	FORM_RULES_NAME: {
 		NOT_EMPTY: "NOT_EMPTY",
 		HAS_FORMAT: "HAS_FORMAT",
 		UNIQUE: "UNIQUE",
 		ADULT: "ADULT",
+		MAX_VALUE: "MAX_VALUE",
+		MIN_VALUE: "MIN_VALUE",
+		MAX_LENGTH: "MAX_LENGTH",
 	},
 	FORM_MODE: {
 		ADD: "ADD",
@@ -75,9 +98,9 @@ const RESOURCES = {
 	},
 	MODAL_MESSAGE: {
 		INFO: "Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
-		WARNING: (id) => `Bạn có chắc chắn muốn xóa nhân viên \<${id}\> không?`,
+		WARNING: (id) => `Bạn có thực sự muốn xóa Nhân viên \<${id}\> không?`,
 		WARNING_MULTIPLE:
-			"Bạn có chắc chắn muốn xóa các nhân viên được chọn không?",
+			"Bạn có thực sự muốn xóa những nhân viên được chọn không?",
 	},
 	PAGINATION: [
 		{
@@ -103,9 +126,11 @@ const RESOURCES = {
 		ENTER: 13,
 	},
 	REGEX: {
-		EMPLOYEE_CODE: /^NV-[0-9]{1,}$/,
+		EMPLOYEE_CODE: /^NV-[0-9]{1,17}$/,
 		EMAIL: /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
 		PHONE_NUMBER: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
+		LANDLINE_NUMBER: /^[0-9]{10,12}$/,
+		IDENTITY_NUMBER: /^[0-9]{12}$/,
 	},
 	GENDER: [
 		{
@@ -121,6 +146,7 @@ const RESOURCES = {
 			title: "Khác",
 		},
 	],
+	FILE_NAME: "Danh_sach_nhan_vien.xlsx",
 };
 
 export default RESOURCES;

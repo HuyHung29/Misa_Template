@@ -2,13 +2,11 @@
 import Loading from "../components/MLoading.vue";
 import EmployeeItem from "./EmployeeItem.vue";
 import CheckBox from "../components/customs/MCheckBox.vue";
-import Select from "../components/customs/MSelect.vue";
 import Button from "../components/MButton.vue";
 import Pagination from "../components/MPagination.vue";
 import RESOURCES from "../constants/resource";
-import { reactive, inject, onBeforeMount, computed } from "vue";
+import { reactive, inject, onBeforeMount, computed, ref, onMounted } from "vue";
 import useEmployee from "../composable/employee";
-import employeeApi from "../api/employeeApi";
 
 /**
  * Định nghĩa các state
@@ -16,7 +14,7 @@ import employeeApi from "../api/employeeApi";
  */
 const empState = reactive({
 	listAction: {
-		isShow: false,
+		isShow: true,
 		employeeId: "",
 		employeeCode: "",
 		style: {
@@ -24,8 +22,15 @@ const empState = reactive({
 			right: "",
 		},
 	},
+	listActionHeight: 0,
 	checkList: [],
 });
+
+/**
+ * Định nghĩa các ref của component
+ * Author: LHH - 04/01/23
+ */
+const listActionRef = ref(null);
 
 /**
  * Sử dụng store
@@ -51,7 +56,7 @@ const {
 const isCheckAll = computed(() => {
 	let isCheck = true;
 
-	if (!(empState.checkList.length !== 0)) {
+	if (empState.checkList.length === 0) {
 		return false;
 	}
 
@@ -75,10 +80,20 @@ onBeforeMount(() => {
 });
 
 /**
+ * Xử lý lấy height của list action
+ * Author: LHH - 04/01/23
+ */
+onMounted(() => {
+	empState.listActionHeight = listActionRef.value.offsetHeight;
+	empState.listAction.isShow = false;
+});
+
+/**
  * Khai báo state của component
  * Author: LHH - 04/01/23
  */
-const { statusCode, deleteIds, deleteEmployee } = useEmployee();
+const { statusCode, deleteIds, deleteEmployee, handleExportExcel } =
+	useEmployee();
 
 /**
  * Hàm call API
@@ -98,17 +113,33 @@ const handleGetAllEmployee = () => {
  */
 const handleDisplayListAction = (data) => {
 	try {
+		console.log(
+			"WIndow height: ",
+			window.innerHeight,
+			window.outerHeight,
+			"Top: ",
+			data.top,
+			"Element: ",
+			empState.listActionHeight,
+			data.top + data.height + empState.listActionHeight <
+				window.innerHeight
+		);
 		if (empState.listAction.employeeId === data.employeeId) {
 			empState.listAction = {
 				isShow: false,
 			};
 		} else {
+			const isOutWindow =
+				data.top + data.height + empState.listActionHeight <
+				window.innerHeight;
 			empState.listAction = {
 				isShow: true,
 				employeeId: data.employeeId,
 				employeeCode: data.employeeCode,
 				style: {
-					top: data.top + data.height + "px",
+					top: isOutWindow
+						? data.top + data.height + "px"
+						: data.top - empState.listActionHeight + "px",
 					right: data.right - data.width + "px",
 				},
 			};
@@ -292,16 +323,14 @@ const handleOpenAddForm = () => {
  */
 const handleExportData = async () => {
 	try {
-		var file = await employeeApi.exportExcel();
+		handleOpenLoading();
 
-		const url = URL.createObjectURL(new Blob([file]));
-		const link = document.createElement("a");
-		link.href = url;
-		link.setAttribute("download", "Danh_sach_nhan_vien.xlsx");
-		document.body.appendChild(link);
-		link.click();
+		await handleExportExcel();
+
+		handleCloseLoading();
 	} catch (error) {
 		console.log(error);
+		handleCloseLoading();
 	}
 };
 </script>
@@ -317,17 +346,28 @@ const handleExportData = async () => {
 			<div class="table__function">
 				<div
 					class="table__function_multiple-task"
-					v-if="empState.checkList.length >= 2"
+					v-show="empState.checkList.length >= 1"
 				>
-					<p class="selected-item">
-						{{ empState.checkList.length }} nhân viên được chọn
+					<p class="table__function_multiple-task__text">
+						Đã chọn {{ empState.checkList.length }}
 					</p>
 					<p
+						class="table__function_multiple-task__text warning"
+						@click="empState.checkList = []"
+					>
+						Bỏ chọn
+					</p>
+
+					<button
 						class="table__function_multiple-task__delete"
 						@click="handleMultipleDelete"
+						:disabled="empState.checkList.length < 1"
 					>
+						<p class="icon">
+							<i></i>
+						</p>
 						Xóa tất cả
-					</p>
+					</button>
 				</div>
 				<div class="textfield textfield--sm">
 					<div class="textfield__input__wrap">
@@ -421,8 +461,9 @@ const handleExportData = async () => {
 				<!-- Action list -->
 				<ul
 					class="table__action__list"
-					v-if="empState.listAction.isShow"
+					v-show="empState.listAction.isShow"
 					:style="empState.listAction.style"
+					ref="listActionRef"
 				>
 					<li
 						class="table__action__item"

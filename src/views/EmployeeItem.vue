@@ -1,7 +1,7 @@
 <script setup>
 import CheckBox from "../components/customs/MCheckBox.vue";
 import { formatDate, formatMoney, formatGender } from "../util/common";
-import { inject } from "vue";
+import { inject, ref } from "vue";
 import RESOURCES from "../constants/resource";
 
 /**
@@ -26,6 +26,12 @@ const props = defineProps({
 });
 
 /**
+ * Định nghĩa các rè của component
+ * Author: LHH - 04/01/23
+ */
+const moreBtnRef = ref(null);
+
+/**
  * Định nghĩa các emiit
  * Author: LHH - 04/01/23
  */
@@ -35,10 +41,9 @@ const emit = defineEmits(["click", "check"]);
  * Xử lý khi ấn nút option
  * Author: LHH - 04/01/23
  */
-const onOptionBtnClick = (e) => {
+const onOptionBtnClick = () => {
 	try {
-		const target = e.target;
-		const position = target.getBoundingClientRect();
+		const position = moreBtnRef.value.getBoundingClientRect();
 		emit("click", {
 			employeeId: props.employee.EmployeeId,
 			employeeCode: props.employee.EmployeeCode,
@@ -126,7 +131,11 @@ const handleCheckBox = (data) => {
 				<p class="table__action__update" @click="onUpdateBtnClick">
 					Sửa
 				</p>
-				<button class="table__action__more" @click="onOptionBtnClick">
+				<button
+					class="table__action__more"
+					@click="onOptionBtnClick"
+					ref="moreBtnRef"
+				>
 					<i class="table__action__icon"></i>
 				</button>
 			</button>

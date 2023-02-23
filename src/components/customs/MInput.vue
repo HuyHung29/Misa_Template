@@ -18,9 +18,6 @@ const props = defineProps({
 		type: [String, Number],
 		default: "",
 	},
-	originValue: {
-		type: [String, Number],
-	},
 	rules: {
 		type: Array,
 		default: [],
@@ -53,6 +50,7 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
+	isShowError: Boolean,
 });
 
 /**
@@ -69,6 +67,7 @@ const inputState = ref(props.value);
 const inputRef = ref(null);
 const errorRef = ref("null");
 const isShowTooltip = ref(false);
+const isError = ref(props.isShowError);
 
 /**
  * Hàm set focus cho input
@@ -88,12 +87,11 @@ const setFocusInput = () => {
  * Hàm xử lý validate
  * Author: LHH - 26/01/23
  */
-const handleValidate = async () => {
-	const message = await inputValidation(
+const handleValidate = () => {
+	const message = inputValidation(
 		props.rules,
-		inputState.value || props.value,
-		props.name,
-		props.originValue
+		inputState.value.trim() || props.value.trim(),
+		props.name
 	);
 
 	emit("error", {
@@ -142,6 +140,17 @@ watch(
 );
 
 /**
+ * Xử lý hiển thị lỗi
+ * Author: LHH - 21/02/23
+ */
+watch(
+	() => props.isShowError,
+	() => {
+		isError.value = props.isShowError;
+	}
+);
+
+/**
  * Xử lý hiên tooltip
  * Author: LHH - 04/01/23
  */
@@ -181,12 +190,12 @@ onUpdated(() => {
 				v-model="inputState"
 			/>
 		</div>
-		<p v-if="error" class="textfield__error" ref="errorRef">
-			{{ error || "Thông tin không đúng" }}
+		<p v-show="error || isError" class="textfield__error" ref="errorRef">
+			{{ error || "Thông tin không hợp lệ" }}
 		</p>
 
 		<p v-if="isShowTooltip" class="textfield__error__tooltip">
-			{{ error || "Thông tin không đúng" }}
+			{{ error }}
 		</p>
 	</div>
 </template>

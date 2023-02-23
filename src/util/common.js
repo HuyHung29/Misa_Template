@@ -2,7 +2,9 @@ import useEmployee from "../composable/employee";
 import ENUMS from "../constants/enum";
 import RESOURCES from "../constants/resource";
 /**
+ * @param {Date} dateTime Ngày tháng còn format
  * Hàm định dạng ngày tháng
+ * @returns Ngày tháng dạng DD/MM/YYYY
  * Author: LHH - 02/01/23
  */
 export const formatDate = (dateTime) => {
@@ -26,6 +28,8 @@ export const formatDate = (dateTime) => {
 
 /**
  * Hàm định dạng tiền tệ
+ * @param {String} money Tiền cần định dạng
+ * @returns Tiền dã được định dạng
  * Author: LHH - 02/01/23
  */
 export const formatMoney = (money) => {
@@ -41,7 +45,9 @@ export const formatMoney = (money) => {
 };
 
 /**
- * Hàm convert ngày tháng
+ * Hàm chuyển đổi chuỗi thành ngày tháng
+ * @param {String} data Ngày tháng cần convert
+ * @returns Ngày tháng tương ứng
  * Author: LHH - 06/01/23
  */
 export const convertStringToDate = (data) => {
@@ -61,7 +67,9 @@ export const convertStringToDate = (data) => {
 };
 
 /**
- * Hàm convert ngày tháng
+ *
+ * @param {Number} gender Giới tính
+ * @returns Tên của giới tính tương ứng
  * Author: LHH - 06/01/23
  */
 export const formatGender = (gender) => {
@@ -79,70 +87,41 @@ export const formatGender = (gender) => {
 };
 
 /**
- * Hàm validate input
- * Author: LHH - 26/01/23
+ *
+ * @param {Array} rules Các rule validate
+ * @param {String || Date} value Giá trị càn kiển tra
+ * @param {String} name Tên của input cần validate
+ * @returns Lỗi tương ứng với các rule
+ *  Author: LHH - 26/01/23
  */
-export const inputValidation = async (rules, value, name, checkValue) => {
-	const { NOT_EMPTY, UNIQUE, ADULT, HAS_FORMAT } = RESOURCES.FORM_RULES;
+export const inputValidation = (rules, value, name) => {
+	const { NOT_EMPTY, ADULT, HAS_FORMAT, MAX_VALUE, MIN_VALUE, MAX_LENGTH } =
+		RESOURCES.FORM_RULES_NAME;
 	const { ERROR } = RESOURCES.FORM_MESSAGE;
-	const { EMPLOYEE_CODE, EMAIL, PHONE_NUMBER } = RESOURCES.INPUT_FIELD;
 	const { INPUT_TITLE } = RESOURCES;
-	const { REGEX } = RESOURCES;
-
-	console.log("Value: ", value);
 
 	for (const rule of rules) {
-		switch (rule) {
+		const key = Object.keys(rule)[0];
+		const objecValue = rule[key];
+
+		const compareValue = objecValue.compareValue
+			? objecValue.compareValue
+			: objecValue;
+		const compareName = objecValue.compareName
+			? objecValue.compareName
+			: "";
+
+		switch (key) {
 			case NOT_EMPTY: {
 				if (!value) {
-					return ERROR[rule](INPUT_TITLE[name]);
-				}
-				break;
-			}
-			case UNIQUE: {
-				if (value) {
-					const { employeeCheck, getEmployeeByEmpCode } =
-						useEmployee();
-					await getEmployeeByEmpCode(value);
-
-					if (
-						employeeCheck.value &&
-						employeeCheck.value.EmployeeCode !== checkValue
-					) {
-						return ERROR[rule](INPUT_TITLE[name]);
-					}
+					return ERROR[key](INPUT_TITLE[name]);
 				}
 				break;
 			}
 			case HAS_FORMAT: {
 				if (value) {
-					switch (name) {
-						case EMPLOYEE_CODE: {
-							if (value) {
-								if (!REGEX.EMPLOYEE_CODE.test(value)) {
-									return ERROR[rule](INPUT_TITLE[name]);
-								}
-							}
-							break;
-						}
-						case PHONE_NUMBER: {
-							if (value) {
-								if (!REGEX.PHONE_NUMBER.test(value)) {
-									return ERROR[rule](INPUT_TITLE[name]);
-								}
-							}
-							break;
-						}
-						case EMAIL: {
-							if (value) {
-								if (!REGEX.EMAIL.test(value)) {
-									return ERROR[rule](INPUT_TITLE[name]);
-								}
-							}
-							break;
-						}
-						default:
-							return null;
+					if (!compareValue.test(value)) {
+						return ERROR[key](INPUT_TITLE[name]);
 					}
 				}
 				break;
@@ -153,7 +132,50 @@ export const inputValidation = async (rules, value, name, checkValue) => {
 					const date = new Date(value).getTime();
 					const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
 					if (age < 18) {
-						return ERROR[rule];
+						return ERROR[key];
+					}
+				}
+				break;
+			}
+			case MAX_VALUE: {
+				if (value) {
+					const rawValue =
+						typeof value === "object" ? new Date(value) : value;
+					const rawCompareValue =
+						typeof compareValue === "object"
+							? new Date(compareValue)
+							: compareValue;
+					if (rawValue > rawCompareValue) {
+						return ERROR[key](
+							INPUT_TITLE[name],
+							INPUT_TITLE[compareName]
+						);
+					}
+				}
+				break;
+			}
+			case MIN_VALUE: {
+				if (value) {
+					const rawValue =
+						typeof value === "object" ? new Date(value) : value;
+					const rawCompareValue =
+						typeof compareValue === "object"
+							? new Date(compareValue)
+							: compareValue;
+
+					if (rawValue < rawCompareValue) {
+						return ERROR[key](
+							INPUT_TITLE[name],
+							INPUT_TITLE[compareName]
+						);
+					}
+				}
+				break;
+			}
+			case MAX_LENGTH: {
+				if (value) {
+					if (value.length > compareValue) {
+						return ERROR[key](INPUT_TITLE[name], compareValue);
 					}
 				}
 				break;
@@ -171,10 +193,18 @@ export const inputValidation = async (rules, value, name, checkValue) => {
  */
 export const isOverflow = (element) => {
 	if (element) {
-		return (
-			element.scrollHeight > element.clientHeight ||
-			element.scrollWidth > element.clientWidth
-		);
+		var curOverflow = element.style.overflow;
+
+		if (!curOverflow || curOverflow === "visible")
+			element.style.overflow = "hidden";
+
+		var isOverflowing =
+			element.clientWidth < element.scrollWidth ||
+			element.clientHeight < element.scrollHeight;
+
+		element.style.overflow = curOverflow;
+
+		return isOverflowing;
 	}
 
 	return false;
