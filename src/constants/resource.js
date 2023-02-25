@@ -11,12 +11,13 @@ const RESOURCES = {
 		INFO: "Thông tin",
 		WARNING: "Cảnh báo",
 	},
-	FORM_MESSAGE: {
+	NOTIFICATION_MESSAGE: {
 		SUCCESS: {
 			ADD: "Thêm mới nhân viên thành công!",
 			EDIT: "Sửa nhân viên thành công!",
 			DELETE: "Xóa nhân viên thành công",
 			DUPLICATE: "Nhân bản nhân viên thành công",
+			EXPORT: "Xuất nhân viên thành công",
 		},
 		ERROR: {
 			NOT_EMPTY: (name) => `${name} không được để trống`,
@@ -29,6 +30,7 @@ const RESOURCES = {
 				`${name} không được nhỏ hơn ${compareName}`,
 			MAX_LENGTH: (name, lenght) =>
 				`${name} không được vượt quá ${lenght} ký tự`,
+			DEFAULT: "Vui lòng liên hệ MISA để được trợ giúp",
 		},
 	},
 	INPUT_TITLE: {
@@ -124,6 +126,7 @@ const RESOURCES = {
 		ARROW_DOWN: 38,
 		ARROW_UP: 40,
 		ENTER: 13,
+		TAB: 9,
 	},
 	REGEX: {
 		EMPLOYEE_CODE: /^NV-[0-9]{1,17}$/,
@@ -131,6 +134,7 @@ const RESOURCES = {
 		PHONE_NUMBER: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
 		LANDLINE_NUMBER: /^[0-9]{10,12}$/,
 		IDENTITY_NUMBER: /^[0-9]{12}$/,
+		BANK_ACCOUNT: /^[0-9]{12,15}$/,
 	},
 	GENDER: [
 		{

@@ -109,6 +109,10 @@
 	height: 5px;
 }
 
+.select__icon:focus i {
+	transform: rotate(180deg);
+}
+
 .select__input__wrap:hover ~ .select__error__tooltip {
 	display: block;
 }

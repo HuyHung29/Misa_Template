@@ -123,36 +123,11 @@ watch(
  */
 onUpdated(() => {
 	if (isOverflow(errorRef.value)) {
-		console.log("quanoi dngs");
 		isShowTooltip.value = true;
 	} else {
 		isShowTooltip.value = false;
 	}
 });
-
-/**
- * Xử lý mở select
- * Author: LHH - 04/01/23
- */
-const handleOpenList = () => {
-	try {
-		state.isShow = true;
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-/**
- * Xử lý đóng select
- * Author: LHH - 04/01/23
- */
-const handleCloseList = () => {
-	try {
-		state.isShow = false;
-	} catch (error) {
-		console.log(error);
-	}
-};
 
 /**
  * Xử lý đóng list khi click ra ngoài
@@ -196,14 +171,15 @@ const handleInput = (e) => {
  */
 
 const handleChangeItemSelected = (e) => {
+	const { ARROW_DOWN, ARROW_UP, ENTER, TAB } = RESOURCES.KEYCODE;
 	switch (e.keyCode) {
-		case RESOURCES.KEYCODE.ARROW_DOWN:
+		case ARROW_DOWN:
 			state.isShow = true;
 			if (state.indexItem > 0) {
 				state.indexItem--;
 			}
 			break;
-		case RESOURCES.KEYCODE.ARROW_UP:
+		case ARROW_UP:
 			state.isShow = true;
 			const length = state.listSearch.length;
 			if (state.indexItem < length - 1) {
@@ -212,7 +188,7 @@ const handleChangeItemSelected = (e) => {
 				state.indexItem = 0;
 			}
 			break;
-		case RESOURCES.KEYCODE.ENTER:
+		case ENTER:
 			state.isShow = false;
 			state.value = state.listSearch[state.indexItem].title;
 
@@ -226,7 +202,9 @@ const handleChangeItemSelected = (e) => {
 			});
 
 			break;
-
+		case TAB:
+			state.isShow = false;
+			break;
 		default:
 			break;
 	}
@@ -244,6 +222,14 @@ const setFocusInput = () => {
 	} catch (error) {
 		console.log(error);
 	}
+};
+
+/**
+ * Xử lý hiện list khi focus vào input
+ * Author: LHH - 25/02/23
+ */
+const handleFocus = () => {
+	state.isShow = true;
 };
 
 /**
@@ -291,10 +277,10 @@ defineExpose({
 				class="select__input"
 				:readonly="type === 'dropdown'"
 				v-model="state.value"
-				@click="state.isShow = !state.isShow"
 				:tabindex="tabindex"
 				@input="handleInput"
 				@keydown="handleChangeItemSelected"
+				@focus="handleFocus"
 				ref="inputRef"
 			/>
 			<ul class="select__list" v-show="state.isShow" :style="style">

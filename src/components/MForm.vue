@@ -146,8 +146,14 @@ const { NOT_EMPTY, ADULT, HAS_FORMAT, MIN_VALUE, MAX_LENGTH } =
  * Các regex cho input
  * Author: LHH - 27/01/23
  */
-const { EMAIL, EMPLOYEE_CODE, PHONE_NUMBER, IDENTITY_NUMBER, LANDLINE_NUMBER } =
-	RESOURCES.REGEX;
+const {
+	EMAIL,
+	EMPLOYEE_CODE,
+	PHONE_NUMBER,
+	IDENTITY_NUMBER,
+	LANDLINE_NUMBER,
+	BANK_ACCOUNT,
+} = RESOURCES.REGEX;
 
 /**
  * Các form mode
@@ -165,146 +171,23 @@ const { ERROR, SUCCESS } = RESOURCES.NOTIFICATION_TYPE;
  * Khai báo ref cho các input
  * Author: LHH - 27/01/23
  */
-const employeeCodeRef = ref(null);
-const fullNameRef = ref(null);
-const departmentIdRef = ref(null);
-const positionRef = ref(null);
-const dateOfBirthRef = ref(null);
-const identityNumberRef = ref(null);
-const identityDateRef = ref(null);
-const identityPlaceRef = ref(null);
-const addressRef = ref(null);
-const phoneNumberRef = ref(null);
-const landlineNumberRef = ref(null);
-const emailRef = ref(null);
-const bankAccountRef = ref(null);
-const bankNameRef = ref(null);
-const bankBranchRef = ref(null);
-
-/**
- * Tính toán tên form
- * Author: LHH - 04/01/23
- */
-const formName = computed(() => {
-	try {
-		if (state.form.type === ADD) {
-			return "Thêm nhân viên";
-		}
-		if (state.form.type === EDIT) {
-			return "Sửa nhân viên";
-		}
-
-		return "Nhân bản nhân viên";
-	} catch (error) {
-		console.log(error);
-	}
-});
-
-/**
- * Xử lý call API
- * Author: LHH - 04/01/23
- */
-const handleCallApi = async () => {
-	try {
-		if (state.form.type) {
-			await getAllDepartment();
-
-			departmentList.value = [...departments.value];
-
-			if (state.form.type === ADD) {
-				await handleGetNewEmployeeCode();
-			}
-
-			if (state.form.type === EDIT) {
-				await handleGetEditEmployee(state.form.employeeId);
-			}
-
-			if (state.form.type === DUPLICATE) {
-				await handleGetEditEmployee(state.form.employeeId);
-				await handleGetNewEmployeeCode();
-			}
-
-			originValue.value = { ...formState.formValue };
-		}
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-/**
- * Hook xử lý các công việc trước khi render
- * Author: LHH - 27/01/23
- */
-onBeforeMount(() => {
-	try {
-		handleCallApi();
-	} catch (error) {
-		console.log(error);
-	}
-});
-
-/**
- * Hàm xử lý phím tắt trong form
- * @param {event} e Sự kiện html
- */
-function docKeyDown(e) {
-	console.log(e);
-	// this would test for whichever key is 40 (down arrow) and the ctrl key at the same time
-	if (e.ctrlKey && e.key === "s") {
-		e.preventDefault();
-		e.stopPropagation();
-
-		// call your function to do the thing
-		onStoreBtnClick();
-
-		console.log("save");
-	}
-
-	if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
-		e.preventDefault();
-		e.stopPropagation();
-
-		// call your function to do the thing
-		onStoreAndAddBtnClick();
-
-		console.log("save and add");
-	}
-
-	if (e.code === "Escape") {
-		onCloseBtnClick();
-	}
-}
-
-/**
- * Xử lý focus vào mã nhân viên và các phím tắt ở form
- * Author: LHH - 27/01/23
- */
-onMounted(() => {
-	if (employeeCodeRef.value) {
-		employeeCodeRef.value.setFocusInput();
-	}
-
-	document.addEventListener("keydown", docKeyDown, false);
-});
-
-/**
- * Hàm xử lý remove event
- * Author: LHH - 23/03/23
- */
-onUnmounted(() => {
-	document.removeEventListener("keydown", docKeyDown);
-});
-
-/**
- * Hàm bindError do BE trả về
- * Author: LHH - 23/03/23
- */
-watch(
-	() => state.form.formError,
-	() => {
-		formState.formError = { ...state.form.formError };
-	}
-);
+const inputRefs = ref([
+	{ EmployeeCode: ref(null) },
+	{ FullName: ref(null) },
+	{ DepartmentId: ref(null) },
+	{ Position: ref(null) },
+	{ DateOfBirth: ref(null) },
+	{ IdentityNumber: ref(null) },
+	{ IdentityDate: ref(null) },
+	{ IdentityPlace: ref(null) },
+	{ Address: ref(null) },
+	{ PhoneNumber: ref(null) },
+	{ LandlineNumber: ref(null) },
+	{ Email: ref(null) },
+	{ BankAccount: ref(null) },
+	{ BankName: ref(null) },
+	{ BankBranch: ref(null) },
+]);
 
 /**
  * Hàm xử lý lấy nhân viên sửa
@@ -316,8 +199,7 @@ const handleGetEditEmployee = async (id) => {
 
 		await getEmployeeById(id);
 
-		const { EmployeeCode, DepartmentId, DateOfBirth, IdentityDate } =
-			editEmployee.value;
+		const { EmployeeCode, DepartmentId } = editEmployee.value;
 
 		formState.formValue = {
 			...editEmployee.value,
@@ -375,132 +257,34 @@ const handleGetNewEmployeeCode = async () => {
 		}, 1000);
 	} catch (error) {
 		console.log(error);
-		// handleShowErrorMessage(error.UserMes);
 	}
 };
 
 /**
- * Xử lý submit form
+ * Xử lý call API
  * Author: LHH - 04/01/23
  */
-const handleSubmit = async () => {
+const handleCallApi = async () => {
 	try {
-		handleValidateForm();
+		if (state.form.type) {
+			await getAllDepartment();
 
-		let isError = false;
+			departmentList.value = [...departments.value];
 
-		for (const key in formState.formError) {
-			if (Object.hasOwnProperty.call(formState.formError, key)) {
-				const element = formState.formError[key];
-
-				if (element) {
-					handleOpenModal(
-						RESOURCES.MODAL_TITLE.ERROR,
-						element,
-						RESOURCES.MODAL_TYPE.ERROR
-					);
-					isError = true;
-					return;
-				}
-			}
-		}
-
-		if (!isError) {
-			const data = {
-				...formState.formValue,
-			};
-
-			if (state.form.type === ADD || state.form.type === DUPLICATE) {
-				await addNewEmployee(data);
+			if (state.form.type === ADD) {
+				await handleGetNewEmployeeCode();
 			}
 
 			if (state.form.type === EDIT) {
-				await updateNewEmployee(state.form.employeeId, data);
+				await handleGetEditEmployee(state.form.employeeId);
 			}
-		}
-	} catch (error) {
-		throw error;
-	}
-};
 
-/**
- * Xử lý hiển thị thông báo thành công
- * Author: LHH - 10/01/23
- */
-const handleShowSuccessMessage = () => {
-	handleShowToast({
-		type: SUCCESS,
-		content: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
-	});
-};
+			if (state.form.type === DUPLICATE) {
+				await handleGetEditEmployee(state.form.employeeId);
+				await handleGetNewEmployeeCode();
+			}
 
-/**
- * Xử lý hiển thị thông báo thành công
- * Author: LHH - 10/01/23
- */
-const handleShowErrorMessage = (error) => {
-	handleCloseLoading();
-	handleShowToast({
-		type: ERROR,
-		content: error,
-	});
-};
-
-/**
- * Xử lý khi gửi dữ liệu
- * Author: LHH - 31/01/23
- */
-const handleAddEditEmployee = async () => {
-	try {
-		handleOpenLoading();
-
-		await handleSubmit();
-
-		if (statusCode.value) {
-			handleUpdateEmployeeList(
-				state.form.type,
-				state.form.employeeId,
-				newEmployee.value
-			);
-
-			handleShowSuccessMessage();
-			handleCloseModal();
-
-			handleCloseLoading();
-
-			return true;
-		}
-
-		handleCloseLoading();
-
-		return false;
-	} catch (error) {
-		// console.log(error);
-
-		// const { UserMes, MoreInfo } = error;
-
-		// for (const key in MoreInfo) {
-		// 	if (Object.hasOwnProperty.call(MoreInfo, key)) {
-		// 		const value = MoreInfo[key];
-
-		// 		formState.formError[key] = value;
-		// 	}
-		// }
-
-		// handleShowErrorMessage(UserMes);
-
-		return false;
-	}
-};
-
-/**
- * Xử lý ấn vào nút cất
- * Author: LHH - 08/01/23
- */
-const onStoreBtnClick = async () => {
-	try {
-		if (await handleAddEditEmployee()) {
-			handleCloseForm();
+			originValue.value = { ...formState.formValue };
 		}
 	} catch (error) {
 		console.log(error);
@@ -508,44 +292,98 @@ const onStoreBtnClick = async () => {
 };
 
 /**
- * Xử lý ấn vào nút cất và thêm
- * Author: LHH - 08/01/23
+ * Hook xử lý các công việc trước khi render
+ * Author: LHH - 27/01/23
  */
-const onStoreAndAddBtnClick = async () => {
+onBeforeMount(() => {
 	try {
-		if (await handleAddEditEmployee()) {
-			handleOpenForm(RESOURCES.FORM_MODE.ADD);
-			await handleGetNewEmployeeCode();
-		}
+		handleCallApi();
 	} catch (error) {
 		console.log(error);
 	}
-};
+});
 
 /**
- * Xử lý ấn vào nút đóng form
+ * Hàm xử lý phím tắt trong form
+ * @param {event} e Sự kiện html
+ */
+function docKeyDown(e) {
+	if (e.ctrlKey && e.key === "s") {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// call your function to do the thing
+		onStoreBtnClick();
+
+		console.log("save");
+	}
+
+	if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
+		e.preventDefault();
+		e.stopPropagation();
+
+		// call your function to do the thing
+		onStoreAndAddBtnClick();
+
+		console.log("save and add");
+	}
+
+	if (e.code === "Escape") {
+		if (!state.modal.isOpen) {
+			onCloseBtnClick();
+		}
+	}
+}
+
+/**
+ * Xử lý focus vào mã nhân viên và các phím tắt ở form
+ * Author: LHH - 27/01/23
+ */
+onMounted(() => {
+	if (inputRefs.value[0].EmployeeCode) {
+		inputRefs.value[0].EmployeeCode.setFocusInput();
+	}
+
+	document.addEventListener("keydown", docKeyDown, false);
+});
+
+/**
+ * Hàm xử lý remove event
+ * Author: LHH - 23/03/23
+ */
+onUnmounted(() => {
+	document.removeEventListener("keydown", docKeyDown);
+});
+
+/**
+ * Hàm bindError do BE trả về
+ * Author: LHH - 23/03/23
+ */
+watch(
+	() => state.form.formError,
+	() => {
+		formState.formError = { ...state.form.formError };
+	}
+);
+
+/**
+ * Tính toán tên form
  * Author: LHH - 04/01/23
  */
-const onCloseBtnClick = () => {
+const formName = computed(() => {
 	try {
-		if (
-			JSON.stringify(formState.formValue) ===
-			JSON.stringify(originValue.value)
-		) {
-			handleCloseForm();
-		} else {
-			handleOpenModal(
-				RESOURCES.MODAL_TITLE.INFO,
-				RESOURCES.MODAL_MESSAGE.INFO,
-				RESOURCES.MODAL_TYPE.INFO,
-				state.form.employeeId,
-				onStoreBtnClick
-			);
+		if (state.form.type === ADD) {
+			return "Thêm nhân viên";
 		}
+		if (state.form.type === EDIT) {
+			return "Sửa nhân viên";
+		}
+
+		return "Nhân bản nhân viên";
 	} catch (error) {
 		console.log(error);
 	}
-};
+});
 
 /**
  * Xử lý binding dữ liệu cho form
@@ -572,40 +410,205 @@ const handleBindError = ({ name, message }) => {
 	}
 };
 
+const handleFocusInputError = () => {
+	for (const key in formState.formError) {
+		if (Object.hasOwnProperty.call(formState.formError, key)) {
+			const element = formState.formError[key];
+			if (element) {
+				const itemErrorFirst = inputRefs.value.find(
+					(item) => Object.keys(item)[0] === key
+				);
+				itemErrorFirst[key]?.setFocusInput();
+
+				return;
+			}
+		}
+	}
+};
+
 /**
  * Xử lý validate form
  * Author: LHH - 04/01/23
  */
 const handleValidateForm = () => {
 	try {
-		employeeCodeRef.value.handleValidate();
-		fullNameRef.value.handleValidate();
-		departmentIdRef.value.handleValidate();
-		positionRef.value.handleValidate();
-		dateOfBirthRef.value.handleValidate();
-		identityNumberRef.value.handleValidate();
-		identityDateRef.value.handleValidate();
-		identityPlaceRef.value.handleValidate();
-		addressRef.value.handleValidate();
-		phoneNumberRef.value.handleValidate();
-		landlineNumberRef.value.handleValidate();
-		emailRef.value.handleValidate();
-		bankAccountRef.value.handleValidate();
-		bankNameRef.value.handleValidate();
-		bankBranchRef.value.handleValidate();
+		inputRefs.value.forEach((ref) => {
+			const key = Object.keys(ref)[0];
+			if (ref[key]) {
+				ref[key].handleValidate();
+			}
+		});
+
+		for (const key in formState.formError) {
+			if (Object.hasOwnProperty.call(formState.formError, key)) {
+				const element = formState.formError[key];
+
+				if (element) {
+					console.log(
+						inputRefs.value.find(
+							(item) => Object.keys(item)[0] === key
+						)
+					);
+					const itemErrorFirst = inputRefs.value.find(
+						(item) => Object.keys(item)[0] === key
+					);
+					itemErrorFirst[key]?.setFocusInput();
+					handleOpenModal(
+						RESOURCES.MODAL_TITLE.ERROR,
+						element,
+						RESOURCES.MODAL_TYPE.ERROR,
+						"",
+						handleFocusInputError
+					);
+					return false;
+				}
+			}
+		}
+
+		return true;
 	} catch (error) {
 		console.log(error);
 	}
 };
 
 /**
- * Xử lsy quay đầu tab index
+ * Xử lý hiển thị thông báo thành công
+ * Author: LHH - 10/01/23
+ */
+const handleShowSuccessMessage = () => {
+	handleShowToast({
+		type: SUCCESS,
+		content: RESOURCES.NOTIFICATION_MESSAGE.SUCCESS[state.form.type],
+	});
+};
+
+/**
+ * Xử lý submit form
+ * Author: LHH - 04/01/23
+ */
+const handleSubmit = async () => {
+	try {
+		if (handleValidateForm()) {
+			handleOpenLoading();
+			const { DateOfBirth, IdentityDate } = formState.formValue;
+			const data = {
+				...formState.formValue,
+				// DateOfBirth: DateOfBirth ? DateOfBirth.toUTCString() : null,
+				// IdentityDate: IdentityDate ? IdentityDate.toUTCString() : null,
+			};
+
+			if (state.form.type === ADD || state.form.type === DUPLICATE) {
+				await addNewEmployee(data);
+			}
+
+			if (state.form.type === EDIT) {
+				await updateNewEmployee(state.form.employeeId, data);
+			}
+
+			if (statusCode.value) {
+				handleUpdateEmployeeList(
+					state.form.type,
+					state.form.employeeId,
+					newEmployee.value
+				);
+
+				handleShowSuccessMessage();
+				handleCloseModal();
+
+				handleCloseLoading();
+
+				return true;
+			}
+
+			handleCloseLoading();
+
+			return false;
+		}
+	} catch (error) {
+		console.log(error);
+		return false;
+	}
+};
+
+/**
+ * Xử lý ấn vào nút cất
+ * Author: LHH - 08/01/23
+ */
+const onStoreBtnClick = async () => {
+	try {
+		if (await handleSubmit()) {
+			handleCloseForm();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý ấn vào nút cất và thêm
+ * Author: LHH - 08/01/23
+ */
+const onStoreAndAddBtnClick = async () => {
+	try {
+		if (await handleSubmit()) {
+			handleOpenForm(RESOURCES.FORM_MODE.ADD);
+			await handleGetNewEmployeeCode();
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý ấn vào nút đóng form
+ * Author: LHH - 04/01/23
+ */
+const onCloseBtnClick = () => {
+	try {
+		console.log(
+			"Sau: ",
+			JSON.stringify(formState.formValue),
+			"Truowcs: ",
+			JSON.stringify(originValue.value)
+		);
+		if (
+			JSON.stringify(formState.formValue) ===
+			JSON.stringify(originValue.value)
+		) {
+			handleCloseForm();
+		} else {
+			handleOpenModal(
+				RESOURCES.MODAL_TITLE.INFO,
+				RESOURCES.MODAL_MESSAGE.INFO,
+				RESOURCES.MODAL_TYPE.INFO,
+				state.form.employeeId,
+				onStoreBtnClick
+			);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Xử lý quay đầu tab index
  * Author: LHH - 15/02/23
  */
 const handleSetTabIndex = (e) => {
 	if (e.keyCode === 9) {
 		e.preventDefault();
-		employeeCodeRef.value.setFocusInput();
+		inputRefs.value[0].EmployeeCode.setFocusInput();
+	}
+};
+
+/**
+ * Xử lý shift tab khi ở input đầu tiên
+ * Author: LHH - 15/02/23
+ */
+const handleSetTabIndexOnFirstInput = (e) => {
+	if (e.shiftKey && e.keyCode === 9) {
+		console.log("first");
+		e.preventDefault();
 	}
 };
 </script>
@@ -647,7 +650,11 @@ const handleSetTabIndex = (e) => {
 						<div class="form__row row-gap">
 							<div class="form__col col--4">
 								<Input
-									ref="employeeCodeRef"
+									:ref="
+										(element) => {
+											inputRefs[0].EmployeeCode = element;
+										}
+									"
 									isRequired
 									title="Mã"
 									name="EmployeeCode"
@@ -665,11 +672,15 @@ const handleSetTabIndex = (e) => {
 											? formState.formError.EmployeeCode
 											: ''
 									"
+									@keydown="handleSetTabIndexOnFirstInput"
 								/>
 							</div>
 							<div class="form__col col--8">
 								<Input
-									ref="fullNameRef"
+									:ref="
+										(element) =>
+											(inputRefs[1].FullName = element)
+									"
 									isRequired
 									title="Tên"
 									name="FullName"
@@ -688,7 +699,11 @@ const handleSetTabIndex = (e) => {
 							</div>
 							<div class="form__col col--12">
 								<Select
-									ref="departmentIdRef"
+									:ref="
+										(element) =>
+											(inputRefs[2].DepartmentId =
+												element)
+									"
 									size="sm"
 									isRequired
 									name="DepartmentId"
@@ -717,7 +732,10 @@ const handleSetTabIndex = (e) => {
 									title="Chức danh"
 									name="Position"
 									size="sm"
-									ref="positionRef"
+									:ref="
+										(element) =>
+											(inputRefs[3].Position = element)
+									"
 									:rules="[MAX_LENGTH(100)]"
 									:tabindex="4"
 									:value="formState.formValue.Position"
@@ -736,7 +754,10 @@ const handleSetTabIndex = (e) => {
 						<div class="form__row row-gap">
 							<div class="form__col col--5">
 								<DatePicker
-									ref="dateOfBirthRef"
+									:ref="
+										(element) =>
+											(inputRefs[4].DateOfBirth = element)
+									"
 									size="sm"
 									title="Ngày sinh"
 									name="DateOfBirth"
@@ -775,7 +796,11 @@ const handleSetTabIndex = (e) => {
 									size="sm"
 									:tabindex="9"
 									tooltip="Số chứng minh nhân dân"
-									ref="identityNumberRef"
+									:ref="
+										(element) =>
+											(inputRefs[5].IdentityNumber =
+												element)
+									"
 									:rules="[HAS_FORMAT(IDENTITY_NUMBER)]"
 									:value="formState.formValue.IdentityNumber"
 									@change="handleBindValue"
@@ -792,7 +817,11 @@ const handleSetTabIndex = (e) => {
 							</div>
 							<div class="form__col col--5">
 								<DatePicker
-									ref="identityDateRef"
+									:ref="
+										(element) =>
+											(inputRefs[6].IdentityDate =
+												element)
+									"
 									size="sm"
 									title="Ngày cấp"
 									name="IdentityDate"
@@ -819,7 +848,11 @@ const handleSetTabIndex = (e) => {
 									title="Nơi cấp"
 									name="IdentityPlace"
 									size="sm"
-									ref="identityPlaceRef"
+									:ref="
+										(element) =>
+											(inputRefs[7].IdentityPlace =
+												element)
+									"
 									:rules="[MAX_LENGTH(255)]"
 									:tabindex="11"
 									:value="formState.formValue.IdentityPlace"
@@ -842,7 +875,7 @@ const handleSetTabIndex = (e) => {
 							name="Address"
 							size="sm"
 							:tabindex="12"
-							ref="addressRef"
+							:ref="(element) => (inputRefs[8].Address = element)"
 							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.Address"
 							@change="handleBindValue"
@@ -856,7 +889,10 @@ const handleSetTabIndex = (e) => {
 					</div>
 					<div class="form__col col--3">
 						<Input
-							ref="phoneNumberRef"
+							:ref="
+								(element) =>
+									(inputRefs[9].PhoneNumber = element)
+							"
 							title="ĐT di động"
 							name="PhoneNumber"
 							size="sm"
@@ -881,7 +917,10 @@ const handleSetTabIndex = (e) => {
 							size="sm"
 							tooltip="Điện thoại cố định"
 							:tabindex="14"
-							ref="landlineNumberRef"
+							:ref="
+								(element) =>
+									(inputRefs[10].LandlineNumber = element)
+							"
 							:rules="[HAS_FORMAT(LANDLINE_NUMBER)]"
 							:value="formState.formValue.LandlineNumber"
 							@change="handleBindValue"
@@ -895,7 +934,7 @@ const handleSetTabIndex = (e) => {
 					</div>
 					<div class="form__col col--3">
 						<Input
-							ref="emailRef"
+							:ref="(element) => (inputRefs[11].Email = element)"
 							title="Email"
 							name="Email"
 							placeholder="example@gmail.com"
@@ -920,8 +959,11 @@ const handleSetTabIndex = (e) => {
 							title="Tài khoản ngân hàng"
 							name="BankAccount"
 							size="sm"
-							ref="bankAccountRef"
-							:rules="[MAX_LENGTH(255)]"
+							:ref="
+								(element) =>
+									(inputRefs[12].BankAccount = element)
+							"
+							:rules="[HAS_FORMAT(BANK_ACCOUNT), MAX_LENGTH(255)]"
 							:value="formState.formValue.BankAccount"
 							@change="handleBindValue"
 							@error="handleBindError"
@@ -938,7 +980,9 @@ const handleSetTabIndex = (e) => {
 							title="Tên ngân hàng"
 							name="BankName"
 							size="sm"
-							ref="bankNameRef"
+							:ref="
+								(element) => (inputRefs[13].BankName = element)
+							"
 							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.BankName"
 							@change="handleBindValue"
@@ -956,7 +1000,10 @@ const handleSetTabIndex = (e) => {
 							title="Chi nhánh"
 							name="BankBranch"
 							size="sm"
-							ref="bankBranchRef"
+							:ref="
+								(element) =>
+									(inputRefs[14].BankBranch = element)
+							"
 							:rules="[MAX_LENGTH(255)]"
 							:value="formState.formValue.BankBranch"
 							@change="handleBindValue"

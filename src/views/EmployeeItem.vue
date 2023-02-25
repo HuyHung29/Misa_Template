@@ -3,6 +3,7 @@ import CheckBox from "../components/customs/MCheckBox.vue";
 import { formatDate, formatMoney, formatGender } from "../util/common";
 import { inject, ref } from "vue";
 import RESOURCES from "../constants/resource";
+import useDetectOutsideClick from "../composable/clickOutSide";
 
 /**
  * Sử dụng store
@@ -35,7 +36,7 @@ const moreBtnRef = ref(null);
  * Định nghĩa các emiit
  * Author: LHH - 04/01/23
  */
-const emit = defineEmits(["click", "check"]);
+const emit = defineEmits(["click", "check", "closeList"]);
 
 /**
  * Xử lý khi ấn nút option
@@ -135,6 +136,7 @@ const handleCheckBox = (data) => {
 					class="table__action__more"
 					@click="onOptionBtnClick"
 					ref="moreBtnRef"
+					@blur="emit('closeList')"
 				>
 					<i class="table__action__icon"></i>
 				</button>

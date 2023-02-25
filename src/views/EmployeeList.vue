@@ -5,8 +5,17 @@ import CheckBox from "../components/customs/MCheckBox.vue";
 import Button from "../components/MButton.vue";
 import Pagination from "../components/MPagination.vue";
 import RESOURCES from "../constants/resource";
-import { reactive, inject, onBeforeMount, computed, ref, onMounted } from "vue";
+import {
+	reactive,
+	inject,
+	onBeforeMount,
+	computed,
+	ref,
+	onMounted,
+	onUpdated,
+} from "vue";
 import useEmployee from "../composable/employee";
+import useDetectOutsideClick from "../composable/clickOutSide";
 
 /**
  * Định nghĩa các state
@@ -113,37 +122,44 @@ const handleGetAllEmployee = () => {
  */
 const handleDisplayListAction = (data) => {
 	try {
-		console.log(
-			"WIndow height: ",
-			window.innerHeight,
-			window.outerHeight,
-			"Top: ",
-			data.top,
-			"Element: ",
-			empState.listActionHeight,
+		empState.listAction.isShow = !empState.listAction.isShow;
+		// if (empState.listAction.employeeId === data.employeeId) {
+		// 	empState.listAction = {
+		// 		isShow: false,
+		// 	};
+		// } else {
+		// 	const isOutWindow =
+		// 		data.top + data.height + empState.listActionHeight <
+		// 		window.innerHeight;
+
+		// 	empState.listAction = {
+		// 		isShow: true,
+		// 		employeeId: data.employeeId,
+		// 		employeeCode: data.employeeCode,
+		// 		style: {
+		// 			top: isOutWindow
+		// 				? data.top + data.height + "px"
+		// 				: data.top - empState.listActionHeight + "px",
+		// 			right: data.right - data.width + "px",
+		// 		},
+		// 	};
+		// }
+		const isOutWindow =
 			data.top + data.height + empState.listActionHeight <
-				window.innerHeight
-		);
-		if (empState.listAction.employeeId === data.employeeId) {
-			empState.listAction = {
-				isShow: false,
-			};
-		} else {
-			const isOutWindow =
-				data.top + data.height + empState.listActionHeight <
-				window.innerHeight;
-			empState.listAction = {
-				isShow: true,
-				employeeId: data.employeeId,
-				employeeCode: data.employeeCode,
-				style: {
-					top: isOutWindow
-						? data.top + data.height + "px"
-						: data.top - empState.listActionHeight + "px",
-					right: data.right - data.width + "px",
-				},
-			};
-		}
+			window.innerHeight;
+
+		empState.listAction = {
+			isShow: empState.listAction.isShow,
+			employeeId: data.employeeId,
+			employeeCode: data.employeeCode,
+			style: {
+				top: isOutWindow
+					? data.top + data.height + "px"
+					: data.top - empState.listActionHeight + "px",
+				right: data.right - data.width + "px",
+			},
+		};
+		console.log("BTN click: ", empState.listAction.isShow);
 	} catch (error) {
 		console.log(error);
 	}
@@ -158,6 +174,12 @@ const handleCloseListAction = () => {
 		empState.listAction.isShow = false;
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+const handleCloseListOutside = () => {
+	if (empState.listAction.isShow) {
+		empState.listAction.isShow = false;
 	}
 };
 
@@ -186,8 +208,6 @@ const handleDeleteEmployee = async () => {
 		await deleteEmployee([...state.modal.employeeId]);
 
 		if (statusCode.value) {
-			// await handleGetEmployees();
-
 			handleUpdateEmployeeList(
 				"DELETE",
 				state.modal.employeeId,
@@ -198,8 +218,10 @@ const handleDeleteEmployee = async () => {
 				type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
 				content:
 					state.modal.type === RESOURCES.MODAL_TYPE.WARNING
-						? RESOURCES.FORM_MESSAGE.SUCCESS.DELETE
-						: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
+						? RESOURCES.NOTIFICATION_MESSAGE.SUCCESS.DELETE
+						: RESOURCES.NOTIFICATION_MESSAGE.SUCCESS[
+								state.form.type
+						  ],
 			});
 			handleCloseModal();
 
@@ -310,6 +332,18 @@ const handleSearchEmployee = (value) => {
 };
 
 /**
+ * Hàm xử lý refresh dữ liệu
+ * Author: LHH - 04/01/23
+ */
+const handleRefreshData = () => {
+	try {
+		handleGetEmployees({ ...state.pagination });
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
  * Hàm xử lý mở form thêm mới
  * Author: LHH - 04/01/2023
  */
@@ -323,9 +357,19 @@ const handleOpenAddForm = () => {
  */
 const handleExportData = async () => {
 	try {
+		const { NOTIFICATION_TYPE, NOTIFICATION_MESSAGE } = RESOURCES;
 		handleOpenLoading();
 
-		await handleExportExcel();
+		await handleExportExcel({
+			keyword: state.pagination.keyword ? state.pagination.keyword : null,
+			pageSize: state.totalRecord,
+			pageNumber: 1,
+		});
+
+		handleShowToast({
+			type: NOTIFICATION_TYPE.SUCCESS,
+			content: NOTIFICATION_MESSAGE.SUCCESS.EXPORT,
+		});
 
 		handleCloseLoading();
 	} catch (error) {
@@ -386,7 +430,9 @@ const handleExportData = async () => {
 				</div>
 				<p
 					class="table__function__refresh"
-					@click="handleGetAllEmployee"
+					@click="handleOpenLoading"
+					:debounce-events="['click']"
+					v-debounce:500ms.lock="handleRefreshData"
 				>
 					<i></i>
 				</p>
@@ -394,7 +440,9 @@ const handleExportData = async () => {
 					<i></i>
 				</p>
 			</div>
+
 			<div class="table__wrap" @scroll="handleCloseListAction">
+				<Loading v-if="state.isLoading" />
 				<table class="table">
 					<thead class="table__header">
 						<tr class="table__row">
@@ -453,33 +501,34 @@ const handleExportData = async () => {
 							:employee="employee"
 							@click="handleDisplayListAction"
 							@check="handleCheck"
+							@closeList="handleCloseListOutside"
 							:checkList="empState.checkList"
+							:key="employee.EmployeeId"
 						/>
 					</tbody>
 				</table>
-				<Loading v-show="state.isLoading" />
 				<!-- Action list -->
 				<ul
 					class="table__action__list"
-					v-show="empState.listAction.isShow"
 					:style="empState.listAction.style"
+					v-if="empState.listAction.isShow"
 					ref="listActionRef"
 				>
 					<li
 						class="table__action__item"
-						@click="handleDuplicateClick"
+						@mousedown="handleDuplicateClick"
 					>
 						Nhân bản
 					</li>
 					<li
 						class="table__action__item open-dialog-btn"
-						@click="onDeleteBtnClick"
+						@mousedown="onDeleteBtnClick"
 					>
 						Xóa
 					</li>
 					<li
-						class="table__action__item"
-						@click="handleCloseListAction"
+						class="table__action__item blocked"
+						@mousedown="handleCloseListAction"
 					>
 						Ngưng sử dụng
 					</li>

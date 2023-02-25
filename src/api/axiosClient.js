@@ -31,15 +31,25 @@ axiosClient.interceptors.response.use(
 	},
 	(error) => {
 		try {
-			const { status, data } = error.response;
+			// Xử lý lỗi chung cho các request trả về
+
+			const { data } = error.response;
 			const { handleShowToast, handleSetErrorForm, handleCloseLoading } =
 				store;
 			const { ERROR } = RESOURCES.NOTIFICATION_TYPE;
+			const { DEFAULT } = RESOURCES.NOTIFICATION_MESSAGE.ERROR;
 
 			handleCloseLoading();
-			handleShowToast({ type: ERROR, content: data.UserMes });
+			handleShowToast({
+				type: ERROR,
+				content: data.UserMes ? data.UserMes : DEFAULT,
+			});
 
-			handleSetErrorForm(data.MoreInfo);
+			if (data.MoreInfo) {
+				handleSetErrorForm(data.MoreInfo);
+			} else {
+				handleSetErrorForm({});
+			}
 
 			// throw error.response.data;
 		} catch (err) {

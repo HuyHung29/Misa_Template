@@ -2,6 +2,7 @@
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { onUpdated, ref, watch } from "vue";
+import RESOURCES from "../../constants/resource";
 import {
 	convertStringToDate,
 	inputValidation,
@@ -137,13 +138,35 @@ const handleInput = (e) => {
  * Hàm xử lý thay đổi date
  * Author: LHH - 16/01/23
  */
-const handleChangeDate = () => {
+const handleChangeDate = (e) => {
 	const dateValue = convertStringToDate(inputVal.value);
+	console.log("Date: ", dateValue);
 	if (dateValue) {
 		date.value = new Date(dateValue);
+	} else {
+		console.log("first");
+		date.value = null;
+		inputVal.value = "";
+		inputRef.value.value = null;
 	}
 };
 
+/**
+ * Hàm xử lý khi tab ra khỏi ô input
+ * @param {Event} e
+ * Author: LHH -24/02/23
+ */
+const handleChangeDateOnKeyEvent = (e) => {
+	if (e.keyCode === RESOURCES.KEYCODE.TAB) {
+		handleChangeDate();
+	}
+};
+
+/**
+ * Hàm xử lý ẩn các ngày quá ngày hiện tại
+ * @param {Date} time
+ * Author: LHH - 24/02/23
+ */
 const disabledDate = (time) => {
 	return time.getTime() > Date.now();
 };
@@ -154,6 +177,7 @@ const disabledDate = (time) => {
  */
 watch(date, () => {
 	try {
+		console.log("Change");
 		emit("change", { name: props.name, value: date.value });
 	} catch (error) {
 		console.log(error);
@@ -223,7 +247,7 @@ onUpdated(() => {
 			hide-offset-dates
 			:day-names="['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']"
 		>
-			<template #dp-input="{ value, onInput, onEnter, onTab, onClear }">
+			<template #dp-input="{ value }">
 				<div class="date-picker__wrapper">
 					<input
 						type="text"
@@ -235,6 +259,7 @@ onUpdated(() => {
 						autocomplete="off"
 						@input="handleInput"
 						@blur="handleChangeDate"
+						@keydown="handleChangeDateOnKeyEvent"
 						ref="inputRef"
 					/>
 					<p class="date-picker__icon">

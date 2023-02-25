@@ -35,9 +35,13 @@ watch(paginationState, () => {
 });
 
 watch(
-	() => state.pagination,
+	() => state.pagination.pageNumber,
 	() => {
-		paginationState.pageNumber = state.pagination.pageNumber;
+		try {
+			paginationState.pageNumber = state.pagination.pageNumber;
+		} catch (error) {
+			console.log(error);
+		}
 	}
 );
 

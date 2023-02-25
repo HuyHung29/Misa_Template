@@ -1,4 +1,6 @@
 <script setup>
+import { ref } from "vue";
+
 /**
  * Định nghĩa các props
  * Author: LHH - 04/01/23
@@ -25,10 +27,19 @@ const props = defineProps({
 	tooltip: String,
 	style: Object,
 });
+
+const btnRef = ref(null);
+
+const setFocusBtn = () => {
+	btnRef.value.focus();
+};
+
+defineExpose({ setFocusBtn });
 </script>
 
 <template>
 	<button
+		ref="btnRef"
 		:type="action"
 		class="btn"
 		:class="{

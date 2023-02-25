@@ -99,7 +99,7 @@ const employeeApi = {
 	 * Hàm xuất excel
 	 * Author: LHH - 19/02/23
 	 */
-	exportExcel: () => {
+	exportExcel: (params) => {
 		try {
 			const headers = {
 				"Content-Disposition": `attachment; filename=hh.xlsx"}`,
@@ -111,6 +111,7 @@ const employeeApi = {
 				url: URL,
 				responseType: "arraybuffer",
 				headers,
+				params,
 			};
 			return axiosClient.get(baseUrl + "get-employee-excel", config);
 		} catch (error) {

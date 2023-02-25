@@ -149,9 +149,9 @@ const useEmployee = () => {
 		 * Hàm xuất excel
 		 * Author: LHH - 21/02/23
 		 */
-		const handleExportExcel = async () => {
+		const handleExportExcel = async (filter) => {
 			try {
-				const response = await employeeApi.exportExcel();
+				const response = await employeeApi.exportExcel(filter);
 
 				const url = URL.createObjectURL(new Blob([response]));
 				const link = document.createElement("a");

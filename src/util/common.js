@@ -97,7 +97,7 @@ export const formatGender = (gender) => {
 export const inputValidation = (rules, value, name) => {
 	const { NOT_EMPTY, ADULT, HAS_FORMAT, MAX_VALUE, MIN_VALUE, MAX_LENGTH } =
 		RESOURCES.FORM_RULES_NAME;
-	const { ERROR } = RESOURCES.FORM_MESSAGE;
+	const { ERROR } = RESOURCES.NOTIFICATION_MESSAGE;
 	const { INPUT_TITLE } = RESOURCES;
 
 	for (const rule of rules) {

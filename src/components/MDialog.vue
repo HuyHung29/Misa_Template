@@ -1,6 +1,6 @@
 <script setup>
 import RESOURCES from "../constants/resource";
-import { inject } from "vue";
+import { inject, ref, onMounted, onUnmounted } from "vue";
 import useEmployee from "../composable/employee";
 import Button from "./MButton.vue";
 
@@ -8,19 +8,15 @@ import Button from "./MButton.vue";
  * Các state và phương thức dùng chung
  * Author: LHH - 04/01/23
  */
-const {
-	state,
-	handleGetEmployees,
-	handleCloseModal,
-	handleCloseForm,
-	handleShowToast,
-} = inject("store");
+const { state, handleCloseModal, handleCloseForm } = inject("store");
 
 /**
  * Các state và phương thức liên quan đến employee
  * Author: LHH - 04/01/23
  */
 const { statusCode, deleteEmployee } = useEmployee();
+
+const closeBtnRef = ref(null);
 
 /**
  * Xử lý đóng dialog
@@ -41,33 +37,53 @@ const handleCloseAll = () => {
  */
 const handleAgreeBtnClick = async () => {
 	try {
-		// if (state.modal.type === RESOURCES.MODAL_TYPE.WARNING) {
-		// 	await deleteEmployee(state.modal.employeeId);
-		// }
-
-		// if (state.modal.type === RESOURCES.MODAL_TYPE.INFO) {
-		// 	await state.modal.callback();
-		// 	// handleCloseAll();
-		// }
-
-		// if (statusCode.value) {
-		// 	await handleGetEmployees();
-
-		// 	handleShowToast({
-		// 		type: RESOURCES.NOTIFICATION_TYPE.SUCCESS,
-		// 		content:
-		// 			state.modal.type === RESOURCES.MODAL_TYPE.WARNING
-		// 				? "Xóa nhân viên thành công"
-		// 				: RESOURCES.FORM_MESSAGE.SUCCESS[state.form.type],
-		// 	});
-		// 	handleCloseAll();
-		// }
-
 		await state.modal.callback();
 	} catch (error) {
 		console.log(error);
 	}
 };
+
+/**
+ * Xử lý ấn nút đóng
+ * Author: LHH - 04/01/23
+ */
+const handleCloseBtnClick = () => {
+	try {
+		state.modal.callback();
+		handleCloseModal();
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+/**
+ * Hàm xử lý phím tắt trong modal
+ * @param {event} e Sự kiện html
+ */
+function docKeyDown(e) {
+	if (e.code === "Escape") {
+		handleCloseModal();
+	}
+}
+
+/**
+ * Xử lý focus vào mã nhân viên và các phím tắt ở form
+ * Author: LHH - 27/01/23
+ */
+onMounted(() => {
+	if (closeBtnRef.value) {
+		closeBtnRef.value.setFocusBtn();
+	}
+	document.addEventListener("keydown", docKeyDown, false);
+});
+
+/**
+ * Hàm xử lý remove event
+ * Author: LHH - 23/03/23
+ */
+onUnmounted(() => {
+	document.removeEventListener("keydown", docKeyDown);
+});
 </script>
 
 <template>
@@ -118,9 +134,10 @@ const handleAgreeBtnClick = async () => {
 					"
 				/>
 				<Button
-					@click="handleCloseModal"
+					@click="handleCloseBtnClick"
 					v-if="state.modal.type === RESOURCES.MODAL_TYPE.ERROR"
 					content="Đóng"
+					ref="closeBtnRef"
 				/>
 			</div>
 		</div>
