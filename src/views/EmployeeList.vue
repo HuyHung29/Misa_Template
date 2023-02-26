@@ -457,10 +457,10 @@ const handleExportData = async () => {
 							<th class="table__heading w-150">
 								<span>mã nhân viên</span>
 							</th>
-							<th class="table__heading w-200">
+							<th class="table__heading w-250">
 								<span>tên nhân viên</span>
 							</th>
-							<th class="table__heading w-150">
+							<th class="table__heading w-100">
 								<span>giới tính</span>
 							</th>
 							<th class="table__heading text-center w-200">

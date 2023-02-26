@@ -134,7 +134,7 @@ const RESOURCES = {
 		PHONE_NUMBER: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
 		LANDLINE_NUMBER: /^[0-9]{10,12}$/,
 		IDENTITY_NUMBER: /^[0-9]{12}$/,
-		BANK_ACCOUNT: /^[0-9]{12,15}$/,
+		BANK_ACCOUNT: /^[0-9]{9,15}$/,
 	},
 	GENDER: [
 		{
@@ -151,6 +151,23 @@ const RESOURCES = {
 		},
 	],
 	FILE_NAME: "Danh_sach_nhan_vien.xlsx",
+	SIDEBAR_NAME: [
+		"Tổng quan",
+		"Tiền mặt",
+		"Tiền gửi",
+		"Mua hàng",
+		"Bán hàng",
+		"Quản lý hóa đơn",
+		"Kho",
+		"Công cụ dụng cụ",
+		"Tài sản cố định",
+		"Thuế",
+		"Giá thành",
+		"Tổng hợp",
+		"Ngân sách",
+		"Báo cáo",
+		"Phân tích tài chính",
+	],
 };
 
 export default RESOURCES;

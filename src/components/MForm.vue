@@ -10,8 +10,8 @@ import {
 	computed,
 	inject,
 	onBeforeMount,
+	onBeforeUnmount,
 	onMounted,
-	onUnmounted,
 	reactive,
 	ref,
 	watch,
@@ -351,7 +351,7 @@ onMounted(() => {
  * Hàm xử lý remove event
  * Author: LHH - 23/03/23
  */
-onUnmounted(() => {
+onBeforeUnmount(() => {
 	document.removeEventListener("keydown", docKeyDown);
 });
 

@@ -211,7 +211,8 @@ const handleClickNextBtn = () => {
 					class="data-table__pagination__action"
 					:class="{
 						disabled:
-							paginationState.pageNumber === state.totalPage,
+							paginationState.pageNumber === state.totalPage ||
+							state.totalPage === 0,
 					}"
 					@click="handleClickNextBtn"
 				>

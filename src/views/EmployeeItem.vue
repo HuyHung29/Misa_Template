@@ -1,6 +1,11 @@
 <script setup>
 import CheckBox from "../components/customs/MCheckBox.vue";
-import { formatDate, formatMoney, formatGender } from "../util/common";
+import {
+	formatDate,
+	formatMoney,
+	formatGender,
+	isOverflow,
+} from "../util/common";
 import { inject, ref } from "vue";
 import RESOURCES from "../constants/resource";
 import useDetectOutsideClick from "../composable/clickOutSide";
@@ -27,10 +32,14 @@ const props = defineProps({
 });
 
 /**
- * Định nghĩa các rè của component
+ * Định nghĩa các ref của component
  * Author: LHH - 04/01/23
  */
 const moreBtnRef = ref(null);
+const nameRef = ref(null);
+const positionRef = ref(null);
+const bankNameRef = ref(null);
+const bankBranchRef = ref(null);
 
 /**
  * Định nghĩa các emiit
@@ -94,38 +103,72 @@ const handleCheckBox = (data) => {
 				:checked="checkList.includes(employee.EmployeeId)"
 			/>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.EmployeeCode }}</span>
+		<td class="table__col w-150">
+			<p class="table__col__text">{{ employee.EmployeeCode }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.FullName }}</span>
+		<td
+			class="table__col w-250"
+			:class="{
+				overflow: isOverflow(nameRef),
+			}"
+		>
+			<p class="table__col__text" ref="nameRef">
+				{{ employee.FullName }}
+			</p>
+			<p class="table__col__tooltip">{{ employee.FullName }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.GenderName }}</span>
+		<td class="table__col w-100">
+			<p class="table__col__text">{{ employee.GenderName }}</p>
 		</td>
-		<td class="table__col text-center">
-			<span>{{ formatDate(employee.DateOfBirth) }}</span>
+		<td class="table__col text-center w-200">
+			<p class="table__col__text">
+				{{ formatDate(employee.DateOfBirth) }}
+			</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.IdentityNumber }}</span>
+		<td class="table__col w-200">
+			<p class="table__col__text">{{ employee.IdentityNumber }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.Position }}</span>
+		<td
+			class="table__col w-200"
+			:class="{
+				overflow: isOverflow(positionRef),
+			}"
+		>
+			<p class="table__col__text" ref="positionRef">
+				{{ employee.Position }}
+			</p>
+			<p class="table__col__tooltip">{{ employee.Position }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.DepartmentName }}</span>
+		<td class="table__col w-300">
+			<p class="table__col__text">{{ employee.DepartmentName }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.PhoneNumber }}</span>
+		<td class="table__col w-200">
+			<p class="table__col__text">{{ employee.PhoneNumber }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.BankAccount }}</span>
+		<td class="table__col w-200">
+			<p class="table__col__text">{{ employee.BankAccount }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.BankName }}</span>
+		<td
+			class="table__col w-200"
+			:class="{
+				overflow: isOverflow(bankNameRef),
+			}"
+		>
+			<p class="table__col__text" ref="bankNameRef">
+				{{ employee.BankName }}
+			</p>
+			<p class="table__col__tooltip">{{ employee.BankName }}</p>
 		</td>
-		<td class="table__col">
-			<span>{{ employee.BankBranch }}</span>
+		<td
+			class="table__col w-200"
+			:class="{
+				overflow: isOverflow(bankBranchRef),
+			}"
+		>
+			<p class="table__col__text" ref="bankBranchRef">
+				{{ employee.BankBranch }}
+			</p>
+			<p class="table__col__tooltip">{{ employee.BankBranch }}</p>
 		</td>
 		<td class="table__col text-center">
 			<button class="table__action">
