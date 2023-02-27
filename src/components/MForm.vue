@@ -12,6 +12,7 @@ import {
 	onBeforeMount,
 	onBeforeUnmount,
 	onMounted,
+	onUpdated,
 	reactive,
 	ref,
 	watch,
@@ -19,6 +20,7 @@ import {
 import RESOURCES from "../constants/resource";
 import useEmployee from "../composable/employee";
 import useDepartment from "../composable/department";
+import { convertStringToDateUSUK } from "../util/common";
 
 /**
  * Lấy dữ liệu từ store
@@ -189,6 +191,9 @@ const inputRefs = ref([
 	{ BankBranch: ref(null) },
 ]);
 
+const cancleBtnRef = ref(null);
+const storeAndAddBtnRef = ref(null);
+
 /**
  * Hàm xử lý lấy nhân viên sửa
  * Author: LHH - 04/01/23
@@ -348,6 +353,14 @@ onMounted(() => {
 });
 
 /**
+ * Xử lý focus vào input lỗi
+ * Author: LHH - 27/02/23
+ */
+onUpdated(() => {
+	handleFocusInputError();
+});
+
+/**
  * Hàm xử lý remove event
  * Author: LHH - 23/03/23
  */
@@ -387,6 +400,8 @@ const formName = computed(() => {
 
 /**
  * Xử lý binding dữ liệu cho form
+ * @param {string} name: tên input
+ * @param {string} value: giá trị của input
  * Author: LHH - 04/01/23
  */
 const handleBindValue = ({ name, value }) => {
@@ -400,16 +415,24 @@ const handleBindValue = ({ name, value }) => {
 
 /**
  * Xử lý binding error
+ * @param {string} name: tên input
+ * @param {string} message: lỗi của input
  * Author: LHH - 27/01/23
  */
+
 const handleBindError = ({ name, message }) => {
 	try {
+		console.log(name, message);
 		formState.formError[name] = message;
 	} catch (error) {
 		console.log(error);
 	}
 };
 
+/**
+ * Hàm xử lý focus vào input lỗi đầu tiên
+ * Author: LHH - 27/01/23
+ */
 const handleFocusInputError = () => {
 	for (const key in formState.formError) {
 		if (Object.hasOwnProperty.call(formState.formError, key)) {
@@ -444,15 +467,6 @@ const handleValidateForm = () => {
 				const element = formState.formError[key];
 
 				if (element) {
-					console.log(
-						inputRefs.value.find(
-							(item) => Object.keys(item)[0] === key
-						)
-					);
-					const itemErrorFirst = inputRefs.value.find(
-						(item) => Object.keys(item)[0] === key
-					);
-					itemErrorFirst[key]?.setFocusInput();
 					handleOpenModal(
 						RESOURCES.MODAL_TITLE.ERROR,
 						element,
@@ -482,6 +496,29 @@ const handleShowSuccessMessage = () => {
 	});
 };
 
+const handleFormatData = () => {
+	try {
+		const { DateOfBirth, IdentityDate } = formState.formValue;
+
+		const formatDateOfBirth = DateOfBirth
+			? new Date(convertStringToDateUSUK(new Date(DateOfBirth), true))
+			: DateOfBirth;
+		const formatIdentityDate = IdentityDate
+			? new Date(convertStringToDateUSUK(new Date(IdentityDate), true))
+			: IdentityDate;
+
+		const data = {
+			...formState.formValue,
+			IdentityDate: formatIdentityDate,
+			DateOfBirth: formatDateOfBirth,
+		};
+
+		return data;
+	} catch (error) {
+		console.log(error);
+	}
+};
+
 /**
  * Xử lý submit form
  * Author: LHH - 04/01/23
@@ -490,12 +527,8 @@ const handleSubmit = async () => {
 	try {
 		if (handleValidateForm()) {
 			handleOpenLoading();
-			const { DateOfBirth, IdentityDate } = formState.formValue;
-			const data = {
-				...formState.formValue,
-				// DateOfBirth: DateOfBirth ? DateOfBirth.toUTCString() : null,
-				// IdentityDate: IdentityDate ? IdentityDate.toUTCString() : null,
-			};
+
+			const data = handleFormatData();
 
 			if (state.form.type === ADD || state.form.type === DUPLICATE) {
 				await addNewEmployee(data);
@@ -595,9 +628,15 @@ const onCloseBtnClick = () => {
  * Author: LHH - 15/02/23
  */
 const handleSetTabIndex = (e) => {
-	if (e.keyCode === 9) {
+	if (e.keyCode === RESOURCES.KEYCODE.TAB) {
 		e.preventDefault();
 		inputRefs.value[0].EmployeeCode.setFocusInput();
+	}
+	if (e.shiftKey && e.keyCode === RESOURCES.KEYCODE.TAB) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		storeAndAddBtnRef.value.setFocusBtn();
 	}
 };
 
@@ -606,9 +645,12 @@ const handleSetTabIndex = (e) => {
  * Author: LHH - 15/02/23
  */
 const handleSetTabIndexOnFirstInput = (e) => {
-	if (e.shiftKey && e.keyCode === 9) {
-		console.log("first");
+	console.log(e.keyCode);
+	if (e.shiftKey && e.keyCode === RESOURCES.KEYCODE.TAB) {
 		e.preventDefault();
+		e.stopPropagation();
+		console.log(cancleBtnRef);
+		cancleBtnRef.value.setFocusBtn();
 	}
 };
 </script>
@@ -695,6 +737,9 @@ const handleSetTabIndexOnFirstInput = (e) => {
 											? formState.formError.FullName
 											: ''
 									"
+									:isShowError="
+										!!formState.formError.DateOfBirth
+									"
 								/>
 							</div>
 							<div class="form__col col--12">
@@ -724,6 +769,10 @@ const handleSetTabIndexOnFirstInput = (e) => {
 										formState.formError
 											? formState.formError.DepartmentId
 											: ''
+									"
+									:isShowError="
+										!!formState.formError.IdentityNumber ||
+										!!formState.formError.IdentityDate
 									"
 								/>
 							</div>
@@ -1024,6 +1073,7 @@ const handleSetTabIndexOnFirstInput = (e) => {
 					@click="handleCloseForm"
 					:tabindex="21"
 					@keydown="handleSetTabIndex"
+					ref="cancleBtnRef"
 				/>
 				<div class="form__action__group">
 					<Button
@@ -1040,6 +1090,7 @@ const handleSetTabIndexOnFirstInput = (e) => {
 						tooltip="Ctrl + Shift + S"
 						@click="onStoreAndAddBtnClick"
 						:tabindex="20"
+						ref="storeAndAddBtnRef"
 					/>
 				</div>
 			</div>

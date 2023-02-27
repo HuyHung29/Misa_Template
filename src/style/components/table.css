@@ -148,10 +148,10 @@
 
 .table__function__refresh::after {
 	display: none;
-	content: "Lấy lại dữ liệu";
+	content: "Làm mới dữ liệu";
 
 	position: absolute;
-	bottom: -30px;
+	bottom: -50px;
 	right: 0;
 
 	z-index: 15;
@@ -193,13 +193,26 @@
 	height: 20px;
 }
 
-.table__function__export::after {
+.table__function__export::before {
 	display: none;
-	content: "Xuất tất cả dữ liệu";
+	content: "";
 
 	position: absolute;
-	bottom: -30px;
+	bottom: -10px;
+
+	border: 10px solid red;
+	border-color: transparent transparent black transparent;
+}
+
+.table__function__export::after {
+	display: none;
+	content: "Xuất file Excel (Shift + P)";
+
+	position: absolute;
+	bottom: 0;
 	right: 0;
+
+	transform: translateY(calc(100% + 10px));
 
 	z-index: 15;
 
@@ -211,10 +224,11 @@
 	color: var(--text-white);
 	text-align: center;
 
-	min-width: 150px;
+	min-width: 100px;
 }
 
-.table__function__export:hover::after {
+.table__function__export:hover::after,
+.table__function__export:hover::before {
 	display: block;
 }
 

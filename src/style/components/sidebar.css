@@ -122,7 +122,8 @@
 	height: 20px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon1 {
+.side-bar__item:hover .side-bar__item__icon .icon1,
+.side-bar__item.active .side-bar__item__icon .icon1 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -33px -1587px;
 }
 
@@ -134,7 +135,8 @@
 	height: 18px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon2 {
+.side-bar__item:hover .side-bar__item__icon .icon2,
+.side-bar__item.active .side-bar__item__icon .icon2 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -78px -1588px;
 }
 
@@ -146,7 +148,8 @@
 	height: 16px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon3 {
+.side-bar__item:hover .side-bar__item__icon .icon3,
+.side-bar__item.active .side-bar__item__icon .icon3 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -121px -1590px;
 }
 
@@ -158,7 +161,8 @@
 	height: 18px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon4 {
+.side-bar__item:hover .side-bar__item__icon .icon4,
+.side-bar__item.active .side-bar__item__icon .icon4 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -165px -1589px;
 }
 
@@ -170,7 +174,8 @@
 	height: 18px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon5 {
+.side-bar__item:hover .side-bar__item__icon .icon5,
+.side-bar__item.active .side-bar__item__icon .icon5 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -206px -1588px;
 }
 
@@ -182,7 +187,8 @@
 	height: 17px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon6 {
+.side-bar__item:hover .side-bar__item__icon .icon6,
+.side-bar__item.active .side-bar__item__icon .icon6 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -254px -1589px;
 }
 
@@ -194,7 +200,8 @@
 	height: 17px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon7 {
+.side-bar__item:hover .side-bar__item__icon .icon7,
+.side-bar__item.active .side-bar__item__icon .icon7 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -294px -1589px;
 }
 
@@ -206,7 +213,8 @@
 	height: 17px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon8 {
+.side-bar__item:hover .side-bar__item__icon .icon8,
+.side-bar__item.active .side-bar__item__icon .icon8 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -339px -1590px;
 }
 
@@ -218,7 +226,8 @@
 	height: 18px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon9 {
+.side-bar__item:hover .side-bar__item__icon .icon9,
+.side-bar__item.active .side-bar__item__icon .icon9 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -382px -1589px;
 }
 
@@ -230,7 +239,8 @@
 	height: 16px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon10 {
+.side-bar__item:hover .side-bar__item__icon .icon10,
+.side-bar__item.active .side-bar__item__icon .icon10 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -427px -1591px;
 }
 
@@ -242,7 +252,8 @@
 	height: 17px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon11 {
+.side-bar__item:hover .side-bar__item__icon .icon11,
+.side-bar__item.active .side-bar__item__icon .icon11 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -471px -1590px;
 }
 
@@ -254,7 +265,8 @@
 	height: 18px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon12 {
+.side-bar__item:hover .side-bar__item__icon .icon12,
+.side-bar__item.active .side-bar__item__icon .icon12 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -340px -1662px;
 }
 
@@ -266,7 +278,8 @@
 	height: 16px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon13 {
+.side-bar__item:hover .side-bar__item__icon .icon13,
+.side-bar__item.active .side-bar__item__icon .icon13 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -427px -1664px;
 }
 
@@ -278,7 +291,8 @@
 	height: 13px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon14 {
+.side-bar__item:hover .side-bar__item__icon .icon14,
+.side-bar__item.active .side-bar__item__icon .icon14 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -552px -1593px;
 }
 
@@ -290,7 +304,8 @@
 	height: 14px;
 }
 
-.side-bar__item:hover .side-bar__item__icon .icon15 {
+.side-bar__item:hover .side-bar__item__icon .icon15,
+.side-bar__item.active .side-bar__item__icon .icon15 {
 	background: url("../../assets/images/Sprites.64af8f61.svg") no-repeat -251px -1667px;
 }
 

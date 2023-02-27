@@ -32,23 +32,29 @@ axiosClient.interceptors.response.use(
 	(error) => {
 		try {
 			// Xử lý lỗi chung cho các request trả về
-
-			const { data } = error.response;
 			const { handleShowToast, handleSetErrorForm, handleCloseLoading } =
 				store;
 			const { ERROR } = RESOURCES.NOTIFICATION_TYPE;
 			const { DEFAULT } = RESOURCES.NOTIFICATION_MESSAGE.ERROR;
+			if (error.response) {
+				const { data } = error.response;
 
-			handleCloseLoading();
-			handleShowToast({
-				type: ERROR,
-				content: data.UserMes ? data.UserMes : DEFAULT,
-			});
+				handleCloseLoading();
+				handleShowToast({
+					type: ERROR,
+					content: data.UserMes ? data.UserMes : DEFAULT,
+				});
 
-			if (data.MoreInfo) {
-				handleSetErrorForm(data.MoreInfo);
+				if (data.MoreInfo) {
+					handleSetErrorForm(data.MoreInfo);
+				} else {
+					handleSetErrorForm({});
+				}
 			} else {
-				handleSetErrorForm({});
+				handleShowToast({
+					type: ERROR,
+					content: DEFAULT,
+				});
 			}
 
 			// throw error.response.data;

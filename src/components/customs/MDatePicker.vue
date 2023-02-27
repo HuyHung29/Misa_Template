@@ -59,6 +59,7 @@ const emit = defineEmits(["change", "error"]);
  * Author: LHH -
  */
 const date = ref(null);
+const datePickerRef = ref(null);
 const inputVal = ref(null);
 const inputRef = ref(null);
 const errorRef = ref(null);
@@ -129,25 +130,38 @@ defineExpose({
  * Author: LHH - 16/01/23
  */
 const handleInput = (e) => {
-	const value = e.target.value;
+	try {
+		const value = e.target.value;
 
-	inputVal.value = value;
+		const dateRegex =
+			/^([1-9]|[0-2][0-9]|3[0-1])\/([1-9]|0[1-9]|1[0-2])\/[1-2][0-9][0-9][0-9]$/;
+		if (dateRegex.test(value)) {
+			date.value = convertStringToDate(value);
+			emit("change", { name: props.name, value: date.value });
+		}
+
+		inputVal.value = value;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 /**
  * Hàm xử lý thay đổi date
  * Author: LHH - 16/01/23
  */
-const handleChangeDate = (e) => {
-	const dateValue = convertStringToDate(inputVal.value);
-	console.log("Date: ", dateValue);
-	if (dateValue) {
-		date.value = new Date(dateValue);
-	} else {
-		console.log("first");
-		date.value = null;
-		inputVal.value = "";
-		inputRef.value.value = null;
+const handleChangeDate = () => {
+	const dateValue = convertStringToDate(inputRef.value.value);
+	console.log("current", date.value, "new: ", dateValue);
+	if (date.value !== dateValue) {
+		if (dateValue) {
+			date.value = new Date(dateValue);
+		} else {
+			console.log("first");
+			date.value = null;
+			inputVal.value = "";
+			inputRef.value.value = null;
+		}
 	}
 };
 
@@ -159,6 +173,7 @@ const handleChangeDate = (e) => {
 const handleChangeDateOnKeyEvent = (e) => {
 	if (e.keyCode === RESOURCES.KEYCODE.TAB) {
 		handleChangeDate();
+		datePickerRef.value.closeMenu();
 	}
 };
 
@@ -246,6 +261,7 @@ onUpdated(() => {
 			:format="format"
 			hide-offset-dates
 			:day-names="['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']"
+			ref="datePickerRef"
 		>
 			<template #dp-input="{ value }">
 				<div class="date-picker__wrapper">

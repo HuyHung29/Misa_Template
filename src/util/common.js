@@ -67,6 +67,35 @@ export const convertStringToDate = (data) => {
 };
 
 /**
+ * Hàm format
+ * @param {date} date Ngày tháng cần convert
+ * @returns Ngày tháng tương ứng
+ * Author: LHH - 06/01/23
+ */
+export const convertStringToDateUSUK = (date, isJson) => {
+	if (date) {
+		// console.log("TIme: ", date);
+		const [day, month, year] = date.toString().split("/");
+		// console.log(day, month, year);
+
+		const newDateString = `${year}/${month}/${day}`;
+
+		const dtFormat = new Intl.DateTimeFormat("en-US", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
+
+		const newDateTime = new Date(newDateString);
+		if (isJson) {
+			newDateTime.setHours(newDateTime.getHours() + 24);
+		}
+
+		return dtFormat.format(newDateTime);
+	}
+};
+
+/**
  *
  * @param {Number} gender Giới tính
  * @returns Tên của giới tính tương ứng

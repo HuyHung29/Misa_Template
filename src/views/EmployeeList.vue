@@ -12,10 +12,9 @@ import {
 	computed,
 	ref,
 	onMounted,
-	onUpdated,
+	onBeforeUnmount,
 } from "vue";
 import useEmployee from "../composable/employee";
-import useDetectOutsideClick from "../composable/clickOutSide";
 
 /**
  * Định nghĩa các state
@@ -54,7 +53,6 @@ const {
 	handleCloseModal,
 	handleOpenLoading,
 	handleCloseLoading,
-	handleCloseForm,
 	handleShowToast,
 } = inject("store");
 
@@ -89,13 +87,41 @@ onBeforeMount(() => {
 });
 
 /**
- * Xử lý lấy height của list action
+ * Xử lý lấy chiều cao của list action và các phím tắt
  * Author: LHH - 04/01/23
  */
 onMounted(() => {
+	// Lấy chiều cao của list action
 	empState.listActionHeight = listActionRef.value.offsetHeight;
 	empState.listAction.isShow = false;
+
+	// Xử lý các phím tắt
+	document.addEventListener("keydown", handleKeyDownEvent);
 });
+
+/**
+ * Xử lý hủy bô các sự kiện
+ * Author: LHH - 27/01/23
+ */
+onBeforeUnmount(() => {
+	document.removeEventListener("keydown", handleKeyDownEvent);
+});
+
+/**
+ * Xử lý các phím tắt trên màn hình danh sách
+ * @param {event} e đối tượng event của js
+ * Author: LHH - 27/02/23
+ */
+const handleKeyDownEvent = (e) => {
+	// Xử lý phím tắt cho nút thêm mới
+	console.log(e);
+	if (e.ctrlKey && e.keyCode === RESOURCES.KEYCODE.NUMBER_ONE) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		handleOpenAddForm();
+	}
+};
 
 /**
  * Khai báo state của component
@@ -383,7 +409,11 @@ const handleExportData = async () => {
 	<div class="data-table">
 		<div class="data-table__header">
 			<h2 class="data-table__heading">Nhân viên</h2>
-			<Button content="Thêm mới nhân viên" @click="handleOpenAddForm" />
+			<Button
+				content="Thêm mới nhân viên"
+				@click="handleOpenAddForm"
+				tooltip="Ctrl + 1"
+			/>
 		</div>
 
 		<div class="table-wrapper">
@@ -410,7 +440,7 @@ const handleExportData = async () => {
 						<p class="icon">
 							<i></i>
 						</p>
-						Xóa tất cả
+						Xóa
 					</button>
 				</div>
 				<div class="textfield textfield--sm">

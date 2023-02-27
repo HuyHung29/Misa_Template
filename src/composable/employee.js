@@ -43,13 +43,20 @@ const useEmployee = () => {
 					filter,
 					keyword
 				);
-				const { TotalPage, TotalRecord, Data } = response;
+				if (response) {
+					const { TotalPage, TotalRecord, Data } = response;
 
-				totalPage.value = TotalPage;
-				totalRecord.value = TotalRecord;
+					totalPage.value = TotalPage;
+					totalRecord.value = TotalRecord;
 
-				listEmployee.value = Data;
-				statusCode.value = null;
+					listEmployee.value = Data;
+					statusCode.value = null;
+				} else {
+					totalPage.value = 0;
+					totalRecord.value = 0;
+
+					listEmployee.value = [];
+				}
 			} catch (error) {
 				totalPage.value = 0;
 				totalRecord.value = 0;

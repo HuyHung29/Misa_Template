@@ -58,6 +58,7 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
+	isShowError: Boolean,
 });
 
 /**
@@ -85,6 +86,7 @@ const listRef = ref(null);
 const inputRef = ref(null);
 const errorRef = ref("null");
 const isShowTooltip = ref(false);
+const isError = ref(false);
 
 /**
  * Xử lý thay đổi dữ liệu
@@ -115,6 +117,13 @@ watch(
 		}
 	},
 	{ deep: true }
+);
+
+watch(
+	() => props.isShowError,
+	() => {
+		isError.value = props.isShowError;
+	}
 );
 
 /**
@@ -298,7 +307,11 @@ defineExpose({
 				</li>
 			</ul>
 		</div>
-		<p v-show="hasError && error" class="select__error" ref="errorRef">
+		<p
+			v-show="(hasError && error) || isError"
+			class="select__error"
+			ref="errorRef"
+		>
 			{{ error }}
 		</p>
 		<p v-if="!state.isShow && isShowTooltip" class="select__error__tooltip">

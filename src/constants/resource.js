@@ -127,6 +127,7 @@ const RESOURCES = {
 		ARROW_UP: 40,
 		ENTER: 13,
 		TAB: 9,
+		NUMBER_ONE: 49,
 	},
 	REGEX: {
 		EMPLOYEE_CODE: /^NV-[0-9]{1,17}$/,
