@@ -152,12 +152,11 @@ const handleInput = (e) => {
  */
 const handleChangeDate = () => {
 	const dateValue = convertStringToDate(inputRef.value.value);
-	console.log("current", date.value, "new: ", dateValue);
+
 	if (date.value !== dateValue) {
 		if (dateValue) {
 			date.value = new Date(dateValue);
 		} else {
-			console.log("first");
 			date.value = null;
 			inputVal.value = "";
 			inputRef.value.value = null;
@@ -192,7 +191,6 @@ const disabledDate = (time) => {
  */
 watch(date, () => {
 	try {
-		console.log("Change");
 		emit("change", { name: props.name, value: date.value });
 	} catch (error) {
 		console.log(error);

@@ -153,7 +153,6 @@ useClickOutSide(listRef, () => {
  * Author: LHH - 12/01/23
  */
 const handleInput = (e) => {
-	console.log(e.target.value);
 	state.isShow = true;
 	state.indexItem = 0;
 	const inputVal = e.target.value.toLowerCase();

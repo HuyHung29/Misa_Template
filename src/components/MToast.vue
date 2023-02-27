@@ -26,8 +26,6 @@ let removeToast = null;
  * Author: LHH - 12/01/23
  */
 onMounted(() => {
-	console.log(props.toast.content);
-
 	removeToast = setTimeout(function () {
 		isShow.value = false;
 	}, 4300);

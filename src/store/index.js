@@ -81,7 +81,6 @@ const handleGetEmployees = async (filter) => {
  */
 const handleUpdateEmployeeList = (type, employeeId, data) => {
 	try {
-		console.log("Data", type, employeeId, data);
 		let index;
 		switch (type) {
 			case "ADD":
@@ -102,8 +101,6 @@ const handleUpdateEmployeeList = (type, employeeId, data) => {
 				}
 				break;
 			case "DELETE":
-				console.log("Before:", state.employees);
-
 				state.totalRecord = state.totalRecord - data.length;
 				state.totalPage = Math.round(
 					state.totalRecord / state.pagination.pageSize
@@ -147,8 +144,6 @@ const handleOpenModal = (title, content, type, employeeId, callback) => {
 			employeeId,
 			callback,
 		};
-
-		console.log(state.modal.type);
 	} catch (error) {
 		console.log(error);
 	}

@@ -319,8 +319,6 @@ function docKeyDown(e) {
 
 		// call your function to do the thing
 		onStoreBtnClick();
-
-		console.log("save");
 	}
 
 	if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
@@ -329,8 +327,6 @@ function docKeyDown(e) {
 
 		// call your function to do the thing
 		onStoreAndAddBtnClick();
-
-		console.log("save and add");
 	}
 
 	if (e.code === "Escape") {
@@ -350,14 +346,6 @@ onMounted(() => {
 	}
 
 	document.addEventListener("keydown", docKeyDown, false);
-});
-
-/**
- * Xử lý focus vào input lỗi
- * Author: LHH - 27/02/23
- */
-onUpdated(() => {
-	handleFocusInputError();
 });
 
 /**
@@ -422,7 +410,6 @@ const handleBindValue = ({ name, value }) => {
 
 const handleBindError = ({ name, message }) => {
 	try {
-		console.log(name, message);
 		formState.formError[name] = message;
 	} catch (error) {
 		console.log(error);
@@ -500,6 +487,14 @@ const handleFormatData = () => {
 	try {
 		const { DateOfBirth, IdentityDate } = formState.formValue;
 
+		for (const key in formState.formValue) {
+			if (Object.hasOwnProperty.call(formState.formValue, key)) {
+				if (typeof formState.formValue[key] === "string") {
+					formState.formValue[key] = formState.formValue[key].trim();
+				}
+			}
+		}
+
 		const formatDateOfBirth = DateOfBirth
 			? new Date(convertStringToDateUSUK(new Date(DateOfBirth), true))
 			: DateOfBirth;
@@ -529,6 +524,8 @@ const handleSubmit = async () => {
 			handleOpenLoading();
 
 			const data = handleFormatData();
+
+			console.log(data);
 
 			if (state.form.type === ADD || state.form.type === DUPLICATE) {
 				await addNewEmployee(data);
@@ -598,12 +595,6 @@ const onStoreAndAddBtnClick = async () => {
  */
 const onCloseBtnClick = () => {
 	try {
-		console.log(
-			"Sau: ",
-			JSON.stringify(formState.formValue),
-			"Truowcs: ",
-			JSON.stringify(originValue.value)
-		);
 		if (
 			JSON.stringify(formState.formValue) ===
 			JSON.stringify(originValue.value)
@@ -645,11 +636,10 @@ const handleSetTabIndex = (e) => {
  * Author: LHH - 15/02/23
  */
 const handleSetTabIndexOnFirstInput = (e) => {
-	console.log(e.keyCode);
 	if (e.shiftKey && e.keyCode === RESOURCES.KEYCODE.TAB) {
 		e.preventDefault();
 		e.stopPropagation();
-		console.log(cancleBtnRef);
+
 		cancleBtnRef.value.setFocusBtn();
 	}
 };

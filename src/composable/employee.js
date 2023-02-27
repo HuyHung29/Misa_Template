@@ -120,7 +120,6 @@ const useEmployee = () => {
 		const updateNewEmployee = async (id, employee) => {
 			try {
 				const response = await employeeApi.updateEmp(id, employee);
-				console.log(response);
 
 				newEmployee.value = response;
 
@@ -138,10 +137,7 @@ const useEmployee = () => {
 		 */
 		const deleteEmployee = async (ids) => {
 			try {
-				console.log(ids);
 				const response = await employeeApi.deleteEmp(ids);
-
-				console.log(response);
 
 				deleteIds.value = response;
 

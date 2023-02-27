@@ -74,9 +74,7 @@ export const convertStringToDate = (data) => {
  */
 export const convertStringToDateUSUK = (date, isJson) => {
 	if (date) {
-		// console.log("TIme: ", date);
 		const [day, month, year] = date.toString().split("/");
-		// console.log(day, month, year);
 
 		const newDateString = `${year}/${month}/${day}`;
 
@@ -157,7 +155,6 @@ export const inputValidation = (rules, value, name) => {
 			}
 			case ADULT: {
 				if (value) {
-					console.log(value);
 					const date = new Date(value).getTime();
 					const age = (Date.now() - date) / 1000 / 60 / 60 / 24 / 365;
 					if (age < 18) {

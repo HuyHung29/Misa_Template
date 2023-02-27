@@ -59,8 +59,7 @@ axiosClient.interceptors.response.use(
 
 			// throw error.response.data;
 		} catch (err) {
-			console.log(store.state);
-			console.log("Looi axios:", err);
+			console.log(err);
 		}
 	}
 );

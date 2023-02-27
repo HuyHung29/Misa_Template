@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
  */
 const handleKeyDownEvent = (e) => {
 	// Xử lý phím tắt cho nút thêm mới
-	console.log(e);
+
 	if (e.ctrlKey && e.keyCode === RESOURCES.KEYCODE.NUMBER_ONE) {
 		e.preventDefault();
 		e.stopPropagation();
@@ -149,27 +149,7 @@ const handleGetAllEmployee = () => {
 const handleDisplayListAction = (data) => {
 	try {
 		empState.listAction.isShow = !empState.listAction.isShow;
-		// if (empState.listAction.employeeId === data.employeeId) {
-		// 	empState.listAction = {
-		// 		isShow: false,
-		// 	};
-		// } else {
-		// 	const isOutWindow =
-		// 		data.top + data.height + empState.listActionHeight <
-		// 		window.innerHeight;
 
-		// 	empState.listAction = {
-		// 		isShow: true,
-		// 		employeeId: data.employeeId,
-		// 		employeeCode: data.employeeCode,
-		// 		style: {
-		// 			top: isOutWindow
-		// 				? data.top + data.height + "px"
-		// 				: data.top - empState.listActionHeight + "px",
-		// 			right: data.right - data.width + "px",
-		// 		},
-		// 	};
-		// }
 		const isOutWindow =
 			data.top + data.height + empState.listActionHeight <
 			window.innerHeight;
@@ -185,7 +165,6 @@ const handleDisplayListAction = (data) => {
 				right: data.right - data.width + "px",
 			},
 		};
-		console.log("BTN click: ", empState.listAction.isShow);
 	} catch (error) {
 		console.log(error);
 	}
@@ -291,7 +270,6 @@ const onDeleteBtnClick = () => {
  * Author: LHH - 17/02/23
  */
 const handleMultipleDelete = () => {
-	console.log(empState.checkList);
 	handleOpenModal(
 		RESOURCES.MODAL_TITLE.WARNING,
 		RESOURCES.MODAL_MESSAGE.WARNING_MULTIPLE,
@@ -330,11 +308,8 @@ const handleCheck = (value) => {
 	try {
 		if (empState.checkList.includes(value)) {
 			empState.checkList.splice(empState.checkList.indexOf(value), 1);
-
-			console.log(empState.checkList);
 		} else {
 			empState.checkList.push(value);
-			console.log(empState.checkList);
 		}
 	} catch (error) {
 		console.log(error);

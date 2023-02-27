@@ -201,7 +201,7 @@
 	bottom: -10px;
 
 	border: 10px solid red;
-	border-color: transparent transparent black transparent;
+	border-color: transparent transparent #38393d transparent;
 }
 
 .table__function__export::after {
